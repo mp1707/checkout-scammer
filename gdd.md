@@ -3,14 +3,15 @@
 ## Meta
 
 - Plattform: Steam
-- Engine: Godot
+- Engine: Godot 4.6
 
 ## Core Player Craving und Juice-Source
 
 - Ein Produkt über den Kassenscanner ziehen
 - Das satisfying „Beep“-Geräusch hören
 - Coin-Animation sehen
-- Geld direkt hochzählen sehen
+- Den aktuellen Verkaufsbetrag direkt am gehaltenen Produkt sehen
+- Geld beim finalen Verkauf direkt hochzählen sehen
 - Der Scanner-Moment ist der wichtigste Kern des Spiels
 
 ## Perspektive und Art-Style
@@ -65,9 +66,12 @@
 - Produkte kommen von rechts über das Fließband herein.
 - Das Fließband reicht visuell aus dem mittleren Viewport heraus und wird dort abgeschnitten.
 - Dadurch entsteht der Eindruck, dass neue Produkte von außerhalb des sichtbaren Bereichs kommen.
-- Es werden immer maximal 4 Produkte gleichzeitig auf dem Fließband angezeigt.
+- Es werden immer maximal 4 Objekte gleichzeitig auf dem Fließband angezeigt.
+- Ohne Coupon sind das 4 Produkte.
+- Mit Coupon kann ein sichtbarer Slot durch den Coupon belegt sein.
 - Ein Kunde hat weiterhin 10 Produkte.
-- Initial fahren die ersten 4 Produkte ins Bild.
+- Initial fahren die ersten 4 Objekte ins Bild.
+- Wenn ein Coupon für diesen Kunden aktiv ist, ist er das erste Objekt, gefolgt von den ersten Produkten.
 - Sobald ein Produkt vom Fließband genommen wurde, rutscht ein neues Produkt nach.
 - Das wiederholt sich, bis alle 10 Produkte des Kunden verarbeitet wurden.
 - Wenn keine Produkte mehr im Kunden-Queue sind, bleibt das Fließband leer.
@@ -75,12 +79,13 @@
 ### Tüte
 
 - Über dem Scanner befindet sich die Tüte.
-- Gescannten Produkte werden nach dem Scan in die Tüte gelegt.
-- Wenn ein Produkt in die Tüte gelegt wird, gilt es als verarbeitet.
-- Die Produktsprites verschwinden dann einfach.
-- Das zuletzt abgelegte Produkt bleibt sichtbar auf der Tüte liegen.
-- Dadurch kann man es nochmal nehmen und erneut scannen.
-- Wird ein weiteres Produkt abgelegt, verschwindet das vorherige sichtbare Produkt.
+- Gescannte Produkte werden in die Tüte gelegt, um den Verkauf final abzuschließen.
+- Ein Scan bucht noch kein Geld in den Total-Wert.
+- Solange der Spieler ein gescanntes Produkt hält, schwebt der aktuelle Verkaufsbetrag am Cursor leicht über dem Produkt.
+- Beim Ablegen in der Tüte wird dieser aktuelle Verkaufsbetrag zum Total-Wert hinzugefügt.
+- Danach verschwindet das Produkt in der Tüte.
+- Ein in die Tüte gelegtes Produkt gilt als verkauft und kann nicht mehr aufgehoben oder erneut gescannt werden.
+- Mehrfachscans passieren nur, solange der Spieler dasselbe Produkt weiter hält.
 
 ### Müll-Loch
 
@@ -90,6 +95,7 @@
 - Produkte oder Coupons können dort hineingeworfen werden.
 - Wird ein Coupon in den Müll geworfen, wird er nicht gescannt.
 - Das ist eine versteckte Scam-Mechanik.
+- Wird ein Produkt mit offenem Verkaufsbetrag in den Müll geworfen, verschwindet es und der offene Betrag wird nicht gebucht.
 
 ### Kundenhand und Mood-Ring
 
@@ -125,35 +131,82 @@
 - Ein Run besteht aus 8 Geschäftstagen.
 - Ein Geschäftstag besteht aus 3 Kunden.
 - Ein Kunde hat 10 zufällige Produkte.
-- Für den Prototyp wird die Produktanzahl hardcoded auf 10 gesetzt.
+- Für den Prototyp ist die Produktanzahl auf 10 gesetzt, aber zentral im Balancing pflegbar.
 - Der erste Tag hat 3 gescriptete Kunden.
 - Diese 3 Kunden bringen bei ehrlichem Spiel knapp nicht genug Geld ein.
 - Dadurch lernt der Spieler die Scam-Mechanik.
+- Runs und zufällige Kunden werden deterministisch über einen Seed erzeugt.
+- Der gleiche Seed soll die gleiche Kunden- und Produktfolge erzeugen.
+
+## Balancing-Defaults
+
+- Startgeld: `10$`
+- Tagesmiete im Prototyp: `40$`
+- Produktpreise im Startsortiment liegen grob zwischen `0,50$` und `1,80$`.
+- Diese Werte sind erste Platzhalter und dürfen später beim Balancing angepasst werden.
+- Wichtig: Balancing muss zentralisiert und im Godot-Editor einfach editierbar sein.
+- Zentral pflegbar sein sollen mindestens:
+  - Startgeld
+  - Tagesmiete / Mietkurve
+  - Tage pro Run
+  - Kunden pro Tag
+  - Produkte pro Kunde
+  - sichtbare Fließband-Slots
+  - Produktpreise
+  - Produktgewichte für die Kundengenerierung
+  - Coupon-Kosten
+  - Coupon-Rabatte
+  - Coupon-Gewichtungsboni
+  - Sortiment-Level-Up-Kosten
+  - Suspicion-Stufen
+
+### Erste Startprodukt-Werte
+
+- Snacks:
+  - Kaugummi: `0,50$`
+  - Chips: `0,80$`
+  - Schokoriegel: `1,00$`
+- Getränke:
+  - Wasser: `0,90$`
+  - Limo: `1,20$`
+  - Energy Drink: `1,80$`
+- Obst:
+  - Apfel: `0,60$`
+  - Banane: `0,70$`
+  - Orange: `1,10$`
 
 ## Kunden-Produktfluss
 
 - Ein Kunde hat intern eine Queue aus 10 Produkten.
-- Zu Beginn eines Kunden fahren die ersten 4 Produkte von rechts auf das Fließband.
-- Nur diese 4 Produkte sind gleichzeitig sichtbar.
+- Zu Beginn eines Kunden fahren die ersten 4 Objekte von rechts auf das Fließband.
+- Nur diese 4 Objekte sind gleichzeitig sichtbar.
+- Wenn ein Coupon für diesen Kunden aktiv ist, ist der Coupon das erste Objekt und danach folgen die ersten Produkte.
 - Wenn ein Produkt vom Fließband genommen wird, rutscht das nächste Produkt aus der Queue nach.
 - Dadurch bleibt das Spielfeld übersichtlich.
 - Der Spieler verarbeitet alle 10 Produkte nacheinander.
-- Die Reihenfolge innerhalb der sichtbaren 4 Produkte ist frei wählbar.
+- Die Reihenfolge innerhalb der sichtbaren Produkt-Slots ist frei wählbar.
 - Produkte können:
   - gescannt werden
   - in die Tüte gelegt werden
   - mehrfach gescannt werden
   - in den Müll geworfen werden, falls das Produkt oder Objekt dafür gedacht ist
+- Jeder erfolgreiche Scan erhöht den offenen Verkaufsbetrag des aktuell gehaltenen Produkts.
+- Der offene Verkaufsbetrag wird erst beim Ablegen in der Tüte zum Total-Wert gebucht.
 
 ## Suspicion-System
 
 - Jeder Kunde hat ein internes Suspicion-Meter.
 - Das Suspicion-Meter ist die Wahrscheinlichkeit, beim Betrügen erwischt zu werden.
 - Es startet pro Kunde bei 10%.
-- Nach einem Double Scan steigt es auf 50%.
-- Danach steigt es auf 75%.
-- Danach steigt es auf 90%.
+- Ein Caught-Roll passiert bei jedem Produkt-Scan ab dem zweiten Scan desselben Produkts.
+- Der erste Scan eines Produkts ist immer sicher.
+- Coupon-Scam löst keinen Caught-Roll aus.
+- Wenn ein Mehrfachscan nicht erwischt wird, steigt die Suspicion danach an.
+- Nach einem erfolgreichen Double Scan steigt sie auf 50%.
+- Danach steigt sie auf 75%.
+- Danach steigt sie auf 90%.
 - Bei 90% bleibt es.
+- Mehrfachscans sind unbegrenzt möglich, bis der Spieler erwischt wird oder das Produkt verkauft.
 - Neuer Kunde = neues Suspicion-Meter bei 10%.
 - Die aktuelle Suspicion wird über den Mood-Ring an der Kundenhand angezeigt.
 
@@ -166,8 +219,9 @@
 - Die Textbox muss mit Enter weggeklickt werden.
 - Die Wirkung:
   - Das aktuelle Produkt verschwindet visuell.
-  - Der Wert des Produkts wird vom Geld abgezogen.
-  - Dadurch hat man dieses Produkt praktisch verschenkt.
+  - Der offene Verkaufsbetrag am Cursor wird gelöscht.
+  - Es wird kein Geld vom Total-Wert abgezogen.
+  - Dadurch verliert der Spieler nur den noch nicht gebuchten Wert dieses Produkts.
 - Danach geht der Kunde weiter normal.
 
 ## Tagesende
@@ -175,6 +229,7 @@
 - Zwischen Geschäftstagen, also immer nach 3 Kunden, wird die Miete bezahlt.
 - Kann man die Miete nicht zahlen, verliert man sofort.
 - Eine spätere Schuldenmechanik ist möglich, aber out of scope für den Prototyp.
+- Aktive Tages-Coupons laufen am Tagesende aus.
 
 ## Upgrades
 
@@ -196,6 +251,10 @@
 
 - Coupons erhöhen die Chance, dass Kunden bestimmte Produkte kaufen.
 - Dadurch kann man die Chance auf wertvollere Produkte erhöhen.
+- Ein gekaufter Coupon gilt für den Geschäftstag, in dem er aktiviert wird.
+- Wird ein Coupon während eines aktiven Kunden gekauft, wird er beim nächsten Kunden aktiviert.
+- Wird ein Coupon beim letzten Kunden eines Geschäftstags gekauft, aktiviert er sich beim ersten Kunden des nächsten Geschäftstags.
+- Der Mouseover-Tooltip des Coupon-Buttons erklärt diese Verzögerung.
 - Beispiel:
   - Am Anfang gibt es viele 0,50$ Produkte.
   - Es gibt wenige 1$ Produkte.
@@ -205,13 +264,17 @@
 ### Coupon-Scam
 
 - Wenn ein Kunde Produkte kauft, die durch einen Coupon beeinflusst wurden, kommt der passende Coupon mit aufs Fließband.
+- Der Coupon ist ein Extra-Objekt und zählt nicht zu den 10 Produkten des Kunden.
+- Der Coupon wird immer als erstes Objekt auf das Fließband gelegt.
+- Er belegt einen sichtbaren Fließband-Slot, reduziert aber nicht die interne Produktanzahl des Kunden.
 - Der Spieler kann den Coupon ehrlich scannen.
-- Dann wird der Rabatt angewendet.
+- Dann wird der Rabatt für alle danach gescannten passenden Produkte dieses Kunden angewendet.
 - Der Spieler kann den Coupon aber auch in das Müll-Loch werfen.
 - Dadurch erhält der Spieler den Vorteil des Coupons:
   - Kunden kaufen wertvollere Produkte
 - Aber der Nachteil wird negiert:
   - Der Rabatt wird nicht angewendet
+- Coupon-Scam erhöht keine Suspicion und löst keinen Caught-Roll aus.
 - Diese Mechanik soll nicht stark erklärt werden.
 - Der Spieler soll sie selbst herausfinden.
 
@@ -222,6 +285,9 @@
 - Der Button ist ausgegraut, wenn man nicht genug Geld hat.
 - Wenn man genug Geld hat, kann man das Sortiment mit einem Klick hochleveln.
 - Dadurch wird der Produktpool erweitert.
+- Sortiment-Level-Ups können auch während eines aktiven Kunden gekauft werden.
+- Sie wirken erst ab dem nächsten Kunden.
+- Der Mouseover-Tooltip erklärt diese Verzögerung.
 - Mouseover zeigt:
   - Welche Produkte im nächsten Level enthalten sind
   - Was diese Produkte wert sind
@@ -268,15 +334,17 @@ Out of scope für den Prototyp:
 ## Core-Gameplay-Loop
 
 - Kunde startet.
-- Die ersten 4 Produkte fahren von rechts auf das Fließband.
+- Die ersten 4 Objekte fahren von rechts auf das Fließband.
+- Falls für diesen Kunden ein Coupon aktiv ist, liegt er zuerst auf dem Fließband.
 - Der Spieler nimmt ein Produkt vom Fließband.
 - Der Spieler zieht das Produkt von rechts nach links über den vertikalen Scannerstrahl.
 - Scan löst aus:
   - Beep
   - Coin-Animation
-  - Geld zählt hoch
+  - Verkaufsbetrag am Cursor erhöht sich
   - Scanner-Feedback
-- Danach legt der Spieler das Produkt in die Tüte.
+- Danach kann der Spieler das Produkt nochmal scannen oder in die Tüte legen.
+- Beim Ablegen in die Tüte wird der offene Verkaufsbetrag zum Total-Wert gebucht.
 - Wenn ein Produkt vom Band genommen wurde, fährt das nächste Produkt nach.
 - Der Spieler verarbeitet alle 10 Produkte des Kunden.
 - Produkte können mehrfach gescannt werden.
@@ -303,6 +371,9 @@ Out of scope für den Prototyp:
   - das Produkt nur auf dem Scanner liegt
   - das Produkt nicht aktiv gezogen wird
 - Dadurch wird der Scan-Moment klarer und absichtlicher.
+- Der erste erfolgreiche Scan eines Produkts erzeugt den offenen Verkaufsbetrag am Cursor.
+- Jeder weitere erfolgreiche Scan desselben gehaltenen Produkts erhöht diesen offenen Verkaufsbetrag erneut um den Produktwert.
+- Bei Mehrfachscans wird vor dem erfolgreichen Hinzufügen ein Caught-Roll gegen die aktuelle Suspicion ausgeführt.
 
 ## Drag-&-Drop-Regeln
 
@@ -313,9 +384,10 @@ Out of scope für den Prototyp:
   - in der Tüte
   - im Müll-Loch
   - optional zurück auf dem Fließband, falls nötig
-- Beim Ablegen in der Tüte gilt das Produkt als verarbeitet.
+- Beim Ablegen in der Tüte gilt das Produkt als verkauft und verarbeitet.
+- Der offene Verkaufsbetrag wird erst in diesem Moment zum Total-Wert gebucht.
 - Beim Ablegen im Müll-Loch verschwindet das Produkt oder der Coupon.
-- Das letzte Produkt in der Tüte bleibt sichtbar und kann erneut aufgenommen werden.
+- Produkte in der Tüte können nicht erneut aufgenommen werden.
 
 ## Juice-Fokus
 
@@ -328,7 +400,8 @@ Out of scope für den Prototyp:
 - Angenehmer Beep-SFX
 - Pitch-Eskalation bei Double-, Triple- und Multi-Scans
 - Coin-Animation am Cursor
-- Geld zählt links in der Menüleiste animiert hoch
+- Offener Verkaufsbetrag schwebt gut lesbar über dem gehaltenen Produkt
+- Geld zählt links in der Menüleiste animiert hoch, wenn das Produkt in die Tüte gelegt wird
 - Kurzer Screen Shake bei Double Scans
 - Visuelles Feedback am Scanner
 - Kurzes Aufleuchten des vertikalen Scannerstrahls
@@ -360,14 +433,15 @@ Für den ersten spielbaren Prototyp ist wichtig:
 - Mittlerer Kassentisch
 - Rechte Upgrade-Leiste
 - Conveyor Belt rechts neben Scanner
-- Maximal 4 sichtbare Produkte
+- Maximal 4 sichtbare Belt-Objekte
 - 10 Produkte pro Kunde
 - Scanner links, quadratisch, vertikaler Strahl
 - Scannen nur von rechts nach links
 - Tüte über dem Scanner
 - Müll-Loch rechts unten
 - Kundenhand rechts oben mit Mood-Ring
-- Geld zählt direkt hoch
+- Offener Verkaufsbetrag am Cursor
+- Geld zählt beim Ablegen in der Tüte direkt hoch
 - Double-Scan erhöht Suspicion
 - Miete am Tagesende
 - Lose bei nicht bezahlbarer Miete
