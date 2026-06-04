@@ -32,7 +32,7 @@ und die Aufgabe muss vor der Umsetzung geklaert oder angepasst werden.
 ## Phasenuebersicht
 
 1. [x] Phase 1: Datenfundament, Content und Validierung
-2. [ ] Phase 2: Pure Simulation und Unit-Tests
+2. [x] Phase 2: Pure Simulation und Unit-Tests
 3. [ ] Phase 3: Editor-Szenen, Platzhalter und Interaktionsoberflaeche
 4. [ ] Phase 4: Run-Integration, HUD, Upgrades und kompletter Loop
 5. [ ] Phase 5: Juice, Balancing, QA und Prototyp-Abschluss
@@ -118,77 +118,77 @@ Empfohlener Session-Scope: ein bis zwei Codex-Sessions, je nach Testaufwand.
 
 ### CustomerGenerator
 
-- [ ] Deterministischen Seed-Eingang definieren.
-- [ ] Gleicher Seed erzeugt gleiche Kunden- und Produktfolge.
-- [ ] Erster Tag mit drei gescripteten Kunden modellieren.
-- [ ] Spaetere Kunden aus Produktpool, Sortiment-Level und Coupon-Gewichtungen generieren.
-- [ ] Coupons beeinflussen Produktgewichtungen, ohne Runtime-Definitionen zu mutieren.
+- [x] Deterministischen Seed-Eingang definieren.
+- [x] Gleicher Seed erzeugt gleiche Kunden- und Produktfolge.
+- [x] Erster Tag mit drei gescripteten Kunden modellieren.
+- [x] Spaetere Kunden aus Produktpool, Sortiment-Level und Coupon-Gewichtungen generieren.
+- [x] Coupons beeinflussen Produktgewichtungen, ohne Runtime-Definitionen zu mutieren.
 
 ### BeltSystem
 
-- [ ] Kunden-Queue aus 10 Produkten verwalten.
-- [ ] Maximal 4 sichtbare Belt-Slots bereitstellen.
-- [ ] Optionalen Coupon als erstes sichtbares Belt-Objekt abbilden.
-- [ ] Coupon zaehlt nicht gegen die 10 Produkte.
-- [ ] Nachruecken aus der Queue nach Produkt-/Coupon-Verarbeitung testen.
-- [ ] Freie Auswahl innerhalb sichtbarer Slots erlauben.
-- [ ] Verarbeitete Slots sauber entfernen, ohne UI-Nodes zu kennen.
+- [x] Kunden-Queue aus 10 Produkten verwalten.
+- [x] Maximal 4 sichtbare Belt-Slots bereitstellen.
+- [x] Optionalen Coupon als erstes sichtbares Belt-Objekt abbilden.
+- [x] Coupon zaehlt nicht gegen die 10 Produkte.
+- [x] Nachruecken aus der Queue nach Produkt-/Coupon-Verarbeitung testen.
+- [x] Freie Auswahl innerhalb sichtbarer Slots erlauben.
+- [x] Verarbeitete Slots sauber entfernen, ohne UI-Nodes zu kennen.
 
 ### ScanSystem
 
-- [ ] `ScanRequest` aus Actor-ID, gehaltenem Zustand, Scannerkontakt und Bewegungsrichtung auswerten.
-- [ ] Nur Bewegung von rechts nach links als gueltigen Scan werten.
-- [ ] Links-nach-rechts, Liegenbleiben auf Scanner und nicht gehaltene Produkte ignorieren.
-- [ ] Ersten Scan eines Produkts immer sicher werten.
-- [ ] Mehrfachscan als Betrugsversuch markieren.
-- [ ] Rotation/Hit-Details als erweiterbare Felder modellieren, auch wenn sie im Prototyp noch einfach bewertet werden.
+- [x] `ScanRequest` aus Actor-ID, gehaltenem Zustand, Scannerkontakt und Bewegungsrichtung auswerten.
+- [x] Nur Bewegung von rechts nach links als gueltigen Scan werten.
+- [x] Links-nach-rechts, Liegenbleiben auf Scanner und nicht gehaltene Produkte ignorieren.
+- [x] Ersten Scan eines Produkts immer sicher werten.
+- [x] Mehrfachscan als Betrugsversuch markieren.
+- [x] Rotation/Hit-Details als erweiterbare Felder modellieren, auch wenn sie im Prototyp noch einfach bewertet werden.
 
 ### SuspicionSystem
 
-- [ ] Suspicion pro Kunde bei `10%` starten.
-- [ ] Caught-Roll ab zweitem Scan desselben Produkts ausfuehren.
-- [ ] Nicht erwischter Double-Scan erhoeht Suspicion auf `50%`.
-- [ ] Danach auf `75%`, dann `90%`, danach Deckel bei `90%`.
-- [ ] Coupon-Scam loest keinen Caught-Roll aus.
-- [ ] Mood-Ring-State aus Suspicion ableiten: gruen, gelb, orange, rot.
-- [ ] Rolls deterministisch testbar machen.
+- [x] Suspicion pro Kunde bei `10%` starten.
+- [x] Caught-Roll ab zweitem Scan desselben Produkts ausfuehren.
+- [x] Nicht erwischter Double-Scan erhoeht Suspicion auf `50%`.
+- [x] Danach auf `75%`, dann `90%`, danach Deckel bei `90%`.
+- [x] Coupon-Scam loest keinen Caught-Roll aus.
+- [x] Mood-Ring-State aus Suspicion ableiten: gruen, gelb, orange, rot.
+- [x] Rolls deterministisch testbar machen.
 
 ### EconomySystem
 
-- [ ] Produktbasiswert aus `ProductVariantResource` berechnen.
-- [ ] Offenen Betrag pro gehaltenem Produkt erhoehen.
-- [ ] Coupon-Rabatt nur anwenden, wenn Coupon ehrlich aktiviert wurde.
-- [ ] Coupon-Scam-Vorteil erhalten: Gewichtungsbonus ja, Rabatt nein.
-- [ ] Payout erst beim Drop in die Tute berechnen und dem Run-State gutschreiben.
-- [ ] Trash verwirft offenen Produktbetrag.
-- [ ] Rundung und Anzeigeformat aus Integer-Cents ableiten.
+- [x] Produktbasiswert aus `ProductVariantResource` berechnen.
+- [x] Offenen Betrag pro gehaltenem Produkt erhoehen.
+- [x] Coupon-Rabatt nur anwenden, wenn Coupon ehrlich aktiviert wurde.
+- [x] Coupon-Scam-Vorteil erhalten: Gewichtungsbonus ja, Rabatt nein.
+- [x] Payout erst beim Drop in die Tute berechnen und dem Run-State gutschreiben.
+- [x] Trash verwirft offenen Produktbetrag.
+- [x] Rundung und Anzeigeformat aus Integer-Cents ableiten.
 
 ### CouponSystem und UpgradeSystem
 
-- [ ] Coupon-Kauf prueft Geld und vorhandenes Sortiment.
-- [ ] Coupon wirkt ab dem naechsten Kunden.
-- [ ] Coupon beim letzten Kunden eines Tages wirkt am ersten Kunden des Folgetags.
-- [ ] Coupon laeuft am Tagesende aus.
-- [ ] Sortiment-Level-Up prueft Geld.
-- [ ] Sortiment-Level-Up wirkt ab dem naechsten Kunden.
-- [ ] Upgrade-Button-Zustand aus State ableiten, nicht im UI entscheiden.
+- [x] Coupon-Kauf prueft Geld und vorhandenes Sortiment.
+- [x] Coupon wirkt ab dem naechsten Kunden.
+- [x] Coupon beim letzten Kunden eines Tages wirkt am ersten Kunden des Folgetags.
+- [x] Coupon laeuft am Tagesende aus.
+- [x] Sortiment-Level-Up prueft Geld.
+- [x] Sortiment-Level-Up wirkt ab dem naechsten Kunden.
+- [x] Upgrade-Button-Zustand aus State ableiten, nicht im UI entscheiden.
 
 ### Tests
 
-- [ ] Unit-Test fuer `CustomerGenerator`: gleiche Seeds, gleiche Folgen.
-- [ ] Unit-Test fuer `BeltSystem`: sichtbare Slots, Coupon-Slot, Nachruecken.
-- [ ] Unit-Test fuer `ScanSystem`: Richtung, Kontakt, gehalten/nicht gehalten.
-- [ ] Unit-Test fuer `SuspicionSystem`: Roll, Stufen, Deckel.
-- [ ] Unit-Test fuer `EconomySystem`: Scan-Betrag, Coupon-Rabatt, Trash, Payout.
-- [ ] Unit-Test fuer `CouponSystem`: Delay, Tagesdauer, Scam-Regeln.
-- [ ] Unit-Test fuer `UpgradeSystem`: Kauf, Kosten, Wirkung ab naechstem Kunden.
+- [x] Unit-Test fuer `CustomerGenerator`: gleiche Seeds, gleiche Folgen.
+- [x] Unit-Test fuer `BeltSystem`: sichtbare Slots, Coupon-Slot, Nachruecken.
+- [x] Unit-Test fuer `ScanSystem`: Richtung, Kontakt, gehalten/nicht gehalten.
+- [x] Unit-Test fuer `SuspicionSystem`: Roll, Stufen, Deckel.
+- [x] Unit-Test fuer `EconomySystem`: Scan-Betrag, Coupon-Rabatt, Trash, Payout.
+- [x] Unit-Test fuer `CouponSystem`: Delay, Tagesdauer, Scam-Regeln.
+- [x] Unit-Test fuer `UpgradeSystem`: Kauf, Kosten, Wirkung ab naechstem Kunden.
 
 ### Phase-2-Akzeptanz
 
-- [ ] Ein kompletter Kundenablauf kann in Tests simuliert werden, ohne eine Szene zu laden.
-- [ ] Simulation mutiert nur Runtime-State, keine Definition-Resources.
-- [ ] UI-Abhaengigkeiten in Simulation sind nicht vorhanden.
-- [ ] Content-Validierung und Unit-Tests laufen reproduzierbar.
+- [x] Ein kompletter Kundenablauf kann in Tests simuliert werden, ohne eine Szene zu laden.
+- [x] Simulation mutiert nur Runtime-State, keine Definition-Resources.
+- [x] UI-Abhaengigkeiten in Simulation sind nicht vorhanden.
+- [x] Content-Validierung und Unit-Tests laufen reproduzierbar.
 
 ## Phase 3 - Editor-Szenen, Platzhalter und Interaktionsoberflaeche
 

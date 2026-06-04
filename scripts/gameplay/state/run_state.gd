@@ -8,6 +8,8 @@ var cash_cents: int = 0
 var rent_due_cents: int = 0
 var assortment_level: int = 1
 var pending_assortment_level: int = 1
+var pending_assortment_activation_day: int = 1
+var pending_assortment_activation_customer_number: int = 1
 var current_customer: CustomerState
 var active_coupons: Array[CouponInstance] = []
 var pending_coupons: Array[CouponInstance] = []
@@ -19,4 +21,5 @@ func apply_balance(balance: GameBalanceResource) -> void:
 	rent_due_cents = balance.daily_rent_cents
 	assortment_level = balance.starting_assortment_level
 	pending_assortment_level = balance.starting_assortment_level
-
+	pending_assortment_activation_day = current_day
+	pending_assortment_activation_customer_number = current_customer_number

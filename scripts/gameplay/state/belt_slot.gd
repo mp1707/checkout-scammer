@@ -20,3 +20,20 @@ func _init(initial_slot_index: int = -1) -> void:
 func has_object() -> bool:
 	return slot_kind != SlotKind.EMPTY
 
+
+func set_product(product: ProductInstance) -> void:
+	slot_kind = SlotKind.PRODUCT
+	product_instance = product
+	coupon_instance = null
+
+
+func set_coupon(coupon: CouponInstance) -> void:
+	slot_kind = SlotKind.COUPON
+	product_instance = null
+	coupon_instance = coupon
+
+
+func clear_object() -> void:
+	slot_kind = SlotKind.EMPTY
+	product_instance = null
+	coupon_instance = null
