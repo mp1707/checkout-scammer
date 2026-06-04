@@ -1,0 +1,42 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/gameplay/components/customer_hand_view.gd" id="1_customer_hand"]
+
+[node name="CustomerHandView" type="Node2D"]
+script = ExtResource("1_customer_hand")
+mood_ring_rect = NodePath("MoodRing")
+animation_player = NodePath("AnimationPlayer")
+
+[node name="Palm" type="ColorRect" parent="."]
+mouse_filter = 2
+offset_left = -34.0
+offset_top = -12.0
+offset_right = 18.0
+offset_bottom = 14.0
+color = Color(0.78, 0.52, 0.34, 1)
+
+[node name="FingerA" type="ColorRect" parent="."]
+mouse_filter = 2
+offset_left = 10.0
+offset_top = -20.0
+offset_right = 36.0
+offset_bottom = -10.0
+color = Color(0.78, 0.52, 0.34, 1)
+
+[node name="FingerB" type="ColorRect" parent="."]
+mouse_filter = 2
+offset_left = 10.0
+offset_top = -5.0
+offset_right = 40.0
+offset_bottom = 5.0
+color = Color(0.78, 0.52, 0.34, 1)
+
+[node name="MoodRing" type="ColorRect" parent="."]
+mouse_filter = 2
+offset_left = 20.0
+offset_top = -9.0
+offset_right = 28.0
+offset_bottom = -1.0
+color = Color(0.1, 0.9, 0.18, 1)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]

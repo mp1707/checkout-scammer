@@ -1,0 +1,93 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/gameplay/components/conveyor_belt_view.gd" id="1_conveyor"]
+[ext_resource type="PackedScene" path="res://scenes/gameplay/products/product_actor.tscn" id="2_product_actor"]
+[ext_resource type="PackedScene" path="res://scenes/gameplay/products/coupon_actor.tscn" id="3_coupon_actor"]
+
+[node name="ConveyorBeltView" type="Node2D"]
+script = ExtResource("1_conveyor")
+actor_container = NodePath("ActorContainer")
+slot_marker_root = NodePath("SlotMarkers")
+spawn_marker = NodePath("SpawnMarker")
+exit_marker = NodePath("ExitMarker")
+product_actor_scene = ExtResource("2_product_actor")
+coupon_actor_scene = ExtResource("3_coupon_actor")
+
+[node name="BeltSurface" type="ColorRect" parent="."]
+mouse_filter = 2
+offset_left = -18.0
+offset_top = -34.0
+offset_right = 238.0
+offset_bottom = 34.0
+color = Color(0.12, 0.13, 0.14, 1)
+
+[node name="BeltStripeA" type="ColorRect" parent="."]
+mouse_filter = 2
+offset_left = -18.0
+offset_top = -26.0
+offset_right = 238.0
+offset_bottom = -22.0
+color = Color(0.22, 0.23, 0.24, 1)
+
+[node name="BeltStripeB" type="ColorRect" parent="."]
+mouse_filter = 2
+offset_left = -18.0
+offset_top = 22.0
+offset_right = 238.0
+offset_bottom = 26.0
+color = Color(0.22, 0.23, 0.24, 1)
+
+[node name="SlotGuides" type="Node2D" parent="."]
+
+[node name="SlotGuide0" type="ColorRect" parent="SlotGuides"]
+mouse_filter = 2
+offset_left = -18.0
+offset_top = -24.0
+offset_right = 18.0
+offset_bottom = 24.0
+color = Color(1, 1, 1, 0.09)
+
+[node name="SlotGuide1" type="ColorRect" parent="SlotGuides"]
+mouse_filter = 2
+offset_left = 36.0
+offset_top = -24.0
+offset_right = 72.0
+offset_bottom = 24.0
+color = Color(1, 1, 1, 0.09)
+
+[node name="SlotGuide2" type="ColorRect" parent="SlotGuides"]
+mouse_filter = 2
+offset_left = 90.0
+offset_top = -24.0
+offset_right = 126.0
+offset_bottom = 24.0
+color = Color(1, 1, 1, 0.09)
+
+[node name="SlotGuide3" type="ColorRect" parent="SlotGuides"]
+mouse_filter = 2
+offset_left = 144.0
+offset_top = -24.0
+offset_right = 180.0
+offset_bottom = 24.0
+color = Color(1, 1, 1, 0.09)
+
+[node name="SlotMarkers" type="Node2D" parent="."]
+
+[node name="Slot0" type="Marker2D" parent="SlotMarkers"]
+
+[node name="Slot1" type="Marker2D" parent="SlotMarkers"]
+position = Vector2(54, 0)
+
+[node name="Slot2" type="Marker2D" parent="SlotMarkers"]
+position = Vector2(108, 0)
+
+[node name="Slot3" type="Marker2D" parent="SlotMarkers"]
+position = Vector2(162, 0)
+
+[node name="SpawnMarker" type="Marker2D" parent="."]
+position = Vector2(238, 0)
+
+[node name="ExitMarker" type="Marker2D" parent="."]
+position = Vector2(-40, 0)
+
+[node name="ActorContainer" type="Node2D" parent="."]

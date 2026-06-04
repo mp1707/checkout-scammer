@@ -33,7 +33,7 @@ und die Aufgabe muss vor der Umsetzung geklaert oder angepasst werden.
 
 1. [x] Phase 1: Datenfundament, Content und Validierung
 2. [x] Phase 2: Pure Simulation und Unit-Tests
-3. [ ] Phase 3: Editor-Szenen, Platzhalter und Interaktionsoberflaeche
+3. [x] Phase 3: Editor-Szenen, Platzhalter und Interaktionsoberflaeche
 4. [ ] Phase 4: Run-Integration, HUD, Upgrades und kompletter Loop
 5. [ ] Phase 5: Juice, Balancing, QA und Prototyp-Abschluss
 
@@ -200,65 +200,65 @@ angelegt und im Editor pruefbar bleiben muessen.
 
 ### Application- und Root-Szenen
 
-- [ ] `GameApp`-Script in `scripts/application` erstellen.
-- [ ] `RunController`-Script in `scripts/application` erstellen.
-- [ ] Spielszene in `scenes/application` oder `scenes/gameplay` anlegen und von `boot.tscn` erreichbar machen.
-- [ ] Root-Layout bei `640x360` in drei Bereiche aufteilen:
+- [x] `GameApp`-Script in `scripts/application` erstellen.
+- [x] `RunController`-Script in `scripts/application` erstellen.
+- [x] Spielszene in `scenes/application` oder `scenes/gameplay` anlegen und von `boot.tscn` erreichbar machen.
+- [x] Root-Layout bei `640x360` in drei Bereiche aufteilen:
   linke Statusleiste ca. 15%, Kassentisch ca. 70%, rechte Upgrade-Leiste ca. 15%.
-- [ ] Exportierte Referenzen statt fragiler Querpfade verwenden.
+- [x] Exportierte Referenzen statt fragiler Querpfade verwenden.
 
 ### Platzhalter-Szenen fuer fehlende Assets
 
-- [ ] `CheckoutTable` als sichtbare Tisch-Szene anlegen.
-- [ ] `ScannerStation` als quadratischer Scanner links im Kassentisch anlegen.
-- [ ] Vertikalen Scannerstrahl als editierbaren Node sichtbar machen.
-- [ ] Scanner-Hitbox als `Area2D` mit sichtbarer `CollisionShape2D` anlegen.
-- [ ] `ConveyorBeltView` rechts neben Scanner anlegen.
-- [ ] Vier Belt-Slot-Marker sichtbar und editierbar platzieren.
-- [ ] Spawn- und Exit-Marker fuer Belt-Bewegungen anlegen.
-- [ ] `BagZone` ueber dem Scanner anlegen.
-- [ ] `TrashZone` rechts unten unter dem Band anlegen.
-- [ ] `CustomerHandView` rechts oben ueber dem Band mit Mood-Ring-Platzhalter anlegen.
-- [ ] Alle Platzhalter so kapseln, dass spaetere echte Assets die Szene ersetzen oder befuellen koennen, ohne Gameplay-Systeme umzubauen.
+- [x] `CheckoutTable` als sichtbare Tisch-Szene anlegen.
+- [x] `ScannerStation` als quadratischer Scanner links im Kassentisch anlegen.
+- [x] Vertikalen Scannerstrahl als editierbaren Node sichtbar machen.
+- [x] Scanner-Hitbox als `Area2D` mit sichtbarer `CollisionShape2D` anlegen.
+- [x] `ConveyorBeltView` rechts neben Scanner anlegen.
+- [x] Vier Belt-Slot-Marker sichtbar und editierbar platzieren.
+- [x] Spawn- und Exit-Marker fuer Belt-Bewegungen anlegen.
+- [x] `BagZone` ueber dem Scanner anlegen.
+- [x] `TrashZone` rechts unten unter dem Band anlegen.
+- [x] `CustomerHandView` rechts oben ueber dem Band mit Mood-Ring-Platzhalter anlegen.
+- [x] Alle Platzhalter so kapseln, dass spaetere echte Assets die Szene ersetzen oder befuellen koennen, ohne Gameplay-Systeme umzubauen.
 
 ### ProductActor und Drag
 
-- [ ] `ProductActor`-Scene in `scenes/gameplay/products` anlegen.
-- [ ] `ProductActor`-Script in `scripts/gameplay/actors` anlegen.
-- [ ] ProductActor zeigt Black-Outline-Produkttexture als normalen Zustand.
-- [ ] Highlight-Zustand nutzt White-Outline-Asset, sobald vorhanden.
-- [ ] Separaten Schatten-Anker im ProductActor anlegen, kein baked Runtime-Schatten als Standardprodukt.
-- [ ] Drag-Input, Hover, Auswahl und Rotation im ProductActor sammeln.
-- [ ] ProductActor sendet Intents/Signals, mutiert aber keinen Run-State.
-- [ ] Betrag-Label-Anker am Produkt vorbereiten.
-- [ ] Wobble/Squash-Anker oder AnimationPlayer vorbereiten.
+- [x] `ProductActor`-Scene in `scenes/gameplay/products` anlegen.
+- [x] `ProductActor`-Script in `scripts/gameplay/actors` anlegen.
+- [x] ProductActor zeigt Black-Outline-Produkttexture als normalen Zustand.
+- [x] Highlight-Zustand nutzt White-Outline-Asset, sobald vorhanden.
+- [x] Separaten Schatten-Anker im ProductActor anlegen, kein baked Runtime-Schatten als Standardprodukt.
+- [x] Drag-Input, Hover, Auswahl und Rotation im ProductActor sammeln.
+- [x] ProductActor sendet Intents/Signals, mutiert aber keinen Run-State.
+- [x] Betrag-Label-Anker am Produkt vorbereiten.
+- [x] Wobble/Squash-Anker oder AnimationPlayer vorbereiten.
 
 ### Conveyor, Drop-Zonen und Scannerkontakte
 
-- [ ] `ConveyorBeltView` instanziiert nur vorbereitete Product-/Coupon-Actor-Scenes in vorhandene Slot-Marker.
-- [ ] Slots, Spawn und Exit kommen aus der Szene, nicht aus magischen Script-Koordinaten.
-- [ ] `ScannerStation` meldet Kontakte lokal an Parent/Controller.
-- [ ] `BagZone` meldet Drop-Intent.
-- [ ] `TrashZone` meldet Drop-Intent.
+- [x] `ConveyorBeltView` instanziiert nur vorbereitete Product-/Coupon-Actor-Scenes in vorhandene Slot-Marker.
+- [x] Slots, Spawn und Exit kommen aus der Szene, nicht aus magischen Script-Koordinaten.
+- [x] `ScannerStation` meldet Kontakte lokal an Parent/Controller.
+- [x] `BagZone` meldet Drop-Intent.
+- [x] `TrashZone` meldet Drop-Intent.
 - [ ] Optionales Zuruecklegen aufs Band nur vorbereiten, wenn es den Core-Loop nicht verkompliziert.
 
 ### HUD und UI-Grundstruktur
 
-- [ ] `HudRoot`-Scene mit linker Statusleiste und rechter Upgrade-Leiste anlegen.
-- [ ] Linke Statusleiste zeigt Tag, Kunde, Mietziel, Cash in Drawer.
-- [ ] Rechte Leiste enthaelt Coupon-Button, Sortiment-Level-Up-Button und Platzhalter fuer spaetere Upgrades.
-- [ ] Dialog-Layer fuer Caught-Dialog, Customer-Bye und Win/Lose vorbereiten.
-- [ ] Popup-Szene fuer Coupon-Auswahl vorbereiten.
-- [ ] Tooltip-Anker fuer Coupon- und Sortiment-Buttons vorbereiten.
-- [ ] Panels ueber 9-Slice-Panel-Architektur aus `architecture.md` stylen.
-- [ ] Fontgroessen nur ueber Theme/Resource-Werte verwenden.
+- [x] `HudRoot`-Scene mit linker Statusleiste und rechter Upgrade-Leiste anlegen.
+- [x] Linke Statusleiste zeigt Tag, Kunde, Mietziel, Cash in Drawer.
+- [x] Rechte Leiste enthaelt Coupon-Button, Sortiment-Level-Up-Button und Platzhalter fuer spaetere Upgrades.
+- [x] Dialog-Layer fuer Caught-Dialog, Customer-Bye und Win/Lose vorbereiten.
+- [x] Popup-Szene fuer Coupon-Auswahl vorbereiten.
+- [x] Tooltip-Anker fuer Coupon- und Sortiment-Buttons vorbereiten.
+- [x] Panels ueber 9-Slice-Panel-Architektur aus `architecture.md` stylen.
+- [x] Fontgroessen nur ueber Theme/Resource-Werte verwenden.
 
 ### Phase-3-Akzeptanz
 
-- [ ] Szene ist bei `640x360` lesbar und alle wichtigen Marker/Zonen sind im Editor sichtbar.
-- [ ] Code baut keine kompletten Gameplay- oder UI-Baeume aus dem Nichts.
-- [ ] ProductActor, Scanner, Bag, Trash und HUD kommunizieren ueber Signals, Exports oder Controller-APIs.
-- [ ] Platzhalter sind klar als Platzhalter erkennbar und spaeter austauschbar.
+- [x] Szene ist bei `640x360` lesbar und alle wichtigen Marker/Zonen sind im Editor sichtbar.
+- [x] Code baut keine kompletten Gameplay- oder UI-Baeume aus dem Nichts.
+- [x] ProductActor, Scanner, Bag, Trash und HUD kommunizieren ueber Signals, Exports oder Controller-APIs.
+- [x] Platzhalter sind klar als Platzhalter erkennbar und spaeter austauschbar.
 
 ## Phase 4 - Run-Integration, HUD, Upgrades und kompletter Loop
 

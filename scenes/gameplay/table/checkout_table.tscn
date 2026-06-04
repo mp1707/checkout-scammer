@@ -1,0 +1,56 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/gameplay/components/checkout_table.gd" id="1_checkout_table"]
+[ext_resource type="PackedScene" path="res://scenes/gameplay/scanner/scanner_station.tscn" id="2_scanner"]
+[ext_resource type="PackedScene" path="res://scenes/gameplay/belt/conveyor_belt_view.tscn" id="3_conveyor"]
+[ext_resource type="PackedScene" path="res://scenes/gameplay/bag/bag_zone.tscn" id="4_bag"]
+[ext_resource type="PackedScene" path="res://scenes/gameplay/trash/trash_zone.tscn" id="5_trash"]
+[ext_resource type="PackedScene" path="res://scenes/gameplay/customer/customer_hand_view.tscn" id="6_hand"]
+
+[node name="CheckoutTable" type="Control"]
+mouse_filter = 2
+offset_right = 448.0
+offset_bottom = 360.0
+script = ExtResource("1_checkout_table")
+conveyor_belt_view = NodePath("ConveyorBeltView")
+scanner_station = NodePath("ScannerStation")
+bag_zone = NodePath("BagZone")
+trash_zone = NodePath("TrashZone")
+customer_hand_view = NodePath("CustomerHandView")
+
+[node name="TableSurface" type="ColorRect" parent="."]
+mouse_filter = 2
+offset_right = 448.0
+offset_bottom = 360.0
+color = Color(0.29, 0.42, 0.37, 1)
+
+[node name="TableLeftEdge" type="ColorRect" parent="."]
+mouse_filter = 2
+offset_right = 12.0
+offset_bottom = 360.0
+color = Color(0.2, 0.29, 0.27, 1)
+
+[node name="TableBottomEdge" type="ColorRect" parent="."]
+mouse_filter = 2
+offset_top = 338.0
+offset_right = 448.0
+offset_bottom = 360.0
+color = Color(0.2, 0.29, 0.27, 1)
+
+[node name="BagZone" parent="." instance=ExtResource("4_bag")]
+position = Vector2(72, 78)
+
+[node name="ScannerStation" parent="." instance=ExtResource("2_scanner")]
+position = Vector2(72, 180)
+
+[node name="ConveyorBeltView" parent="." instance=ExtResource("3_conveyor")]
+position = Vector2(154, 188)
+
+[node name="TrashZone" parent="." instance=ExtResource("5_trash")]
+position = Vector2(382, 292)
+
+[node name="CustomerHandView" parent="." instance=ExtResource("6_hand")]
+position = Vector2(356, 78)
+
+[node name="VfxAnchor" type="Marker2D" parent="."]
+position = Vector2(72, 146)
