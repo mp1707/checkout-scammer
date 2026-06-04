@@ -12,6 +12,7 @@ const CUSTOMER_BYE_MESSAGE: String = "Thanks, byyyyyeeeeee"
 const LOSE_MESSAGE: String = "Rent is due, but the drawer is short. Shift over."
 const WIN_MESSAGE: String = "Day 8 rent is paid. You win!"
 const CUSTOMER_DONE_DELAY_SECONDS: float = 0.6
+const COUPON_BUTTON_TOOLTIP: String = "Coupons wirken ab dem naechsten Kunden. Beim letzten Kunden starten sie morgen."
 
 enum DialogKind {
 	NONE,
@@ -135,6 +136,7 @@ func _update_hud_state() -> void:
 		cash_cents
 	)
 	hud_root.set_coupon_button_enabled(not _is_run_finished and not _get_available_coupon_options().is_empty())
+	hud_root.set_coupon_button_tooltip(COUPON_BUTTON_TOOLTIP)
 	_update_assortment_button()
 
 
@@ -145,6 +147,7 @@ func _update_assortment_button() -> void:
 	var next_upgrade: UpgradeResource = _upgrade_system.get_next_assortment_upgrade(run_state, registry.upgrades)
 	if next_upgrade == null:
 		hud_root.set_assortment_upgrade_button("Max Stock", false)
+		hud_root.set_assortment_upgrade_tooltip("Alle Sortiment-Level sind freigeschaltet.")
 		return
 
 	var label_text: String = "Lvl %d %s" % [
@@ -155,6 +158,7 @@ func _update_assortment_button() -> void:
 		label_text,
 		not _is_run_finished and _upgrade_system.can_purchase_assortment_upgrade(run_state, next_upgrade)
 	)
+	hud_root.set_assortment_upgrade_tooltip(_build_assortment_upgrade_tooltip(next_upgrade))
 
 
 func _update_mood_ring() -> void:
@@ -456,6 +460,37 @@ func _get_affordable_coupon_ids() -> PackedStringArray:
 			affordable_coupon_ids.append(coupon.id)
 
 	return affordable_coupon_ids
+
+
+func _build_assortment_upgrade_tooltip(upgrade: UpgradeResource) -> String:
+	if upgrade == null:
+		return ""
+
+	var lines: PackedStringArray = PackedStringArray()
+	if not upgrade.tooltip.strip_edges().is_empty():
+		lines.append(upgrade.tooltip.strip_edges())
+	lines.append("Wirkt ab dem naechsten Kunden.")
+
+	if not upgrade.unlocked_products.is_empty():
+		lines.append("Neue Produkte:")
+		for product: ProductVariantResource in upgrade.unlocked_products:
+			if product == null:
+				continue
+			lines.append("%s %s" % [
+				product.display_name,
+				_economy_system.format_cents(product.price_cents),
+			])
+
+	return _join_tooltip_lines(lines)
+
+
+func _join_tooltip_lines(lines: PackedStringArray) -> String:
+	var tooltip_text: String = ""
+	for line_index: int in range(lines.size()):
+		if line_index > 0:
+			tooltip_text += "\n"
+		tooltip_text += lines[line_index]
+	return tooltip_text
 
 
 func _should_ignore_player_input() -> bool:

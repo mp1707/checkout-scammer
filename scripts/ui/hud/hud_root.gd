@@ -51,11 +51,21 @@ func set_coupon_button_enabled(is_enabled: bool) -> void:
 		coupon_button.disabled = not is_enabled
 
 
+func set_coupon_button_tooltip(tooltip_text: String) -> void:
+	if coupon_button != null:
+		coupon_button.tooltip_text = tooltip_text
+
+
 func set_assortment_upgrade_button(label_text: String, is_enabled: bool) -> void:
 	if assortment_upgrade_button == null:
 		return
 	assortment_upgrade_button.text = label_text
 	assortment_upgrade_button.disabled = not is_enabled
+
+
+func set_assortment_upgrade_tooltip(tooltip_text: String) -> void:
+	if assortment_upgrade_button != null:
+		assortment_upgrade_button.tooltip_text = tooltip_text
 
 
 func show_dialog(message: String) -> void:

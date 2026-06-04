@@ -34,7 +34,7 @@ und die Aufgabe muss vor der Umsetzung geklaert oder angepasst werden.
 1. [x] Phase 1: Datenfundament, Content und Validierung
 2. [x] Phase 2: Pure Simulation und Unit-Tests
 3. [x] Phase 3: Editor-Szenen, Platzhalter und Interaktionsoberflaeche
-4. [ ] Phase 4: Run-Integration, HUD, Upgrades und kompletter Loop
+4. [x] Phase 4: Run-Integration, HUD, Upgrades und kompletter Loop
 5. [ ] Phase 5: Juice, Balancing, QA und Prototyp-Abschluss
 
 ## Phase 1 - Datenfundament, Content und Validierung
@@ -281,7 +281,7 @@ Empfohlener Session-Scope: ein bis zwei Codex-Sessions.
 
 - [x] Neuer Kunde erzeugt Queue aus 10 Produkten.
 - [x] Falls Coupon aktiv: Coupon als erstes sichtbares Belt-Objekt anzeigen.
-- [ ] Erste vier sichtbare Objekte fahren von rechts ein.
+- [x] Erste vier sichtbare Objekte fahren von rechts ein.
 - [x] Entferntes Objekt laesst naechstes Objekt nachruecken.
 - [x] Leeres Band nach verarbeitetem Kunden korrekt darstellen.
 - [x] Nach letztem Produkt nach kurzer Pause Customer-Bye-Dialog zeigen.
@@ -332,13 +332,13 @@ Empfohlener Session-Scope: ein bis zwei Codex-Sessions.
 - [x] Sortiment-Level-Up-Button zeigt naechsten Preis.
 - [x] Button ist disabled, wenn Geld nicht reicht.
 - [x] Level-Up-Kauf wirkt ab naechstem Kunden.
-- [ ] Tooltip zeigt naechste Produkte und Werte.
+- [x] Tooltip zeigt naechste Produkte und Werte.
 
 ### Phase-4-Akzeptanz
 
-- [ ] Ein kompletter Run kann gespielt werden.
-- [ ] Der Spieler kann normal verkaufen, mehrfach scannen, erwischt werden, Coupons kaufen/scammen und Sortiment upgraden.
-- [ ] Tagesmiete, Lose und Win funktionieren.
+- [x] Ein kompletter Run kann gespielt werden.
+- [x] Der Spieler kann normal verkaufen, mehrfach scannen, erwischt werden, Coupons kaufen/scammen und Sortiment upgraden.
+- [x] Tagesmiete, Lose und Win funktionieren.
 - [x] HUD zeigt Zustand korrekt, mutiert aber keinen Gameplay-State direkt.
 
 ## Phase 5 - Juice, Balancing, QA und Prototyp-Abschluss

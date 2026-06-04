@@ -11,8 +11,13 @@ signal coupon_actor_spawned(actor: Node2D, slot_index: int)
 @export var exit_marker: Marker2D
 @export var product_actor_scene: PackedScene
 @export var coupon_actor_scene: PackedScene
+@export var spawn_tween_duration: float = 0.22
+@export var spawn_stagger_seconds: float = 0.04
 
 var _actors_by_slot: Dictionary[int, Node2D] = {}
+var _actors_by_object_key: Dictionary[String, Node2D] = {}
+var _object_keys_by_slot: Dictionary[int, String] = {}
+var _spawn_tweens_by_object_key: Dictionary[String, Tween] = {}
 
 
 func _ready() -> void:
@@ -21,7 +26,12 @@ func _ready() -> void:
 
 func display_slots(slots: Array[BeltSlot]) -> void:
 	_resolve_child_references()
-	clear_actors()
+	var stale_object_keys: Dictionary[String, bool] = {}
+	for object_key: String in _actors_by_object_key.keys():
+		stale_object_keys[object_key] = true
+
+	_actors_by_slot.clear()
+	_object_keys_by_slot.clear()
 
 	for slot: BeltSlot in slots:
 		if slot == null or not slot.has_object():
@@ -32,18 +42,29 @@ func display_slots(slots: Array[BeltSlot]) -> void:
 			push_warning("Missing conveyor slot marker for slot %d." % slot.slot_index)
 			continue
 
-		var actor: Node2D = _instantiate_actor_for_slot(slot)
-		if actor == null:
+		var object_key: String = _get_slot_object_key(slot)
+		if object_key.is_empty():
 			continue
 
-		actor.position = actor_container.to_local(slot_marker.global_position) if actor_container != null else slot_marker.position
-		if actor_container != null:
-			actor_container.add_child(actor)
+		var actor: Node2D = _actors_by_object_key.get(object_key) as Node2D
+		var is_new_actor: bool = actor == null or not is_instance_valid(actor)
+		if is_new_actor:
+			actor = _instantiate_actor_for_slot(slot)
+			if actor == null:
+				continue
+			_add_actor_to_container(actor)
+			_actors_by_object_key[object_key] = actor
+			_emit_actor_spawned(actor, slot.slot_index)
 		else:
-			add_child(actor)
+			actor.set("slot_index", slot.slot_index)
 
+		stale_object_keys.erase(object_key)
 		_actors_by_slot[slot.slot_index] = actor
-		_emit_actor_spawned(actor, slot.slot_index)
+		_object_keys_by_slot[slot.slot_index] = object_key
+		_move_actor_to_slot(actor, object_key, slot_marker, is_new_actor, slot.slot_index)
+
+	for object_key: String in stale_object_keys.keys():
+		_remove_actor_for_object_key(object_key)
 
 
 func clear_actors() -> void:
@@ -51,6 +72,12 @@ func clear_actors() -> void:
 		if actor != null and is_instance_valid(actor):
 			actor.queue_free()
 	_actors_by_slot.clear()
+	_actors_by_object_key.clear()
+	_object_keys_by_slot.clear()
+	for tween: Tween in _spawn_tweens_by_object_key.values():
+		if tween != null and tween.is_valid():
+			tween.kill()
+	_spawn_tweens_by_object_key.clear()
 
 
 func release_actor(actor: Node2D) -> void:
@@ -62,6 +89,11 @@ func release_actor(actor: Node2D) -> void:
 		return
 	if _actors_by_slot.get(slot_index) == actor:
 		_actors_by_slot.erase(slot_index)
+		var object_key: String = _object_keys_by_slot.get(slot_index, "")
+		_object_keys_by_slot.erase(slot_index)
+		if not object_key.is_empty() and _actors_by_object_key.get(object_key) == actor:
+			_actors_by_object_key.erase(object_key)
+			_kill_spawn_tween(object_key)
 
 
 func get_actor_for_slot(slot_index: int) -> Node2D:
@@ -122,6 +154,70 @@ func _instantiate_coupon_actor(slot: BeltSlot) -> Node2D:
 	if actor.has_method("set_coupon_instance"):
 		actor.call("set_coupon_instance", slot.coupon_instance)
 	return actor
+
+
+func _add_actor_to_container(actor: Node2D) -> void:
+	if actor_container != null:
+		actor_container.add_child(actor)
+	else:
+		add_child(actor)
+
+
+func _move_actor_to_slot(
+	actor: Node2D,
+	object_key: String,
+	slot_marker: Marker2D,
+	from_spawn: bool,
+	slot_index: int
+) -> void:
+	var target_position: Vector2 = _get_marker_position_in_actor_container(slot_marker)
+	_kill_spawn_tween(object_key)
+
+	if not from_spawn or spawn_marker == null or spawn_tween_duration <= 0.0:
+		actor.position = target_position
+		return
+
+	actor.position = _get_marker_position_in_actor_container(spawn_marker)
+	var tween: Tween = actor.create_tween()
+	_spawn_tweens_by_object_key[object_key] = tween
+	tween.tween_property(actor, "position", target_position, spawn_tween_duration) \
+		.set_delay(spawn_stagger_seconds * float(slot_index)) \
+		.set_trans(Tween.TRANS_QUAD) \
+		.set_ease(Tween.EASE_OUT)
+
+
+func _get_marker_position_in_actor_container(marker: Marker2D) -> Vector2:
+	if actor_container != null:
+		return actor_container.to_local(marker.global_position)
+	return marker.position
+
+
+func _remove_actor_for_object_key(object_key: String) -> void:
+	var actor: Node2D = _actors_by_object_key.get(object_key) as Node2D
+	_kill_spawn_tween(object_key)
+	if actor != null and is_instance_valid(actor):
+		actor.queue_free()
+	_actors_by_object_key.erase(object_key)
+
+
+func _kill_spawn_tween(object_key: String) -> void:
+	var tween: Tween = _spawn_tweens_by_object_key.get(object_key) as Tween
+	if tween != null and tween.is_valid():
+		tween.kill()
+	_spawn_tweens_by_object_key.erase(object_key)
+
+
+func _get_slot_object_key(slot: BeltSlot) -> String:
+	match slot.slot_kind:
+		BeltSlot.SlotKind.PRODUCT:
+			if slot.product_instance != null:
+				return "product:%s" % slot.product_instance.instance_id
+		BeltSlot.SlotKind.COUPON:
+			if slot.coupon_instance != null:
+				return "coupon:%s" % slot.coupon_instance.instance_id
+		_:
+			return ""
+	return ""
 
 
 func _emit_actor_spawned(actor: Node2D, slot_index: int) -> void:
