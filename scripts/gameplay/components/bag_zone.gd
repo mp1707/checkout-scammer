@@ -6,6 +6,11 @@ signal actor_dropped(actor: Node2D)
 @export var drop_anchor: Marker2D
 
 
+func _ready() -> void:
+	if drop_anchor == null:
+		drop_anchor = get_node_or_null("DropAnchor") as Marker2D
+
+
 func try_drop_actor(actor: Node2D) -> bool:
 	if not can_accept_actor(actor):
 		return false

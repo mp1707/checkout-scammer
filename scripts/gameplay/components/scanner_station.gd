@@ -13,6 +13,7 @@ signal actor_contact_ended(actor: Node2D)
 
 
 func _ready() -> void:
+	_resolve_child_references()
 	if hit_area == null:
 		return
 	if not hit_area.area_entered.is_connected(_on_hit_area_entered):
@@ -72,3 +73,14 @@ func _find_actor_from_area(area: Area2D) -> Node2D:
 		node = node.get_parent()
 
 	return null
+
+
+func _resolve_child_references() -> void:
+	if hit_area == null:
+		hit_area = get_node_or_null("HitArea") as Area2D
+	if beam == null:
+		beam = get_node_or_null("Beam") as CanvasItem
+	if feedback_anchor == null:
+		feedback_anchor = get_node_or_null("FeedbackAnchor") as Marker2D
+	if animation_player == null:
+		animation_player = get_node_or_null("AnimationPlayer") as AnimationPlayer

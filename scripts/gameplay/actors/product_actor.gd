@@ -28,6 +28,9 @@ var _last_global_position: Vector2 = Vector2.ZERO
 
 
 func _ready() -> void:
+	_resolve_child_references()
+	if product_instance != null and product_instance.variant != null:
+		_set_product_textures(product_instance.variant.normal_texture, product_instance.variant.highlight_texture)
 	_apply_label_theme()
 	_connect_interaction_area()
 	_update_visual_state()
@@ -194,3 +197,18 @@ func _apply_label_theme() -> void:
 func _format_cents(cents: int) -> String:
 	var dollars: int = floori(float(cents) / 100.0)
 	return "$%d.%02d" % [dollars, cents % 100]
+
+
+func _resolve_child_references() -> void:
+	if normal_sprite == null:
+		normal_sprite = get_node_or_null("SpriteRoot/NormalSprite") as Sprite2D
+	if highlight_sprite == null:
+		highlight_sprite = get_node_or_null("SpriteRoot/HighlightSprite") as Sprite2D
+	if shadow_sprite == null:
+		shadow_sprite = get_node_or_null("ShadowAnchor/ShadowSprite") as Sprite2D
+	if amount_label == null:
+		amount_label = get_node_or_null("AmountLabel") as Label
+	if interaction_area == null:
+		interaction_area = get_node_or_null("InteractionArea") as Area2D
+	if animation_player == null:
+		animation_player = get_node_or_null("AnimationPlayer") as AnimationPlayer

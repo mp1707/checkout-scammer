@@ -92,7 +92,7 @@ func _update_customer_completion(customer: CustomerState) -> void:
 	customer.is_complete = (
 		customer.processed_product_count >= customer.total_product_count
 		and customer.product_queue.is_empty()
-		and get_visible_product_count(customer) == 0
+		and get_visible_object_count(customer) == 0
 	)
 
 

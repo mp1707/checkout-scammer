@@ -2,6 +2,7 @@ extends Control
 class_name HudRoot
 
 signal coupon_button_pressed()
+signal coupon_selected(coupon_id: String)
 signal assortment_upgrade_button_pressed()
 signal dialog_closed()
 
@@ -21,6 +22,7 @@ var _active_popup: Control
 
 
 func _ready() -> void:
+	_resolve_child_references()
 	_connect_buttons()
 	_apply_label_theme(self)
 	hide_dialog()
@@ -68,7 +70,7 @@ func hide_dialog() -> void:
 		dialog_layer.visible = false
 
 
-func show_coupon_popup() -> void:
+func show_coupon_popup(coupons: Array[CouponResource], affordable_coupon_ids: PackedStringArray) -> void:
 	if coupon_popup_scene == null or popup_layer == null:
 		return
 
@@ -85,6 +87,10 @@ func show_coupon_popup() -> void:
 
 	if _active_popup.has_signal("popup_closed"):
 		_active_popup.connect("popup_closed", Callable(self, "close_coupon_popup"))
+	if _active_popup.has_signal("coupon_selected"):
+		_active_popup.connect("coupon_selected", _on_coupon_selected)
+	if _active_popup.has_method("configure_options"):
+		_active_popup.call("configure_options", coupons, affordable_coupon_ids)
 
 
 func close_coupon_popup() -> void:
@@ -121,6 +127,11 @@ func _on_assortment_upgrade_button_pressed() -> void:
 	assortment_upgrade_button_pressed.emit()
 
 
+func _on_coupon_selected(coupon_id: String) -> void:
+	coupon_selected.emit(coupon_id)
+	close_coupon_popup()
+
+
 func _apply_label_theme(root: Node) -> void:
 	if theme_resource == null:
 		return
@@ -149,3 +160,24 @@ func _format_cents(cents: int) -> String:
 
 	var dollars: int = floori(float(absolute_cents) / 100.0)
 	return "%s$%d.%02d" % [sign, dollars, absolute_cents % 100]
+
+
+func _resolve_child_references() -> void:
+	if day_value_label == null:
+		day_value_label = get_node_or_null("LeftStatusPanel/Margin/StatusList/DayValue") as Label
+	if customer_value_label == null:
+		customer_value_label = get_node_or_null("LeftStatusPanel/Margin/StatusList/CustomerValue") as Label
+	if rent_value_label == null:
+		rent_value_label = get_node_or_null("LeftStatusPanel/Margin/StatusList/RentValue") as Label
+	if cash_value_label == null:
+		cash_value_label = get_node_or_null("LeftStatusPanel/Margin/StatusList/CashValue") as Label
+	if coupon_button == null:
+		coupon_button = get_node_or_null("RightUpgradePanel/Margin/UpgradeList/CouponButton") as Button
+	if assortment_upgrade_button == null:
+		assortment_upgrade_button = get_node_or_null("RightUpgradePanel/Margin/UpgradeList/AssortmentButton") as Button
+	if dialog_layer == null:
+		dialog_layer = get_node_or_null("DialogLayer") as Control
+	if dialog_message_label == null:
+		dialog_message_label = get_node_or_null("DialogLayer/DialogPanel/Margin/DialogMessage") as Label
+	if popup_layer == null:
+		popup_layer = get_node_or_null("PopupLayer") as Control

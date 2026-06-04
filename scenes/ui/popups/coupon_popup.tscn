@@ -1,8 +1,9 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/hud/coupon_popup.gd" id="1_coupon_popup"]
 [ext_resource type="Script" path="res://scripts/ui/panels/pixel_button.gd" id="2_pixel_button"]
 [ext_resource type="Resource" path="res://content/ui/checkout_theme.tres" id="3_theme"]
+[ext_resource type="PackedScene" path="res://scenes/ui/popups/coupon_option_button.tscn" id="4_option_button"]
 
 [node name="CouponPopup" type="PanelContainer"]
 offset_left = 220.0
@@ -15,7 +16,9 @@ panel_color = Color(0.98, 0.94, 0.78, 1)
 content_margin_override = 6
 title_label = NodePath("VBox/TitleLabel")
 body_label = NodePath("VBox/BodyLabel")
+options_container = NodePath("VBox/OptionsAnchor")
 close_button = NodePath("VBox/CloseButton")
+coupon_option_button_scene = ExtResource("4_option_button")
 
 [node name="VBox" type="VBoxContainer" parent="."]
 layout_mode = 2

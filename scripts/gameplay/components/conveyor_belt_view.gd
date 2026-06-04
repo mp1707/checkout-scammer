@@ -15,7 +15,12 @@ signal coupon_actor_spawned(actor: Node2D, slot_index: int)
 var _actors_by_slot: Dictionary[int, Node2D] = {}
 
 
+func _ready() -> void:
+	_resolve_child_references()
+
+
 func display_slots(slots: Array[BeltSlot]) -> void:
+	_resolve_child_references()
 	clear_actors()
 
 	for slot: BeltSlot in slots:
@@ -46,6 +51,17 @@ func clear_actors() -> void:
 		if actor != null and is_instance_valid(actor):
 			actor.queue_free()
 	_actors_by_slot.clear()
+
+
+func release_actor(actor: Node2D) -> void:
+	if actor == null:
+		return
+
+	var slot_index: int = _get_actor_slot_index(actor)
+	if slot_index < 0:
+		return
+	if _actors_by_slot.get(slot_index) == actor:
+		_actors_by_slot.erase(slot_index)
 
 
 func get_actor_for_slot(slot_index: int) -> Node2D:
@@ -116,3 +132,21 @@ func _emit_actor_spawned(actor: Node2D, slot_index: int) -> void:
 
 	if actor.has_method("set_coupon_instance"):
 		coupon_actor_spawned.emit(actor, slot_index)
+
+
+func _get_actor_slot_index(actor: Node2D) -> int:
+	var slot_index_value: Variant = actor.get("slot_index")
+	if slot_index_value is int:
+		return slot_index_value
+	return -1
+
+
+func _resolve_child_references() -> void:
+	if actor_container == null:
+		actor_container = get_node_or_null("ActorContainer") as Node2D
+	if slot_marker_root == null:
+		slot_marker_root = get_node_or_null("SlotMarkers") as Node2D
+	if spawn_marker == null:
+		spawn_marker = get_node_or_null("SpawnMarker") as Marker2D
+	if exit_marker == null:
+		exit_marker = get_node_or_null("ExitMarker") as Marker2D

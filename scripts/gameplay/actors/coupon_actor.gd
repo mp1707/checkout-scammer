@@ -20,13 +20,23 @@ var _is_hovered: bool = false
 
 
 func _ready() -> void:
+	_resolve_child_references()
 	_apply_label_theme()
+	_refresh_coupon_labels()
 	_connect_interaction_area()
 	_update_visual_state()
 
 
 func set_coupon_instance(initial_coupon_instance: CouponInstance) -> void:
 	coupon_instance = initial_coupon_instance
+	_refresh_coupon_labels()
+
+
+func get_contact_area() -> Area2D:
+	return interaction_area
+
+
+func _refresh_coupon_labels() -> void:
 	if coupon_instance == null:
 		actor_id = ""
 		_set_label_text("Coupon", "")
@@ -37,10 +47,6 @@ func set_coupon_instance(initial_coupon_instance: CouponInstance) -> void:
 		_set_label_text("Coupon", "")
 	else:
 		_set_label_text(coupon_instance.coupon.display_name, "-%d%%" % coupon_instance.coupon.discount_percent)
-
-
-func get_contact_area() -> Area2D:
-	return interaction_area
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -136,3 +142,12 @@ func _apply_label_theme() -> void:
 			label.add_theme_font_override("font", theme_resource.font)
 		label.add_theme_font_size_override("font_size", theme_resource.font_size_small)
 		label.add_theme_color_override("font_color", theme_resource.text_color)
+
+
+func _resolve_child_references() -> void:
+	if title_label == null:
+		title_label = get_node_or_null("Card/VBox/TitleLabel") as Label
+	if detail_label == null:
+		detail_label = get_node_or_null("Card/VBox/DetailLabel") as Label
+	if interaction_area == null:
+		interaction_area = get_node_or_null("InteractionArea") as Area2D

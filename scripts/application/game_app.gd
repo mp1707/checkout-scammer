@@ -18,17 +18,36 @@ func _load_content() -> void:
 		_show_content_errors(errors)
 		return
 
-	if content_error_label != null:
-		content_error_label.visible = false
-	if run_controller != null and run_controller.has_method("configure"):
-		run_controller.call("configure", registry)
+	var error_label: Label = _get_content_error_label()
+	if error_label != null:
+		error_label.visible = false
+	var controller: RunController = _get_run_controller()
+	if controller != null:
+		controller.configure(registry)
 
 
 func _show_content_errors(errors: PackedStringArray) -> void:
-	if content_error_label == null:
+	var error_label: Label = _get_content_error_label()
+	if error_label == null:
 		for error: String in errors:
 			push_error(error)
 		return
 
-	content_error_label.visible = true
-	content_error_label.text = "\n".join(errors)
+	error_label.visible = true
+	error_label.text = "\n".join(errors)
+
+
+func _get_run_controller() -> RunController:
+	var controller: RunController = run_controller as RunController
+	if controller != null:
+		return controller
+
+	return get_node_or_null("RunController") as RunController
+
+
+func _get_content_error_label() -> Label:
+	var label: Label = content_error_label as Label
+	if label != null:
+		return label
+
+	return get_node_or_null("ContentErrorLabel") as Label

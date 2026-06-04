@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/panels/pixel_button.gd" id="1_pixel_button"]
+[ext_resource type="Resource" path="res://content/ui/checkout_theme.tres" id="2_theme"]
+
+[node name="CouponOptionButton" type="Button"]
+custom_minimum_size = Vector2(0, 22)
+size_flags_horizontal = 3
+text = "Coupon"
+script = ExtResource("1_pixel_button")
+theme_resource = ExtResource("2_theme")

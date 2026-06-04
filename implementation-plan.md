@@ -269,69 +269,69 @@ Empfohlener Session-Scope: ein bis zwei Codex-Sessions.
 
 ### RunController-Integration
 
-- [ ] Boot startet die spielbare Szene.
-- [ ] `GameApp` laedt Content und startet den Run.
-- [ ] `RunController` besitzt den aktuellen `RunState`.
-- [ ] `RunController` verbindet Simulation-Systeme mit Presentation.
-- [ ] Kundenstart folgt dem Datenfluss aus `architecture.md`.
-- [ ] State-Updates werden an HUD und Gameplay-Views verteilt.
-- [ ] UI sendet Intents; RunController entscheidet und mutiert Runtime-State.
+- [x] Boot startet die spielbare Szene.
+- [x] `GameApp` laedt Content und startet den Run.
+- [x] `RunController` besitzt den aktuellen `RunState`.
+- [x] `RunController` verbindet Simulation-Systeme mit Presentation.
+- [x] Kundenstart folgt dem Datenfluss aus `architecture.md`.
+- [x] State-Updates werden an HUD und Gameplay-Views verteilt.
+- [x] UI sendet Intents; RunController entscheidet und mutiert Runtime-State.
 
 ### Kunden- und Belt-Loop
 
-- [ ] Neuer Kunde erzeugt Queue aus 10 Produkten.
-- [ ] Falls Coupon aktiv: Coupon als erstes sichtbares Belt-Objekt anzeigen.
+- [x] Neuer Kunde erzeugt Queue aus 10 Produkten.
+- [x] Falls Coupon aktiv: Coupon als erstes sichtbares Belt-Objekt anzeigen.
 - [ ] Erste vier sichtbare Objekte fahren von rechts ein.
-- [ ] Entferntes Objekt laesst naechstes Objekt nachruecken.
-- [ ] Leeres Band nach verarbeitetem Kunden korrekt darstellen.
-- [ ] Nach letztem Produkt nach kurzer Pause Customer-Bye-Dialog zeigen.
-- [ ] Dialog wird mit Enter geschlossen.
-- [ ] Danach naechster Kunde oder Tagesende.
+- [x] Entferntes Objekt laesst naechstes Objekt nachruecken.
+- [x] Leeres Band nach verarbeitetem Kunden korrekt darstellen.
+- [x] Nach letztem Produkt nach kurzer Pause Customer-Bye-Dialog zeigen.
+- [x] Dialog wird mit Enter geschlossen.
+- [x] Danach naechster Kunde oder Tagesende.
 
 ### Scan-, Bag- und Trash-Loop
 
-- [ ] Produkt kann vom Band aufgenommen werden.
-- [ ] Rechts-nach-links-Scan ueber Scanner loest `ScanSystem` aus.
-- [ ] Erster Scan erhoeht offenen Betrag am Cursor.
-- [ ] Weitere Scans desselben gehaltenen Produkts fuehren Caught-Roll aus.
-- [ ] Bei Erfolg erhoeht sich offener Betrag weiter.
-- [ ] Bei Caught erscheint Dialog:
+- [x] Produkt kann vom Band aufgenommen werden.
+- [x] Rechts-nach-links-Scan ueber Scanner loest `ScanSystem` aus.
+- [x] Erster Scan erhoeht offenen Betrag am Cursor.
+- [x] Weitere Scans desselben gehaltenen Produkts fuehren Caught-Roll aus.
+- [x] Bei Erfolg erhoeht sich offener Betrag weiter.
+- [x] Bei Caught erscheint Dialog:
   `Kunde: Hey, do you want to scam me? I want compensation!`
-- [ ] Caught-Dialog wird mit Enter geschlossen.
-- [ ] Bei Caught verschwindet aktuelles Produkt, offener Betrag wird geloescht, kein Geld wird abgezogen.
-- [ ] Drop in Tute bucht offenen Betrag in Cash in Drawer.
-- [ ] Drop in Trash verwirft Produkt oder Coupon korrekt.
-- [ ] In die Tute gelegte Produkte koennen nicht wieder aufgenommen werden.
+- [x] Caught-Dialog wird mit Enter geschlossen.
+- [x] Bei Caught verschwindet aktuelles Produkt, offener Betrag wird geloescht, kein Geld wird abgezogen.
+- [x] Drop in Tute bucht offenen Betrag in Cash in Drawer.
+- [x] Drop in Trash verwirft Produkt oder Coupon korrekt.
+- [x] In die Tute gelegte Produkte koennen nicht wieder aufgenommen werden.
 
 ### Suspicion und Mood-Ring
 
-- [ ] Mood-Ring zeigt Suspicion farblich.
-- [ ] Ring aktualisiert sich nach Mehrfachscan.
-- [ ] Neuer Kunde setzt Suspicion wieder auf Startwert.
-- [ ] Keine numerische Suspicion-Progressbar anzeigen.
+- [x] Mood-Ring zeigt Suspicion farblich.
+- [x] Ring aktualisiert sich nach Mehrfachscan.
+- [x] Neuer Kunde setzt Suspicion wieder auf Startwert.
+- [x] Keine numerische Suspicion-Progressbar anzeigen.
 
 ### Tagesende, Win und Lose
 
-- [ ] Nach 3 Kunden endet der Geschaeftstag.
-- [ ] Tagesmiete wird bezahlt.
-- [ ] Bei unzureichendem Geld: Lose-State zeigen.
-- [ ] Bei ausreichendem Geld: naechster Tag startet.
-- [ ] Aktive Tages-Coupons laufen am Tagesende aus.
-- [ ] Nach bezahlter Miete am Ende von Tag 8: Win-State zeigen.
+- [x] Nach 3 Kunden endet der Geschaeftstag.
+- [x] Tagesmiete wird bezahlt.
+- [x] Bei unzureichendem Geld: Lose-State zeigen.
+- [x] Bei ausreichendem Geld: naechster Tag startet.
+- [x] Aktive Tages-Coupons laufen am Tagesende aus.
+- [x] Nach bezahlter Miete am Ende von Tag 8: Win-State zeigen.
 
 ### Coupons und Sortiment-Upgrades
 
-- [ ] Coupon-Button oeffnet Popup.
-- [ ] Popup zeigt nur Coupons fuer freigeschaltete Produkte.
-- [ ] Coupon-Kauf zieht Kosten ab.
-- [ ] Coupon-Kauf waehrend aktivem Kunden wirkt ab naechstem Kunden.
-- [ ] Coupon beim letzten Kunden wirkt am ersten Kunden des naechsten Tages.
-- [ ] Ehrlich gescannter Coupon aktiviert Rabatt fuer passende Produkte dieses Kunden.
-- [ ] In Trash geworfener Coupon aktiviert keinen Rabatt, Gewichtungsvorteil bleibt aber erhalten.
-- [ ] Coupon-Scam erzeugt keine Suspicion.
-- [ ] Sortiment-Level-Up-Button zeigt naechsten Preis.
-- [ ] Button ist disabled, wenn Geld nicht reicht.
-- [ ] Level-Up-Kauf wirkt ab naechstem Kunden.
+- [x] Coupon-Button oeffnet Popup.
+- [x] Popup zeigt nur Coupons fuer freigeschaltete Produkte.
+- [x] Coupon-Kauf zieht Kosten ab.
+- [x] Coupon-Kauf waehrend aktivem Kunden wirkt ab naechstem Kunden.
+- [x] Coupon beim letzten Kunden wirkt am ersten Kunden des naechsten Tages.
+- [x] Ehrlich gescannter Coupon aktiviert Rabatt fuer passende Produkte dieses Kunden.
+- [x] In Trash geworfener Coupon aktiviert keinen Rabatt, Gewichtungsvorteil bleibt aber erhalten.
+- [x] Coupon-Scam erzeugt keine Suspicion.
+- [x] Sortiment-Level-Up-Button zeigt naechsten Preis.
+- [x] Button ist disabled, wenn Geld nicht reicht.
+- [x] Level-Up-Kauf wirkt ab naechstem Kunden.
 - [ ] Tooltip zeigt naechste Produkte und Werte.
 
 ### Phase-4-Akzeptanz
@@ -339,7 +339,7 @@ Empfohlener Session-Scope: ein bis zwei Codex-Sessions.
 - [ ] Ein kompletter Run kann gespielt werden.
 - [ ] Der Spieler kann normal verkaufen, mehrfach scannen, erwischt werden, Coupons kaufen/scammen und Sortiment upgraden.
 - [ ] Tagesmiete, Lose und Win funktionieren.
-- [ ] HUD zeigt Zustand korrekt, mutiert aber keinen Gameplay-State direkt.
+- [x] HUD zeigt Zustand korrekt, mutiert aber keinen Gameplay-State direkt.
 
 ## Phase 5 - Juice, Balancing, QA und Prototyp-Abschluss
 
