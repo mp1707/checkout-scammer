@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="ProductVariantResource" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/gameplay/state/product_variant_resource.gd" id="1_variant"]
+[ext_resource type="ProductLineResource" path="res://content/products/lines/fruit.tres" id="2_line"]
+[ext_resource type="Texture2D" path="res://assets/textures/products/black_outline/spritesheet.png" id="3_sheet"]
+[ext_resource type="Texture2D" path="res://assets/textures/products/white_outline/spritesheet.png" id="4_white_sheet"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_apple"]
+atlas = ExtResource("3_sheet")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_apple_highlight"]
+atlas = ExtResource("4_white_sheet")
+region = Rect2(0, 0, 16, 16)
+
+[resource]
+script = ExtResource("1_variant")
+id = "apple"
+display_name = "Apfel"
+product_line = ExtResource("2_line")
+price_cents = 60
+generator_weight = 10
+assortment_level = 1
+normal_texture = SubResource("AtlasTexture_apple")
+highlight_texture = SubResource("AtlasTexture_apple_highlight")

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="CouponResource" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/gameplay/state/coupon_resource.gd" id="1_coupon"]
+[ext_resource type="ProductVariantResource" path="res://content/products/variants/energy_drink.tres" id="2_product"]
+
+[resource]
+script = ExtResource("1_coupon")
+id = "energy_25_discount"
+display_name = "Coupon: Energy -25%"
+tooltip = "Kunden kaufen mehr Energy Drinks."
+purchase_price_cents = 350
+discount_percent = 25
+weight_multiplier_percent = 220
+duration_days = 1
+target_kind = 0
+target_product = ExtResource("2_product")
+

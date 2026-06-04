@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="SuspicionCurveResource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/gameplay/state/suspicion_curve_resource.gd" id="1_curve"]
+
+[resource]
+script = ExtResource("1_curve")
+stage_percentages = Array[int]([10, 50, 75, 90])
+mood_ring_colors = Array[Color]([Color(0.2, 0.78, 0.32, 1), Color(0.94, 0.84, 0.24, 1), Color(0.95, 0.48, 0.18, 1), Color(0.88, 0.16, 0.16, 1)])
+

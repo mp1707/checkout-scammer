@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ProductLineResource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/gameplay/state/product_line_resource.gd" id="1_line"]
+
+[resource]
+script = ExtResource("1_line")
+id = "snacks"
+display_name = "Snacks"
+description = "Guensrige Impulskauf-Produkte am Kiosk."
+

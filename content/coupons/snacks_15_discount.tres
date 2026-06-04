@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="CouponResource" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/gameplay/state/coupon_resource.gd" id="1_coupon"]
+[ext_resource type="ProductLineResource" path="res://content/products/lines/snacks.tres" id="2_line"]
+
+[resource]
+script = ExtResource("1_coupon")
+id = "snacks_15_discount"
+display_name = "Coupon: Snacks -15%"
+tooltip = "Kunden kaufen mehr Snacks."
+purchase_price_cents = 250
+discount_percent = 15
+weight_multiplier_percent = 150
+duration_days = 1
+target_kind = 1
+target_line = ExtResource("2_line")
+

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="GameBalanceResource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/gameplay/state/game_balance_resource.gd" id="1_balance"]
+
+[resource]
+script = ExtResource("1_balance")
+start_money_cents = 1000
+daily_rent_cents = 4000
+days_per_run = 8
+customers_per_day = 3
+products_per_customer = 10
+visible_belt_slots = 4
+starting_assortment_level = 1
+default_run_seed = 1
+

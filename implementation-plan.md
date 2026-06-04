@@ -27,11 +27,11 @@ und die Aufgabe muss vor der Umsetzung geklaert oder angepasst werden.
 - [x] Scanner-Beep vorhanden.
 - [x] Coin-VFX-Source-Asset vorhanden.
 - [x] Produkt-Black-Outline-Spritesheet vorhanden.
-- [ ] Produkt-White-Outline-Highlight-Assets pruefen oder nachreichen. Wenn sie fehlen, Highlights nicht still durch ein anderes dauerhaftes System ersetzen.
+- [x] Produkt-White-Outline-Highlight-Assets vorhanden und in den Startprodukt-Resources referenziert.
 
 ## Phasenuebersicht
 
-1. [ ] Phase 1: Datenfundament, Content und Validierung
+1. [x] Phase 1: Datenfundament, Content und Validierung
 2. [ ] Phase 2: Pure Simulation und Unit-Tests
 3. [ ] Phase 3: Editor-Szenen, Platzhalter und Interaktionsoberflaeche
 4. [ ] Phase 4: Run-Integration, HUD, Upgrades und kompletter Loop
@@ -46,67 +46,67 @@ Empfohlener Session-Scope: eine Codex-Session.
 
 ### Ordner und Basistypen
 
-- [ ] Ordnerstruktur aus `architecture.md` anlegen, soweit noch nicht vorhanden:
+- [x] Ordnerstruktur aus `architecture.md` anlegen, soweit noch nicht vorhanden:
   `content/balance`, `content/coupons`, `content/products/lines`,
   `content/products/variants`, `content/upgrades`, `scripts/application`,
   `scripts/gameplay/state`, `scripts/gameplay/requests`,
   `scripts/gameplay/systems`, `scripts/gameplay/generation`,
   `tests/content`, `tests/unit`.
-- [ ] `GameBalanceResource` erstellen.
-- [ ] `ProductLineResource` erstellen.
-- [ ] `ProductVariantResource` erstellen.
-- [ ] `CouponResource` erstellen.
-- [ ] `UpgradeResource` erstellen.
-- [ ] `SuspicionCurveResource` erstellen.
-- [ ] Bestehende `CheckoutThemeResource` nur erweitern, wenn Phase-1-Content das wirklich braucht.
+- [x] `GameBalanceResource` erstellen.
+- [x] `ProductLineResource` erstellen.
+- [x] `ProductVariantResource` erstellen.
+- [x] `CouponResource` erstellen.
+- [x] `UpgradeResource` erstellen.
+- [x] `SuspicionCurveResource` erstellen.
+- [x] Bestehende `CheckoutThemeResource` nur erweitern, wenn Phase-1-Content das wirklich braucht.
 
 ### Runtime-Daten
 
-- [ ] `RunState` als mutable Runtime-State erstellen.
-- [ ] `CustomerState` erstellen.
-- [ ] `ProductInstance` erstellen.
-- [ ] `CouponInstance` erstellen.
-- [ ] `BeltSlot` erstellen.
-- [ ] `ScanRequest` erstellen.
-- [ ] `ScanResult` erstellen.
-- [ ] `PayoutOutcome` erstellen.
-- [ ] Geldwerte zentral und konsistent modellieren, bevorzugt als Integer-Cents statt Float-Dollar.
+- [x] `RunState` als mutable Runtime-State erstellen.
+- [x] `CustomerState` erstellen.
+- [x] `ProductInstance` erstellen.
+- [x] `CouponInstance` erstellen.
+- [x] `BeltSlot` erstellen.
+- [x] `ScanRequest` erstellen.
+- [x] `ScanResult` erstellen.
+- [x] `PayoutOutcome` erstellen.
+- [x] Geldwerte zentral und konsistent modellieren, bevorzugt als Integer-Cents statt Float-Dollar.
 
 ### Start-Content
 
-- [ ] `GameBalanceResource` mit Prototypwerten anlegen:
+- [x] `GameBalanceResource` mit Prototypwerten anlegen:
   Startgeld `10$`, Tagesmiete `40$`, 8 Tage, 3 Kunden pro Tag,
   10 Produkte pro Kunde, 4 sichtbare Belt-Slots.
-- [ ] Produktlinien `snacks`, `drinks`, `fruit` anlegen.
-- [ ] Startprodukte aus `gdd.md` als `ProductVariantResource` anlegen:
+- [x] Produktlinien `snacks`, `drinks`, `fruit` anlegen.
+- [x] Startprodukte aus `gdd.md` als `ProductVariantResource` anlegen:
   Kaugummi, Chips, Schokoriegel, Wasser, Limo, Energy Drink, Apfel,
   Banane, Orange.
-- [ ] Produktpreise und Generator-Gewichtungen in Resources pflegen, nicht als lose Konstanten.
-- [ ] Produkttexturen aus den vorhandenen Product-Assets referenzieren.
-- [ ] Falls Atlas-Regionen aus Spritesheet-Text-Mapping generiert werden muessen:
+- [x] Produktpreise und Generator-Gewichtungen in Resources pflegen, nicht als lose Konstanten.
+- [x] Produkttexturen aus den vorhandenen Product-Assets referenzieren.
+- [x] Falls Atlas-Regionen aus Spritesheet-Text-Mapping generiert werden muessen:
   Import-/Generator-Tool in `tools/import` planen oder bauen, nicht manuell verstreuen.
-- [ ] Erste Coupons fuer vorhandene Produkte oder Produktlinien anlegen.
-- [ ] Sortiment-Level-Up-Content mit Kosten und freigeschalteten Produkten anlegen.
-- [ ] Suspicion-Stufen `10%`, `50%`, `75%`, `90%` als Resource anlegen.
+- [x] Erste Coupons fuer vorhandene Produkte oder Produktlinien anlegen.
+- [x] Sortiment-Level-Up-Content mit Kosten und freigeschalteten Produkten anlegen.
+- [x] Suspicion-Stufen `10%`, `50%`, `75%`, `90%` als Resource anlegen.
 
 ### ContentRegistry und Validierung
 
-- [ ] `ContentRegistry` in `scripts/application` erstellen.
-- [ ] Content-Ladepfade zentral im Registry halten.
-- [ ] Doppelte IDs validieren.
-- [ ] Fehlende Referenzen validieren.
-- [ ] Fehlende Texturen validieren.
-- [ ] Ungueltige Preise, Gewichtungen und Sortiment-Level validieren.
-- [ ] Coupons nur gegen existierende Produkte oder Produktlinien validieren.
-- [ ] Upgrade-Freischaltungen gegen existierende Produktvarianten validieren.
-- [ ] Content-Validierung als fruehen Test oder Tool ausfuehrbar machen.
+- [x] `ContentRegistry` in `scripts/application` erstellen.
+- [x] Content-Ladepfade zentral im Registry halten.
+- [x] Doppelte IDs validieren.
+- [x] Fehlende Referenzen validieren.
+- [x] Fehlende Texturen validieren.
+- [x] Ungueltige Preise, Gewichtungen und Sortiment-Level validieren.
+- [x] Coupons nur gegen existierende Produkte oder Produktlinien validieren.
+- [x] Upgrade-Freischaltungen gegen existierende Produktvarianten validieren.
+- [x] Content-Validierung als fruehen Test oder Tool ausfuehrbar machen.
 
 ### Phase-1-Akzeptanz
 
-- [ ] Content kann zentral geladen werden, ohne UI-Szenen zu instanziieren.
-- [ ] Validierung meldet kaputten Content sichtbar und verdeckt ihn nicht durch Fallbacks.
-- [ ] Neue Produkte, Coupons und Upgrade-Werte sind in Resources editierbar.
-- [ ] Alle neuen GDScript-Dateien nutzen `class_name`, typisierte Variablen,
+- [x] Content kann zentral geladen werden, ohne UI-Szenen zu instanziieren.
+- [x] Validierung meldet kaputten Content sichtbar und verdeckt ihn nicht durch Fallbacks.
+- [x] Neue Produkte, Coupons und Upgrade-Werte sind in Resources editierbar.
+- [x] Alle neuen GDScript-Dateien nutzen `class_name`, typisierte Variablen,
   typisierte Parameter und typisierte Rueckgabewerte.
 
 ## Phase 2 - Pure Simulation und Unit-Tests
