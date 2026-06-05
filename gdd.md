@@ -133,6 +133,7 @@
 - Ein Kunde hat 10 zufällige Produkte.
 - Für den Prototyp ist die Produktanzahl auf 10 gesetzt, aber zentral im Balancing pflegbar.
 - Der erste Tag hat 3 gescriptete Kunden.
+- Die gescripteten Tag-1-Kunden gelten fuer das Startsortiment. Sobald ein Sortiment-Level-Up aktiv ist, wird der naechste Kunde aus dem erweiterten Produktpool generiert.
 - Diese 3 Kunden bringen bei ehrlichem Spiel knapp nicht genug Geld ein.
 - Dadurch lernt der Spieler die Scam-Mechanik.
 - Runs und zufällige Kunden werden deterministisch über einen Seed erzeugt.

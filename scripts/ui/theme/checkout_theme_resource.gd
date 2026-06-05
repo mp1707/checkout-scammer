@@ -1,7 +1,9 @@
 extends Resource
 class_name CheckoutThemeResource
 
-const PANEL_TEXTURE_MARGIN: int = 5
+const PANEL_TEXTURE_OUTER_PADDING: int = 2
+const PANEL_CORNER_SLICE_SIZE: int = 5
+const PANEL_TEXTURE_MARGIN: int = PANEL_TEXTURE_OUTER_PADDING + PANEL_CORNER_SLICE_SIZE
 const PANEL_CONTENT_MARGIN: int = 2
 
 @export var font: FontFile

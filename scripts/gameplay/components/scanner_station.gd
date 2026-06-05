@@ -29,9 +29,9 @@ func _ready() -> void:
 		hit_area.area_exited.connect(_on_hit_area_exited)
 
 
-func set_beam_visible(is_visible: bool) -> void:
+func set_beam_visible(should_show_beam: bool) -> void:
 	if beam != null:
-		beam.visible = is_visible
+		beam.visible = should_show_beam
 
 
 func flash() -> void:

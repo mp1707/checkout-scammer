@@ -494,12 +494,12 @@ func _build_assortment_upgrade_tooltip(upgrade: UpgradeResource) -> String:
 
 
 func _join_tooltip_lines(lines: PackedStringArray) -> String:
-	var tooltip_text: String = ""
+	var joined_tooltip_text: String = ""
 	for line_index: int in range(lines.size()):
 		if line_index > 0:
-			tooltip_text += "\n"
-		tooltip_text += lines[line_index]
-	return tooltip_text
+			joined_tooltip_text += "\n"
+		joined_tooltip_text += lines[line_index]
+	return joined_tooltip_text
 
 
 func _should_ignore_player_input() -> bool:

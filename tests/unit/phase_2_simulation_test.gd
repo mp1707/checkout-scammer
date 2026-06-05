@@ -85,6 +85,22 @@ func _test_customer_generator() -> void:
 		"CustomerGenerator models scripted first customer"
 	)
 
+	var no_active_coupons_for_upgrade: Array[CouponInstance] = []
+	var upgraded_first_day_customer: CustomerState = _generator.generate_customer_for_context(
+		_registry,
+		_registry.game_balance.default_run_seed,
+		1,
+		2,
+		2,
+		no_active_coupons_for_upgrade,
+		_registry.game_balance.products_per_customer,
+		_registry.game_balance.starting_assortment_level
+	)
+	_expect_true(
+		_has_product_at_assortment_level(upgraded_first_day_customer, 2),
+		"CustomerGenerator uses expanded assortment once a level-up is active"
+	)
+
 	var apple_coupon: CouponInstance = CouponInstance.new(_registry.get_coupon("apple_20_discount"), "test_coupon")
 	var no_coupons: Array[CouponInstance] = []
 	var weighted_count_without_coupon: int = _count_generated_product("apple", 400, no_coupons)
@@ -375,6 +391,13 @@ func _count_generated_product(product_id: String, sample_count: int, active_coup
 				count += 1
 
 	return count
+
+
+func _has_product_at_assortment_level(customer: CustomerState, assortment_level: int) -> bool:
+	for product: ProductInstance in customer.product_queue:
+		if product.variant != null and product.variant.assortment_level == assortment_level:
+			return true
+	return false
 
 
 func _expect_true(value: bool, label: String) -> void:

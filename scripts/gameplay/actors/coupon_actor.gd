@@ -41,8 +41,8 @@ func play_finish_feedback(target_global_position: Vector2, is_sale: bool) -> voi
 	is_held = false
 	if interaction_area != null:
 		interaction_area.input_pickable = false
-		interaction_area.monitorable = false
-		interaction_area.monitoring = false
+		interaction_area.set_deferred("monitorable", false)
+		interaction_area.set_deferred("monitoring", false)
 
 	if _finish_tween != null and _finish_tween.is_valid():
 		_finish_tween.kill()

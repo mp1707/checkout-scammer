@@ -68,11 +68,11 @@ func get_best_discount_percent(product: ProductVariantResource, honest_coupons: 
 
 
 func format_cents(cents: int) -> String:
-	var sign: String = ""
+	var sign_prefix: String = ""
 	var absolute_cents: int = cents
 	if cents < 0:
-		sign = "-"
+		sign_prefix = "-"
 		absolute_cents = -cents
 
 	var dollars: int = floori(float(absolute_cents) / 100.0)
-	return "%s$%d.%02d" % [sign, dollars, absolute_cents % 100]
+	return "%s$%d.%02d" % [sign_prefix, dollars, absolute_cents % 100]

@@ -56,9 +56,9 @@ func set_coupon_button_enabled(is_enabled: bool) -> void:
 		coupon_button.disabled = not is_enabled
 
 
-func set_coupon_button_tooltip(tooltip_text: String) -> void:
+func set_coupon_button_tooltip(button_tooltip_text: String) -> void:
 	if coupon_button != null:
-		coupon_button.tooltip_text = tooltip_text
+		coupon_button.tooltip_text = button_tooltip_text
 
 
 func set_assortment_upgrade_button(label_text: String, is_enabled: bool) -> void:
@@ -68,9 +68,9 @@ func set_assortment_upgrade_button(label_text: String, is_enabled: bool) -> void
 	assortment_upgrade_button.disabled = not is_enabled
 
 
-func set_assortment_upgrade_tooltip(tooltip_text: String) -> void:
+func set_assortment_upgrade_tooltip(button_tooltip_text: String) -> void:
 	if assortment_upgrade_button != null:
-		assortment_upgrade_button.tooltip_text = tooltip_text
+		assortment_upgrade_button.tooltip_text = button_tooltip_text
 
 
 func show_dialog(message: String) -> void:
@@ -161,9 +161,9 @@ func _apply_label_theme(root: Node) -> void:
 		_apply_label_theme(child)
 
 
-func _set_popup_layer_visible(is_visible: bool) -> void:
+func _set_popup_layer_visible(should_show_popup_layer: bool) -> void:
 	if popup_layer != null:
-		popup_layer.visible = is_visible
+		popup_layer.visible = should_show_popup_layer
 
 
 func _animate_cash_value(target_cents: int) -> void:
@@ -192,14 +192,14 @@ func _set_displayed_cash_cents(cents: int) -> void:
 
 
 func _format_cents(cents: int) -> String:
-	var sign: String = ""
+	var sign_prefix: String = ""
 	var absolute_cents: int = cents
 	if cents < 0:
-		sign = "-"
+		sign_prefix = "-"
 		absolute_cents = -cents
 
 	var dollars: int = floori(float(absolute_cents) / 100.0)
-	return "%s$%d.%02d" % [sign, dollars, absolute_cents % 100]
+	return "%s$%d.%02d" % [sign_prefix, dollars, absolute_cents % 100]
 
 
 func _resolve_child_references() -> void:

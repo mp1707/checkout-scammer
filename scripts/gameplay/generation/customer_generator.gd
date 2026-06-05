@@ -22,7 +22,8 @@ func generate_customer(registry: ContentRegistry, run_state: RunState) -> Custom
 		run_state.current_customer_number,
 		run_state.assortment_level,
 		run_state.active_coupons,
-		registry.game_balance.products_per_customer
+		registry.game_balance.products_per_customer,
+		registry.game_balance.starting_assortment_level
 	)
 
 
@@ -33,7 +34,8 @@ func generate_customer_for_context(
 	customer_number: int,
 	assortment_level: int,
 	active_coupons: Array[CouponInstance],
-	product_count: int
+	product_count: int,
+	scripted_assortment_level: int = 1
 ) -> CustomerState:
 	var customer: CustomerState = CustomerState.new("day_%d_customer_%d" % [day, customer_number])
 	customer.total_product_count = product_count
@@ -41,7 +43,12 @@ func generate_customer_for_context(
 	var random: RandomNumberGenerator = RandomNumberGenerator.new()
 	random.seed = _build_customer_seed(run_seed, day, customer_number, assortment_level)
 
-	var scripted_ids: PackedStringArray = _get_scripted_first_day_product_ids(day, customer_number)
+	var scripted_ids: PackedStringArray = _get_scripted_first_day_product_ids(
+		day,
+		customer_number,
+		assortment_level,
+		scripted_assortment_level
+	)
 	if not scripted_ids.is_empty():
 		_append_scripted_products(customer, scripted_ids, registry, product_count, day, customer_number)
 
@@ -129,8 +136,13 @@ func _build_customer_seed(run_seed: int, day: int, customer_number: int, assortm
 	return seed_value
 
 
-func _get_scripted_first_day_product_ids(day: int, customer_number: int) -> PackedStringArray:
-	if day != 1:
+func _get_scripted_first_day_product_ids(
+	day: int,
+	customer_number: int,
+	assortment_level: int,
+	scripted_assortment_level: int
+) -> PackedStringArray:
+	if day != 1 or assortment_level != scripted_assortment_level:
 		return PackedStringArray()
 
 	match customer_number:
@@ -175,4 +187,3 @@ func _get_scripted_first_day_product_ids(day: int, customer_number: int) -> Pack
 			])
 		_:
 			return PackedStringArray()
-

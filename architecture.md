@@ -177,6 +177,7 @@ Alle UI-Panels nutzen `res://assets/textures/ui/panels/9slice_panel_white.png`.
 Asset-Daten:
 
 - Texture: `16x16px`
+- Outer Padding: `2px`
 - Corner-Slices: `5x5px`
 - Side-Slices: `2x5px` bzw. `5x2px`
 - Center-Slice: `2x2px`
@@ -185,7 +186,7 @@ Asset-Daten:
 Verbindliche Nutzung:
 
 - Panels sind `PanelContainer` oder spezialisierte Szenen, deren Theme/StyleBox auf dieser Texture basiert.
-- `StyleBoxTexture.texture_margin_left/right/top/bottom = 5`.
+- `StyleBoxTexture.texture_margin_left/right/top/bottom = 7`, weil die Texture `2px` Outer Padding plus `5px` Corner-Slice enthaelt.
 - Content-Margins starten bei `2`, koennen pro Panel-Typ aber als Theme-Token groesser gesetzt werden.
 - Farbvarianten entstehen ueber `modulate_color`/Theme-Varianten, nicht ueber neue Panel-Bilder.
 - Buttons, Dialoge, Upgrade-Karten, Statusboxen und Popups verwenden dieselbe Panel-Architektur.
