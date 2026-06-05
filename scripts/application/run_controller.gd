@@ -165,11 +165,12 @@ func _update_mood_ring() -> void:
 	if checkout_table == null or registry == null or run_state == null or run_state.current_customer == null:
 		return
 
+	var suspicion_percent: int = run_state.current_customer.current_suspicion_percent
 	var color: Color = _suspicion_system.get_mood_ring_color(
-		run_state.current_customer.current_suspicion_percent,
+		suspicion_percent,
 		registry.suspicion_curve
 	)
-	checkout_table.set_mood_ring_color(color)
+	checkout_table.set_mood_ring_state(color, suspicion_percent)
 
 
 func _on_product_scan_contact_started(actor: Node2D, contact_position: Vector2) -> void:
@@ -181,6 +182,7 @@ func _on_product_scan_contact_started(actor: Node2D, contact_position: Vector2) 
 	if product_instance == null:
 		return
 
+	var suspicion_before_scan: int = run_state.current_customer.current_suspicion_percent
 	var request: ScanRequest = ScanRequest.new()
 	request.actor_id = _get_actor_id(actor)
 	request.product_instance = product_instance
@@ -209,7 +211,11 @@ func _on_product_scan_contact_started(actor: Node2D, contact_position: Vector2) 
 	)
 	if actor.has_method("update_open_amount_label"):
 		actor.call("update_open_amount_label")
+	if checkout_table != null:
+		checkout_table.play_successful_scan_feedback(actor, product_instance.scan_count, contact_position)
 	_update_mood_ring()
+	if run_state.current_customer.current_suspicion_percent > suspicion_before_scan and checkout_table != null:
+		checkout_table.pulse_mood_ring()
 
 
 func _on_actor_bag_drop_requested(actor: Node2D) -> void:
@@ -221,7 +227,7 @@ func _on_actor_bag_drop_requested(actor: Node2D) -> void:
 	if product_instance != null:
 		_economy_system.payout_product(run_state, product_instance)
 		_belt_system.mark_product_processed(run_state.current_customer, product_instance)
-		_finish_actor(actor)
+		_finish_actor(actor, true)
 		_after_customer_object_processed()
 		return
 
@@ -239,7 +245,7 @@ func _on_actor_trash_drop_requested(actor: Node2D) -> void:
 	if product_instance != null:
 		_economy_system.trash_product(run_state, product_instance)
 		_belt_system.mark_product_processed(run_state.current_customer, product_instance)
-		_finish_actor(actor)
+		_finish_actor(actor, false)
 		_after_customer_object_processed()
 		return
 
@@ -247,7 +253,7 @@ func _on_actor_trash_drop_requested(actor: Node2D) -> void:
 	if coupon_instance != null:
 		_coupon_system.mark_coupon_trashed(coupon_instance)
 		_belt_system.mark_coupon_processed(run_state.current_customer, coupon_instance, true)
-		_finish_actor(actor)
+		_finish_actor(actor, false)
 		_after_customer_object_processed()
 
 
@@ -340,14 +346,14 @@ func _on_dialog_closed() -> void:
 func _process_coupon_honestly(actor: Node2D, coupon_instance: CouponInstance) -> void:
 	_coupon_system.mark_coupon_honestly_activated(coupon_instance)
 	_belt_system.mark_coupon_processed(run_state.current_customer, coupon_instance, false)
-	_finish_actor(actor)
+	_finish_actor(actor, true)
 	_after_customer_object_processed()
 
 
 func _handle_caught_scan(actor: Node2D, product_instance: ProductInstance) -> void:
 	_economy_system.trash_product(run_state, product_instance)
 	_belt_system.mark_product_processed(run_state.current_customer, product_instance)
-	_finish_actor(actor)
+	_finish_actor(actor, false)
 	_update_hud_state()
 	_update_mood_ring()
 	_show_dialog(CAUGHT_MESSAGE, DialogKind.CAUGHT)
@@ -426,12 +432,15 @@ func _show_dialog(message: String, dialog_kind: int) -> void:
 		hud_root.show_dialog(message)
 
 
-func _finish_actor(actor: Node2D) -> void:
+func _finish_actor(actor: Node2D, is_sale: bool) -> void:
 	var actor_id: String = _get_actor_id(actor)
 	if not actor_id.is_empty():
 		_taken_actor_ids.erase(actor_id)
 	if actor != null and is_instance_valid(actor):
-		actor.queue_free()
+		if checkout_table != null and checkout_table.has_method("play_actor_finish_feedback"):
+			checkout_table.call("play_actor_finish_feedback", actor, is_sale)
+		else:
+			actor.queue_free()
 
 
 func _get_available_coupon_options() -> Array[CouponResource]:

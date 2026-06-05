@@ -17,6 +17,7 @@ var is_held: bool = false
 var movement_direction: Vector2 = Vector2.ZERO
 
 var _is_hovered: bool = false
+var _finish_tween: Tween
 
 
 func _ready() -> void:
@@ -34,6 +35,33 @@ func set_coupon_instance(initial_coupon_instance: CouponInstance) -> void:
 
 func get_contact_area() -> Area2D:
 	return interaction_area
+
+
+func play_finish_feedback(target_global_position: Vector2, is_sale: bool) -> void:
+	is_held = false
+	if interaction_area != null:
+		interaction_area.input_pickable = false
+		interaction_area.monitorable = false
+		interaction_area.monitoring = false
+
+	if _finish_tween != null and _finish_tween.is_valid():
+		_finish_tween.kill()
+
+	var finish_duration: float = 0.16 if is_sale else 0.11
+	var target_scale: Vector2 = Vector2(0.40, 0.40) if is_sale else Vector2(0.60, 0.60)
+	z_index = 120
+
+	_finish_tween = create_tween()
+	_finish_tween.set_parallel(true)
+	_finish_tween.tween_property(self, "global_position", target_global_position.round(), finish_duration) \
+		.set_trans(Tween.TRANS_QUAD) \
+		.set_ease(Tween.EASE_IN)
+	_finish_tween.tween_property(self, "scale", target_scale, finish_duration) \
+		.set_trans(Tween.TRANS_BACK) \
+		.set_ease(Tween.EASE_IN)
+	_finish_tween.tween_property(self, "modulate:a", 0.0, finish_duration)
+	_finish_tween.set_parallel(false)
+	_finish_tween.tween_callback(queue_free)
 
 
 func _refresh_coupon_labels() -> void:

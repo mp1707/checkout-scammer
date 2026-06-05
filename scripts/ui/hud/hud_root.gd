@@ -19,6 +19,8 @@ signal dialog_closed()
 @export var coupon_popup_scene: PackedScene
 
 var _active_popup: Control
+var _displayed_cash_cents: int = -1
+var _cash_tween: Tween
 
 
 func _ready() -> void:
@@ -43,7 +45,10 @@ func update_run_summary(
 	if rent_value_label != null:
 		rent_value_label.text = _format_cents(rent_due_cents)
 	if cash_value_label != null:
-		cash_value_label.text = _format_cents(cash_cents)
+		if _displayed_cash_cents < 0:
+			_set_displayed_cash_cents(cash_cents)
+		elif _displayed_cash_cents != cash_cents:
+			_animate_cash_value(cash_cents)
 
 
 func set_coupon_button_enabled(is_enabled: bool) -> void:
@@ -159,6 +164,31 @@ func _apply_label_theme(root: Node) -> void:
 func _set_popup_layer_visible(is_visible: bool) -> void:
 	if popup_layer != null:
 		popup_layer.visible = is_visible
+
+
+func _animate_cash_value(target_cents: int) -> void:
+	if _cash_tween != null and _cash_tween.is_valid():
+		_cash_tween.kill()
+
+	var distance_cents: int = absi(target_cents - _displayed_cash_cents)
+	var duration_seconds: float = clampf(0.12 + float(distance_cents) / 2500.0, 0.16, 0.45)
+	_cash_tween = create_tween()
+	_cash_tween.tween_method(
+		Callable(self, "_set_displayed_cash_cents_from_float"),
+		float(_displayed_cash_cents),
+		float(target_cents),
+		duration_seconds
+	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+
+func _set_displayed_cash_cents_from_float(cents_value: float) -> void:
+	_set_displayed_cash_cents(roundi(cents_value))
+
+
+func _set_displayed_cash_cents(cents: int) -> void:
+	_displayed_cash_cents = cents
+	if cash_value_label != null:
+		cash_value_label.text = _format_cents(_displayed_cash_cents)
 
 
 func _format_cents(cents: int) -> String:

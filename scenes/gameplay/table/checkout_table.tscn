@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scripts/gameplay/components/checkout_table.gd" id="1_checkout_table"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/scanner/scanner_station.tscn" id="2_scanner"]
@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" path="res://scenes/gameplay/bag/bag_zone.tscn" id="4_bag"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/trash/trash_zone.tscn" id="5_trash"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/customer/customer_hand_view.tscn" id="6_hand"]
+[ext_resource type="PackedScene" path="res://scenes/vfx/coin_burst_vfx.tscn" id="7_coin_burst"]
 
 [node name="CheckoutTable" type="Control"]
 mouse_filter = 2
@@ -17,6 +18,8 @@ scanner_station = NodePath("ScannerStation")
 bag_zone = NodePath("BagZone")
 trash_zone = NodePath("TrashZone")
 customer_hand_view = NodePath("CustomerHandView")
+vfx_container = NodePath("VfxContainer")
+coin_burst_scene = ExtResource("7_coin_burst")
 
 [node name="TableSurface" type="ColorRect" parent="."]
 mouse_filter = 2
@@ -54,3 +57,5 @@ position = Vector2(356, 78)
 
 [node name="VfxAnchor" type="Marker2D" parent="."]
 position = Vector2(72, 146)
+
+[node name="VfxContainer" type="Node2D" parent="."]

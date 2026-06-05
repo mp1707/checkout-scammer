@@ -351,84 +351,84 @@ und offene Fixes.
 
 ### Scan-Juice
 
-- [ ] Scanner-Beep beim erfolgreichen Scan abspielen.
-- [ ] Pitch-Eskalation fuer Double-, Triple- und Multi-Scans einbauen.
-- [ ] Scannerstrahl kurz aufleuchten lassen.
-- [ ] Scannerflash am vorbereiteten VFX-Anker abspielen.
-- [ ] Coin-VFX am Cursor oder Produktanker mit vorhandenem Coin-Asset abspielen.
-- [ ] Offener Verkaufsbetrag gut lesbar ueber gehaltenem Produkt darstellen.
-- [ ] Produkt-Wobble oder Squash beim erfolgreichen Scan abspielen.
-- [ ] Kurzer Screen-Shake bei Double-Scan oder hoeher pruefen, ohne Lesbarkeit zu stoeren.
+- [x] Scanner-Beep beim erfolgreichen Scan abspielen.
+- [x] Pitch-Eskalation fuer Double-, Triple- und Multi-Scans einbauen.
+- [x] Scannerstrahl kurz aufleuchten lassen.
+- [x] Scannerflash am vorbereiteten VFX-Anker abspielen.
+- [x] Coin-VFX am Cursor oder Produktanker mit vorhandenem Coin-Asset abspielen.
+- [x] Offener Verkaufsbetrag gut lesbar ueber gehaltenem Produkt darstellen.
+- [x] Produkt-Wobble oder Squash beim erfolgreichen Scan abspielen.
+- [x] Kurzer Screen-Shake bei Double-Scan oder hoeher pruefen, ohne Lesbarkeit zu stoeren.
 
 ### Conveyor- und Drop-Juice
 
-- [ ] Neue Produkte fahren weich von rechts ein.
-- [ ] Nachruecken wirkt mechanisch und klar.
-- [ ] Drop in Tute hat kurze Verkaufsanimation.
-- [ ] Geld in linker Leiste zaehlt sichtbar hoch.
-- [ ] Trash-Drop laesst Produkt/Coupon sauber verschwinden.
-- [ ] VFX so kapseln, dass spaeter Pooling moeglich ist.
+- [x] Neue Produkte fahren weich von rechts ein.
+- [x] Nachruecken wirkt mechanisch und klar.
+- [x] Drop in Tute hat kurze Verkaufsanimation.
+- [x] Geld in linker Leiste zaehlt sichtbar hoch.
+- [x] Trash-Drop laesst Produkt/Coupon sauber verschwinden.
+- [x] VFX so kapseln, dass spaeter Pooling moeglich ist.
 
 ### Suspicion- und Dialog-Juice
 
-- [ ] Mood-Ring pulsiert bei Suspicion-Anstieg.
-- [ ] Hand-Platzhalter bekommt kleine Unruhe bei hoher Suspicion.
-- [ ] Caught-Dialog und Customer-Bye-Dialog sind lesbar, kurz und per Enter steuerbar.
-- [ ] Kein erklaerender Overload fuer Coupon-Scam einbauen.
+- [x] Mood-Ring pulsiert bei Suspicion-Anstieg.
+- [x] Hand-Platzhalter bekommt kleine Unruhe bei hoher Suspicion.
+- [x] Caught-Dialog und Customer-Bye-Dialog sind lesbar, kurz und per Enter steuerbar.
+- [x] Kein erklaerender Overload fuer Coupon-Scam einbauen.
 
 ### UI-Polish
 
-- [ ] Alle Panels nutzen die 9-Slice-Panel-Architektur.
+- [x] Alle Panels nutzen die 9-Slice-Panel-Architektur.
 - [ ] Linke und rechte Sidebar bleiben bei `640x360` lesbar.
-- [ ] Buttons zeigen klare enabled/disabled-Zustaende.
+- [x] Buttons zeigen klare enabled/disabled-Zustaende.
 - [ ] Tooltips passen in den Viewport.
-- [ ] Fontgroessen bleiben auf `11`, `22`, `33`, `44`.
+- [x] Fontgroessen bleiben auf `11`, `22`, `33`, `44`.
 - [ ] Keine UI-Texte ueberlappen.
-- [ ] Pixel-Snap und nearest filtering bleiben erhalten.
+- [x] Pixel-Snap und nearest filtering bleiben erhalten.
 
 ### Balancing und Content-Finish
 
-- [ ] Tag 1 ist bei ehrlichem Spiel knapp nicht schaffbar.
-- [ ] Double-Scan-Risiko ist spuerbar, aber nicht unfair.
+- [x] Tag 1 ist bei ehrlichem Spiel knapp nicht schaffbar.
+- [x] Double-Scan-Risiko ist spuerbar, aber nicht unfair.
 - [ ] Coupon-Preise, Rabatte und Gewichtungsboni grob spielbar einstellen.
 - [ ] Sortiment-Level-Up-Kosten grob spielbar einstellen.
-- [ ] Gescriptete erste drei Kunden testen.
-- [ ] Seed-basierte spaetere Kunden testen.
+- [x] Gescriptete erste drei Kunden testen.
+- [x] Seed-basierte spaetere Kunden testen.
 
 ### QA und Abschluss
 
-- [ ] Content-Validierung ausfuehren.
-- [ ] Unit-Tests ausfuehren.
+- [x] Content-Validierung ausfuehren.
+- [x] Unit-Tests ausfuehren.
 - [ ] Spiel bei `640x360`-Authoring und `1280x720`-Run-Fenster visuell pruefen.
 - [ ] Alle Platzhalter-Szenen im Editor auffindbar und austauschbar halten.
-- [ ] Keine teuren Node-Suchen oder Asset-Ladevorgaenge im Scan-/Payout-Flow.
-- [ ] Keine Gameplay-State-Mutation aus UI-Scripts.
-- [ ] Keine Definition-Resources als mutable Runtime-State missbrauchen.
-- [ ] Offene technische Schuld in diesem Dokument oder direkt am betroffenen Code markieren.
+- [x] Keine teuren Node-Suchen oder Asset-Ladevorgaenge im Scan-/Payout-Flow.
+- [x] Keine Gameplay-State-Mutation aus UI-Scripts.
+- [x] Keine Definition-Resources als mutable Runtime-State missbrauchen.
+- [x] Offene technische Schuld in diesem Dokument oder direkt am betroffenen Code markieren.
 
 ### Phase-5-Akzeptanz
 
 - [ ] Der Scanner-Moment fuehlt sich als Kern des Spiels befriedigend an.
-- [ ] Der Prototyp ist ohne echte Tisch-/Scanner-/Band-/Tueten-/Trash-/Hand-Assets spielbar.
-- [ ] Fehlende Assets sind durch saubere Platzhalter-Szenen ersetzt.
-- [ ] Die Code- und Szenenstruktur bleibt kompatibel mit `architecture.md`.
-- [ ] Der naechste Entwicklungsschritt kann mit echten Assets oder erweitertem Content beginnen, ohne zentrale Systeme umzubauen.
+- [x] Der Prototyp ist ohne echte Tisch-/Scanner-/Band-/Tueten-/Trash-/Hand-Assets spielbar.
+- [x] Fehlende Assets sind durch saubere Platzhalter-Szenen ersetzt.
+- [x] Die Code- und Szenenstruktur bleibt kompatibel mit `architecture.md`.
+- [x] Der naechste Entwicklungsschritt kann mit echten Assets oder erweitertem Content beginnen, ohne zentrale Systeme umzubauen.
 
 ## Definition of Done fuer den ersten spielbaren Prototyp
 
-- [ ] 1-Screen-Gameplay mit linker Statusleiste, Kassentisch und rechter Upgrade-Leiste.
-- [ ] Vier sichtbare Belt-Objekte und 10 Produkte pro Kunde.
-- [ ] Scanner links im Kassentisch, quadratisch, mit vertikalem Strahl.
-- [ ] Scans zaehlen nur rechts nach links.
-- [ ] Tute ueber Scanner finalisiert Verkauf.
-- [ ] Trash-Zone rechts unten verwirft Produkte oder Coupons.
-- [ ] Kundenhand mit Mood-Ring zeigt Suspicion.
-- [ ] Offener Verkaufsbetrag folgt gehaltenem Produkt.
-- [ ] Cash in Drawer steigt erst beim Drop in die Tute.
-- [ ] Mehrfachscan kann Caught-Dialog ausloesen.
-- [ ] Miete am Tagesende, Lose bei Nichtzahlung, Win nach Tag 8.
-- [ ] Coupon-Button und Sortiment-Level-Up-Button funktionieren.
-- [ ] Produkt- und Coin-Assets werden verwendet.
-- [ ] Fehlende Environment-Assets sind als editorseitige Platzhalter-Szenen vorhanden.
-- [ ] Pure Gameplay-Logik ist durch Tests abgedeckt.
-- [ ] Content-Validierung meldet kaputte IDs, Referenzen, Texturen und Balancing-Werte.
+- [x] 1-Screen-Gameplay mit linker Statusleiste, Kassentisch und rechter Upgrade-Leiste.
+- [x] Vier sichtbare Belt-Objekte und 10 Produkte pro Kunde.
+- [x] Scanner links im Kassentisch, quadratisch, mit vertikalem Strahl.
+- [x] Scans zaehlen nur rechts nach links.
+- [x] Tute ueber Scanner finalisiert Verkauf.
+- [x] Trash-Zone rechts unten verwirft Produkte oder Coupons.
+- [x] Kundenhand mit Mood-Ring zeigt Suspicion.
+- [x] Offener Verkaufsbetrag folgt gehaltenem Produkt.
+- [x] Cash in Drawer steigt erst beim Drop in die Tute.
+- [x] Mehrfachscan kann Caught-Dialog ausloesen.
+- [x] Miete am Tagesende, Lose bei Nichtzahlung, Win nach Tag 8.
+- [x] Coupon-Button und Sortiment-Level-Up-Button funktionieren.
+- [x] Produkt- und Coin-Assets werden verwendet.
+- [x] Fehlende Environment-Assets sind als editorseitige Platzhalter-Szenen vorhanden.
+- [x] Pure Gameplay-Logik ist durch Tests abgedeckt.
+- [x] Content-Validierung meldet kaputte IDs, Referenzen, Texturen und Balancing-Werte.

@@ -13,6 +13,8 @@ normal_sprite = NodePath("SpriteRoot/NormalSprite")
 highlight_sprite = NodePath("SpriteRoot/HighlightSprite")
 shadow_sprite = NodePath("ShadowAnchor/ShadowSprite")
 amount_label = NodePath("AmountLabel")
+amount_label_anchor = NodePath("AmountLabelAnchor")
+sprite_root = NodePath("SpriteRoot")
 interaction_area = NodePath("InteractionArea")
 animation_player = NodePath("AnimationPlayer")
 

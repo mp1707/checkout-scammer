@@ -1,6 +1,7 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/gameplay/components/scanner_station.gd" id="1_scanner_station"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/scanner/high_beep.mp3" id="2_beep"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_scanner_hit"]
 size = Vector2(18, 74)
@@ -10,6 +11,8 @@ script = ExtResource("1_scanner_station")
 hit_area = NodePath("HitArea")
 beam = NodePath("Beam")
 feedback_anchor = NodePath("FeedbackAnchor")
+flash_rect = NodePath("FeedbackAnchor/ScannerFlash")
+beep_player = NodePath("BeepPlayer")
 animation_player = NodePath("AnimationPlayer")
 
 [node name="Body" type="ColorRect" parent="."]
@@ -45,5 +48,18 @@ shape = SubResource("RectangleShape2D_scanner_hit")
 
 [node name="FeedbackAnchor" type="Marker2D" parent="."]
 position = Vector2(0, -34)
+
+[node name="ScannerFlash" type="ColorRect" parent="FeedbackAnchor"]
+visible = false
+mouse_filter = 2
+offset_left = -18.0
+offset_top = -8.0
+offset_right = 18.0
+offset_bottom = 8.0
+color = Color(1, 0.92, 0.52, 1)
+
+[node name="BeepPlayer" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("2_beep")
+volume_db = -5.0
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
