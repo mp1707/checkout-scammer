@@ -1,47 +1,22 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/gameplay/actors/coupon_actor.gd" id="1_coupon_actor"]
-[ext_resource type="Script" path="res://scripts/ui/panels/pixel_panel.gd" id="2_pixel_panel"]
-[ext_resource type="Resource" path="res://content/ui/checkout_theme.tres" id="3_theme"]
+[ext_resource type="Texture2D" path="res://assets/textures/products/products_sheet.png" id="2_products_sheet"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_coupon"]
+atlas = ExtResource("2_products_sheet")
+region = Rect2(128, 0, 32, 32)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_coupon_pick"]
-size = Vector2(44, 30)
+size = Vector2(32, 32)
 
 [node name="CouponActor" type="Node2D"]
 script = ExtResource("1_coupon_actor")
-theme_resource = ExtResource("3_theme")
-title_label = NodePath("Card/VBox/TitleLabel")
-detail_label = NodePath("Card/VBox/DetailLabel")
+coupon_sprite = NodePath("CouponSprite")
 interaction_area = NodePath("InteractionArea")
 
-[node name="Card" type="PanelContainer" parent="."]
-mouse_filter = 2
-offset_left = -22.0
-offset_top = -15.0
-offset_right = 22.0
-offset_bottom = 15.0
-script = ExtResource("2_pixel_panel")
-theme_resource = ExtResource("3_theme")
-panel_color = Color(1, 0.96, 0.72, 1)
-content_margin_override = 3
-
-[node name="VBox" type="VBoxContainer" parent="Card"]
-layout_mode = 2
-theme_override_constants/separation = 0
-
-[node name="TitleLabel" type="Label" parent="Card/VBox"]
-layout_mode = 2
-mouse_filter = 2
-text = "Coupon"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="DetailLabel" type="Label" parent="Card/VBox"]
-layout_mode = 2
-mouse_filter = 2
-text = "-20%"
-horizontal_alignment = 1
-vertical_alignment = 1
+[node name="CouponSprite" type="Sprite2D" parent="."]
+texture = SubResource("AtlasTexture_coupon")
 
 [node name="InteractionArea" type="Area2D" parent="."]
 input_pickable = true

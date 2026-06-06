@@ -14,7 +14,7 @@ und die Aufgabe muss vor der Umsetzung geklaert oder angepasst werden.
 - [ ] Pro Session genau eine Phase oder einen klar abgegrenzten Teil einer Phase bearbeiten.
 - [ ] Am Ende jeder Session den Fortschritt in diesem Dokument abhaken.
 - [ ] Keine neuen Autoloads, Ordnergrundmuster, Datenfluss-Patterns oder UI-Architekturen ohne Rueckfrage einfuehren.
-- [ ] Platzhalter fuer fehlende Tisch-, Scanner-, Band-, Tueten-, Trash- und Kundenhand-Assets als editierbare Szenen bauen, nicht als versteckte Runtime-Zeichnung.
+- [x] Neue Tisch-, Tueten- und Kundenhand-Assets als editierbare Szenen einbauen; Scannerkoerper liegt im Tisch-Sprite.
 - [ ] Produkt- und Coin-Assets aus dem bestehenden Asset-Ordner verwenden.
 - [ ] Technische Schuld nur bewusst und markiert einbauen, inklusive Grund und spaeterem Ersatzpfad.
 
@@ -26,8 +26,7 @@ und die Aufgabe muss vor der Umsetzung geklaert oder angepasst werden.
 - [x] Pixel-Font und 9-Slice-Panel-Asset vorhanden.
 - [x] Scanner-Beep vorhanden.
 - [x] Coin-VFX-Source-Asset vorhanden.
-- [x] Produkt-Black-Outline-Spritesheet vorhanden.
-- [x] Produkt-White-Outline-Highlight-Assets vorhanden und in den Startprodukt-Resources referenziert.
+- [x] Neues Produkt-Spritesheet mit Apfel, Orange, Banane, Brown Snackbar und Coupon vorhanden.
 
 ## Phasenuebersicht
 
@@ -77,10 +76,9 @@ Empfohlener Session-Scope: eine Codex-Session.
 - [x] `GameBalanceResource` mit Prototypwerten anlegen:
   Startgeld `10$`, Tagesmiete `40$`, 8 Tage, 3 Kunden pro Tag,
   10 Produkte pro Kunde, 4 sichtbare Belt-Slots.
-- [x] Produktlinien `snacks`, `drinks`, `fruit` anlegen.
-- [x] Startprodukte aus `gdd.md` als `ProductVariantResource` anlegen:
-  Kaugummi, Chips, Schokoriegel, Wasser, Limo, Energy Drink, Apfel,
-  Banane, Orange.
+- [x] Produktlinien `fruit` und `snacks` anlegen.
+- [x] Aktuellen Asset-Stand als `ProductVariantResource` anlegen:
+  Apfel, Orange, Banane und Brown Snackbar.
 - [x] Produktpreise und Generator-Gewichtungen in Resources pflegen, nicht als lose Konstanten.
 - [x] Produkttexturen aus den vorhandenen Product-Assets referenzieren.
 - [x] Falls Atlas-Regionen aus Spritesheet-Text-Mapping generiert werden muessen:
@@ -150,7 +148,7 @@ Empfohlener Session-Scope: ein bis zwei Codex-Sessions, je nach Testaufwand.
 - [x] Nicht erwischter Double-Scan erhoeht Suspicion auf `50%`.
 - [x] Danach auf `75%`, dann `90%`, danach Deckel bei `90%`.
 - [x] Coupon-Scam loest keinen Caught-Roll aus.
-- [x] Mood-Ring-State aus Suspicion ableiten: gruen, gelb, orange, rot.
+- [x] Kundenhand-State aus Suspicion ableiten: gruen, gelb, rot.
 - [x] Rolls deterministisch testbar machen.
 
 ### EconomySystem
@@ -210,7 +208,7 @@ angelegt und im Editor pruefbar bleiben muessen.
 ### Platzhalter-Szenen fuer fehlende Assets
 
 - [x] `CheckoutTable` als sichtbare Tisch-Szene anlegen.
-- [x] `ScannerStation` als quadratischer Scanner links im Kassentisch anlegen.
+- [x] `ScannerStation` als Hitbox, Strahl und Feedback fuer den im Tisch-Sprite enthaltenen Scanner anlegen.
 - [x] Vertikalen Scannerstrahl als editierbaren Node sichtbar machen.
 - [x] Scanner-Hitbox als `Area2D` mit sichtbarer `CollisionShape2D` anlegen.
 - [x] `ConveyorBeltView` rechts neben Scanner anlegen.
@@ -218,17 +216,16 @@ angelegt und im Editor pruefbar bleiben muessen.
 - [x] Spawn- und Exit-Marker fuer Belt-Bewegungen anlegen.
 - [x] `BagZone` ueber dem Scanner anlegen.
 - [x] `TrashZone` rechts unten unter dem Band anlegen.
-- [x] `CustomerHandView` rechts oben ueber dem Band mit Mood-Ring-Platzhalter anlegen.
+- [x] `CustomerHandView` rechts oben ueber dem Band mit drei Hand-Sprites anlegen.
 - [x] Alle Platzhalter so kapseln, dass spaetere echte Assets die Szene ersetzen oder befuellen koennen, ohne Gameplay-Systeme umzubauen.
 
 ### ProductActor und Drag
 
 - [x] `ProductActor`-Scene in `scenes/gameplay/products` anlegen.
 - [x] `ProductActor`-Script in `scripts/gameplay/actors` anlegen.
-- [x] ProductActor zeigt Black-Outline-Produkttexture als normalen Zustand.
-- [x] Highlight-Zustand nutzt White-Outline-Asset, sobald vorhanden.
+- [x] ProductActor zeigt ein einzelnes Produkt-Sprite aus dem aktuellen Atlas.
 - [x] Separaten Schatten-Anker im ProductActor anlegen, kein baked Runtime-Schatten als Standardprodukt.
-- [x] Drag-Input, Hover, Auswahl und Rotation im ProductActor sammeln.
+- [x] Drag-Input, Auswahl und Rotation im ProductActor sammeln.
 - [x] ProductActor sendet Intents/Signals, mutiert aber keinen Run-State.
 - [x] Betrag-Label-Anker am Produkt vorbereiten.
 - [x] Wobble/Squash-Anker oder AnimationPlayer vorbereiten.
@@ -303,10 +300,10 @@ Empfohlener Session-Scope: ein bis zwei Codex-Sessions.
 - [x] Drop in Trash verwirft Produkt oder Coupon korrekt.
 - [x] In die Tute gelegte Produkte koennen nicht wieder aufgenommen werden.
 
-### Suspicion und Mood-Ring
+### Suspicion und Kundenhand
 
-- [x] Mood-Ring zeigt Suspicion farblich.
-- [x] Ring aktualisiert sich nach Mehrfachscan.
+- [x] Kundenhand zeigt Suspicion ueber gruenes, gelbes und rotes Sprite.
+- [x] Hand-Sprite aktualisiert sich nach Mehrfachscan.
 - [x] Neuer Kunde setzt Suspicion wieder auf Startwert.
 - [x] Keine numerische Suspicion-Progressbar anzeigen.
 
@@ -371,7 +368,7 @@ und offene Fixes.
 
 ### Suspicion- und Dialog-Juice
 
-- [x] Mood-Ring pulsiert bei Suspicion-Anstieg.
+- [x] Kundenhand pulsiert bei Suspicion-Anstieg.
 - [x] Hand-Platzhalter bekommt kleine Unruhe bei hoher Suspicion.
 - [x] Caught-Dialog und Customer-Bye-Dialog sind lesbar, kurz und per Enter steuerbar.
 - [x] Kein erklaerender Overload fuer Coupon-Scam einbauen.
@@ -409,7 +406,7 @@ und offene Fixes.
 ### Phase-5-Akzeptanz
 
 - [ ] Der Scanner-Moment fuehlt sich als Kern des Spiels befriedigend an.
-- [x] Der Prototyp ist ohne echte Tisch-/Scanner-/Band-/Tueten-/Trash-/Hand-Assets spielbar.
+- [x] Der Prototyp nutzt echte Tisch-, Tueten- und Hand-Assets; Band-Visuals bleiben vorerst Platzhalter.
 - [x] Fehlende Assets sind durch saubere Platzhalter-Szenen ersetzt.
 - [x] Die Code- und Szenenstruktur bleibt kompatibel mit `architecture.md`.
 - [x] Der naechste Entwicklungsschritt kann mit echten Assets oder erweitertem Content beginnen, ohne zentrale Systeme umzubauen.
@@ -418,11 +415,11 @@ und offene Fixes.
 
 - [x] 1-Screen-Gameplay mit linker Statusleiste, Kassentisch und rechter Upgrade-Leiste.
 - [x] Vier sichtbare Belt-Objekte und 10 Produkte pro Kunde.
-- [x] Scanner links im Kassentisch, quadratisch, mit vertikalem Strahl.
+- [x] Scanner im Tisch-Sprite mit vertikalem Strahl.
 - [x] Scans zaehlen nur rechts nach links.
 - [x] Tute ueber Scanner finalisiert Verkauf.
 - [x] Trash-Zone rechts unten verwirft Produkte oder Coupons.
-- [x] Kundenhand mit Mood-Ring zeigt Suspicion.
+- [x] Kundenhand-Sprites zeigen Suspicion.
 - [x] Offener Verkaufsbetrag folgt gehaltenem Produkt.
 - [x] Cash in Drawer steigt erst beim Drop in die Tute.
 - [x] Mehrfachscan kann Caught-Dialog ausloesen.

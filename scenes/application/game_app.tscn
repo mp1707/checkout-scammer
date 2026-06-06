@@ -13,16 +13,7 @@ script = ExtResource("1_game_app")
 run_controller = NodePath("RunController")
 content_error_label = NodePath("ContentErrorLabel")
 
-[node name="MiddlePlayAreaGuide" type="ColorRect" parent="."]
-mouse_filter = 2
-offset_left = 96.0
-offset_right = 544.0
-offset_bottom = 360.0
-color = Color(0.08, 0.1, 0.1, 1)
-
 [node name="CheckoutTable" parent="." instance=ExtResource("3_checkout_table")]
-offset_left = 96.0
-offset_right = 544.0
 offset_bottom = 360.0
 
 [node name="HudRoot" parent="." instance=ExtResource("4_hud_root")]

@@ -5,5 +5,3 @@
 [resource]
 script = ExtResource("1_curve")
 stage_percentages = Array[int]([10, 50, 75, 90])
-mood_ring_colors = Array[Color]([Color(0.2, 0.78, 0.32, 1), Color(0.94, 0.84, 0.24, 1), Color(0.95, 0.48, 0.18, 1), Color(0.88, 0.16, 0.16, 1)])
-

@@ -80,7 +80,7 @@ func _test_customer_generator() -> void:
 	scripted_run.current_customer_number = 1
 	var scripted_customer: CustomerState = _generator.generate_customer(_registry, scripted_run)
 	_expect_string_arrays_equal(
-		PackedStringArray(["gum", "gum", "chips", "apple", "water", "banana", "gum", "chips", "apple", "water"]),
+		PackedStringArray(["apple", "orange", "banana", "apple", "banana", "orange", "apple", "banana", "apple", "orange"]),
 		_product_ids(scripted_customer.product_queue),
 		"CustomerGenerator models scripted first customer"
 	)
@@ -141,7 +141,7 @@ func _test_belt_system() -> void:
 func _test_scan_system() -> void:
 	var customer: CustomerState = CustomerState.new("scan_customer")
 	_suspicion_system.setup_customer(customer, _registry.suspicion_curve)
-	var product: ProductInstance = ProductInstance.new(_registry.get_product_variant("gum"), "scan_product")
+	var product: ProductInstance = ProductInstance.new(_registry.get_product_variant("apple"), "scan_product")
 	var random: RandomNumberGenerator = RandomNumberGenerator.new()
 	random.seed = 10
 
@@ -198,8 +198,9 @@ func _test_suspicion_system() -> void:
 	was_caught = _suspicion_system.roll_for_duplicate_scan_with_value(customer, _registry.suspicion_curve, 10)
 	_expect_true(was_caught, "SuspicionSystem catches rolls at or below current suspicion")
 	_expect_equal_int(10, customer.current_suspicion_percent, "SuspicionSystem does not advance suspicion after caught roll")
-	_expect_equal_int(0, _suspicion_system.get_mood_ring_stage_index(10, _registry.suspicion_curve), "SuspicionSystem maps green mood-ring stage")
-	_expect_equal_int(3, _suspicion_system.get_mood_ring_stage_index(90, _registry.suspicion_curve), "SuspicionSystem maps red mood-ring stage")
+	_expect_equal_int(0, _suspicion_system.get_customer_hand_stage_index(10, _registry.suspicion_curve), "SuspicionSystem maps green hand stage")
+	_expect_equal_int(1, _suspicion_system.get_customer_hand_stage_index(50, _registry.suspicion_curve), "SuspicionSystem maps yellow hand stage")
+	_expect_equal_int(2, _suspicion_system.get_customer_hand_stage_index(75, _registry.suspicion_curve), "SuspicionSystem maps red hand stage")
 
 
 func _test_economy_system() -> void:
@@ -226,7 +227,7 @@ func _test_economy_system() -> void:
 	_expect_equal_int(1060, run_state.cash_cents, "EconomySystem credits cash only on payout")
 	_expect_true(apple.is_processed, "EconomySystem marks paid product processed")
 
-	var trash_product: ProductInstance = ProductInstance.new(_registry.get_product_variant("chips"), "trash_product")
+	var trash_product: ProductInstance = ProductInstance.new(_registry.get_product_variant("orange"), "trash_product")
 	trash_product.open_amount_cents = 160
 	var trash_outcome: PayoutOutcome = _economy_system.trash_product(run_state, trash_product)
 	_expect_equal_int(0, trash_outcome.payout_cents, "EconomySystem trash pays no money")
@@ -238,10 +239,10 @@ func _test_economy_system() -> void:
 func _test_coupon_system() -> void:
 	var run_state: RunState = _create_run_state(2)
 	var apple_coupon: CouponResource = _registry.get_coupon("apple_20_discount")
-	var energy_coupon: CouponResource = _registry.get_coupon("energy_25_discount")
+	var brown_snackbar_coupon: CouponResource = _registry.get_coupon("brown_snackbar_15_discount")
 
 	_expect_true(_coupon_system.can_purchase_coupon(run_state, apple_coupon, _registry), "CouponSystem allows coupons for current assortment")
-	_expect_false(_coupon_system.can_purchase_coupon(run_state, energy_coupon, _registry), "CouponSystem hides coupons for locked products")
+	_expect_false(_coupon_system.can_purchase_coupon(run_state, brown_snackbar_coupon, _registry), "CouponSystem hides coupons for locked products")
 
 	var purchased_coupon: CouponInstance = _coupon_system.purchase_coupon(run_state, apple_coupon, _registry, _registry.game_balance)
 	_expect_true(purchased_coupon != null, "CouponSystem purchases affordable coupon")
@@ -295,8 +296,8 @@ func _test_upgrade_system() -> void:
 	_upgrade_system.apply_pending_assortment_for_customer(run_state)
 	_expect_equal_int(2, run_state.assortment_level, "UpgradeSystem applies pending level for next customer")
 
-	var level_three_upgrade: UpgradeResource = _upgrade_system.get_next_assortment_upgrade(run_state, _registry.upgrades)
-	_expect_false(_upgrade_system.can_purchase_assortment_upgrade(run_state, level_three_upgrade), "UpgradeSystem disables unaffordable next upgrade")
+	var further_upgrade: UpgradeResource = _upgrade_system.get_next_assortment_upgrade(run_state, _registry.upgrades)
+	_expect_true(further_upgrade == null, "UpgradeSystem has no further assortment level without new product art")
 
 
 func _test_complete_customer_flow_without_scenes() -> void:
@@ -346,10 +347,9 @@ func _create_run_state(seed: int) -> RunState:
 func _create_customer_with_products(product_count: int) -> CustomerState:
 	var customer: CustomerState = CustomerState.new("manual_customer")
 	var variants: Array[ProductVariantResource] = [
-		_registry.get_product_variant("gum"),
-		_registry.get_product_variant("chips"),
 		_registry.get_product_variant("apple"),
-		_registry.get_product_variant("water"),
+		_registry.get_product_variant("orange"),
+		_registry.get_product_variant("banana"),
 	]
 	for index: int in range(product_count):
 		var variant: ProductVariantResource = variants[index % variants.size()]

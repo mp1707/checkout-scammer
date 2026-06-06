@@ -1,16 +1,13 @@
-[gd_resource type="Resource" script_class="UpgradeResource" load_steps=5 format=3]
+[gd_resource type="Resource" script_class="UpgradeResource" load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/gameplay/state/upgrade_resource.gd" id="1_upgrade"]
-[ext_resource type="ProductVariantResource" path="res://content/products/variants/chocolate_bar.tres" id="2_chocolate"]
-[ext_resource type="ProductVariantResource" path="res://content/products/variants/soda.tres" id="3_soda"]
-[ext_resource type="ProductVariantResource" path="res://content/products/variants/orange.tres" id="4_orange"]
+[ext_resource type="ProductVariantResource" path="res://content/products/variants/brown_snackbar.tres" id="2_brown_snackbar"]
 
 [resource]
 script = ExtResource("1_upgrade")
 id = "assortment_level_2"
 display_name = "Sortiment Level 2"
-tooltip = "Fuegt Schokoriegel, Limo und Orange zum Pool hinzu."
+tooltip = "Fuegt Brown Snackbar zum Pool hinzu."
 cost_cents = 600
 target_assortment_level = 2
-unlocked_products = Array[ProductVariantResource]([ExtResource("2_chocolate"), ExtResource("3_soda"), ExtResource("4_orange")])
-
+unlocked_products = Array[ProductVariantResource]([ExtResource("2_brown_snackbar")])

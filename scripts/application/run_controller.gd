@@ -102,7 +102,7 @@ func _start_customer() -> void:
 	run_state.current_customer = customer
 
 	_update_belt_view()
-	_update_mood_ring()
+	_update_customer_hand()
 	_update_hud_state()
 
 
@@ -161,16 +161,16 @@ func _update_assortment_button() -> void:
 	hud_root.set_assortment_upgrade_tooltip(_build_assortment_upgrade_tooltip(next_upgrade))
 
 
-func _update_mood_ring() -> void:
+func _update_customer_hand() -> void:
 	if checkout_table == null or registry == null or run_state == null or run_state.current_customer == null:
 		return
 
 	var suspicion_percent: int = run_state.current_customer.current_suspicion_percent
-	var color: Color = _suspicion_system.get_mood_ring_color(
+	var hand_stage_index: int = _suspicion_system.get_customer_hand_stage_index(
 		suspicion_percent,
 		registry.suspicion_curve
 	)
-	checkout_table.set_mood_ring_state(color, suspicion_percent)
+	checkout_table.set_customer_hand_state(hand_stage_index, suspicion_percent)
 
 
 func _on_product_scan_contact_started(actor: Node2D, contact_position: Vector2) -> void:
@@ -213,9 +213,9 @@ func _on_product_scan_contact_started(actor: Node2D, contact_position: Vector2) 
 		actor.call("update_open_amount_label")
 	if checkout_table != null:
 		checkout_table.play_successful_scan_feedback(actor, product_instance.scan_count, contact_position)
-	_update_mood_ring()
+	_update_customer_hand()
 	if run_state.current_customer.current_suspicion_percent > suspicion_before_scan and checkout_table != null:
-		checkout_table.pulse_mood_ring()
+		checkout_table.pulse_customer_hand()
 
 
 func _on_actor_bag_drop_requested(actor: Node2D) -> void:
@@ -355,13 +355,13 @@ func _handle_caught_scan(actor: Node2D, product_instance: ProductInstance) -> vo
 	_belt_system.mark_product_processed(run_state.current_customer, product_instance)
 	_finish_actor(actor, false)
 	_update_hud_state()
-	_update_mood_ring()
+	_update_customer_hand()
 	_show_dialog(CAUGHT_MESSAGE, DialogKind.CAUGHT)
 
 
 func _after_customer_object_processed() -> void:
 	_update_hud_state()
-	_update_mood_ring()
+	_update_customer_hand()
 	if run_state == null or run_state.current_customer == null:
 		return
 	if not run_state.current_customer.is_complete:

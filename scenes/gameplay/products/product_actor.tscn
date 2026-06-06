@@ -4,13 +4,12 @@
 [ext_resource type="Resource" path="res://content/ui/checkout_theme.tres" id="2_theme"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_product_pick"]
-size = Vector2(24, 24)
+size = Vector2(32, 32)
 
 [node name="ProductActor" type="Node2D"]
 script = ExtResource("1_product_actor")
 theme_resource = ExtResource("2_theme")
-normal_sprite = NodePath("SpriteRoot/NormalSprite")
-highlight_sprite = NodePath("SpriteRoot/HighlightSprite")
+product_sprite = NodePath("SpriteRoot/ProductSprite")
 shadow_sprite = NodePath("ShadowAnchor/ShadowSprite")
 amount_label = NodePath("AmountLabel")
 amount_label_anchor = NodePath("AmountLabelAnchor")
@@ -26,10 +25,7 @@ modulate = Color(0, 0, 0, 0.28)
 
 [node name="SpriteRoot" type="Node2D" parent="."]
 
-[node name="NormalSprite" type="Sprite2D" parent="SpriteRoot"]
-
-[node name="HighlightSprite" type="Sprite2D" parent="SpriteRoot"]
-visible = false
+[node name="ProductSprite" type="Sprite2D" parent="SpriteRoot"]
 
 [node name="AmountLabel" type="Label" parent="."]
 visible = false

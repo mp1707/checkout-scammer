@@ -1,19 +1,19 @@
 [gd_resource type="Resource" script_class="ProductVariantResource" load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/gameplay/state/product_variant_resource.gd" id="1_variant"]
-[ext_resource type="ProductLineResource" path="res://content/products/lines/fruit.tres" id="2_line"]
+[ext_resource type="ProductLineResource" path="res://content/products/lines/snacks.tres" id="2_line"]
 [ext_resource type="Texture2D" path="res://assets/textures/products/products_sheet.png" id="3_sheet"]
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_orange"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_brown_snackbar"]
 atlas = ExtResource("3_sheet")
-region = Rect2(32, 0, 32, 32)
+region = Rect2(96, 0, 32, 32)
 
 [resource]
 script = ExtResource("1_variant")
-id = "orange"
-display_name = "Orange"
+id = "brown_snackbar"
+display_name = "Brown Snackbar"
 product_line = ExtResource("2_line")
-price_cents = 110
-generator_weight = 8
-assortment_level = 1
-texture = SubResource("AtlasTexture_orange")
+price_cents = 130
+generator_weight = 7
+assortment_level = 2
+texture = SubResource("AtlasTexture_brown_snackbar")

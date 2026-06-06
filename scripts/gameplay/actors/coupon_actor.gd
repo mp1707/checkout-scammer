@@ -5,9 +5,7 @@ signal drag_started(actor: CouponActor)
 signal drag_moved(actor: CouponActor, previous_position: Vector2, current_position: Vector2, movement_delta: Vector2)
 signal drag_ended(actor: CouponActor, drop_position: Vector2)
 
-@export var theme_resource: CheckoutThemeResource = preload("res://content/ui/checkout_theme.tres")
-@export var title_label: Label
-@export var detail_label: Label
+@export var coupon_sprite: Sprite2D
 @export var interaction_area: Area2D
 
 var actor_id: String = ""
@@ -16,21 +14,18 @@ var coupon_instance: CouponInstance
 var is_held: bool = false
 var movement_direction: Vector2 = Vector2.ZERO
 
-var _is_hovered: bool = false
 var _finish_tween: Tween
 
 
 func _ready() -> void:
 	_resolve_child_references()
-	_apply_label_theme()
-	_refresh_coupon_labels()
+	_refresh_coupon_id()
 	_connect_interaction_area()
-	_update_visual_state()
 
 
 func set_coupon_instance(initial_coupon_instance: CouponInstance) -> void:
 	coupon_instance = initial_coupon_instance
-	_refresh_coupon_labels()
+	_refresh_coupon_id()
 
 
 func get_contact_area() -> Area2D:
@@ -64,17 +59,12 @@ func play_finish_feedback(target_global_position: Vector2, is_sale: bool) -> voi
 	_finish_tween.tween_callback(queue_free)
 
 
-func _refresh_coupon_labels() -> void:
+func _refresh_coupon_id() -> void:
 	if coupon_instance == null:
 		actor_id = ""
-		_set_label_text("Coupon", "")
 		return
 
 	actor_id = coupon_instance.instance_id
-	if coupon_instance.coupon == null:
-		_set_label_text("Coupon", "")
-	else:
-		_set_label_text(coupon_instance.coupon.display_name, "-%d%%" % coupon_instance.coupon.discount_percent)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -98,10 +88,6 @@ func _connect_interaction_area() -> void:
 		return
 	if not interaction_area.input_event.is_connected(_on_interaction_area_input_event):
 		interaction_area.input_event.connect(_on_interaction_area_input_event)
-	if not interaction_area.mouse_entered.is_connected(_on_interaction_area_mouse_entered):
-		interaction_area.mouse_entered.connect(_on_interaction_area_mouse_entered)
-	if not interaction_area.mouse_exited.is_connected(_on_interaction_area_mouse_exited):
-		interaction_area.mouse_exited.connect(_on_interaction_area_mouse_exited)
 
 
 func _on_interaction_area_input_event(_viewport: Viewport, event: InputEvent, _shape_idx: int) -> void:
@@ -113,22 +99,11 @@ func _on_interaction_area_input_event(_viewport: Viewport, event: InputEvent, _s
 		get_viewport().set_input_as_handled()
 
 
-func _on_interaction_area_mouse_entered() -> void:
-	_is_hovered = true
-	_update_visual_state()
-
-
-func _on_interaction_area_mouse_exited() -> void:
-	_is_hovered = false
-	_update_visual_state()
-
-
 func _start_drag(pointer_position: Vector2) -> void:
 	is_held = true
 	z_index = 100
 	_update_drag_position(pointer_position)
 	drag_started.emit(self)
-	_update_visual_state()
 
 
 func _update_drag_position(next_global_position: Vector2) -> void:
@@ -146,36 +121,10 @@ func _end_drag(drop_position: Vector2) -> void:
 	z_index = 0
 	_update_drag_position(drop_position)
 	drag_ended.emit(self, global_position)
-	_update_visual_state()
-
-
-func _set_label_text(title_text: String, detail_text: String) -> void:
-	if title_label != null:
-		title_label.text = title_text
-	if detail_label != null:
-		detail_label.text = detail_text
-
-
-func _update_visual_state() -> void:
-	modulate = Color(1.12, 1.12, 1.12, 1.0) if _is_hovered or is_held else Color.WHITE
-
-
-func _apply_label_theme() -> void:
-	if theme_resource == null:
-		return
-	for label: Label in [title_label, detail_label]:
-		if label == null:
-			continue
-		if theme_resource.font != null:
-			label.add_theme_font_override("font", theme_resource.font)
-		label.add_theme_font_size_override("font_size", theme_resource.font_size_small)
-		label.add_theme_color_override("font_color", theme_resource.text_color)
 
 
 func _resolve_child_references() -> void:
-	if title_label == null:
-		title_label = get_node_or_null("Card/VBox/TitleLabel") as Label
-	if detail_label == null:
-		detail_label = get_node_or_null("Card/VBox/DetailLabel") as Label
+	if coupon_sprite == null:
+		coupon_sprite = get_node_or_null("CouponSprite") as Sprite2D
 	if interaction_area == null:
 		interaction_area = get_node_or_null("InteractionArea") as Area2D

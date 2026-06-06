@@ -40,23 +40,16 @@ func clear_belt() -> void:
 		conveyor_belt_view.call("clear_actors")
 
 
-func set_mood_ring_color(color: Color) -> void:
-	if customer_hand_view != null:
-		customer_hand_view.call("set_mood_ring_color", color)
-
-
-func set_mood_ring_state(color: Color, suspicion_percent: int) -> void:
+func set_customer_hand_state(hand_stage_index: int, suspicion_percent: int) -> void:
 	if customer_hand_view == null:
 		return
-	if customer_hand_view.has_method("set_mood_ring_state"):
-		customer_hand_view.call("set_mood_ring_state", color, suspicion_percent)
-	else:
-		customer_hand_view.call("set_mood_ring_color", color)
+	if customer_hand_view.has_method("set_suspicion_state"):
+		customer_hand_view.call("set_suspicion_state", hand_stage_index, suspicion_percent)
 
 
-func pulse_mood_ring() -> void:
-	if customer_hand_view != null and customer_hand_view.has_method("pulse_mood_ring"):
-		customer_hand_view.call("pulse_mood_ring")
+func pulse_customer_hand() -> void:
+	if customer_hand_view != null and customer_hand_view.has_method("pulse_customer_hand"):
+		customer_hand_view.call("pulse_customer_hand")
 
 
 func play_successful_scan_feedback(actor: Node2D, scan_count: int, contact_position: Vector2) -> void:

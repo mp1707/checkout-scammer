@@ -1,30 +1,23 @@
 # Product Atlas Import Plan
 
-Phase 1 uses `AtlasTexture` subresources in product variant `.tres` files so the
-starting content can be loaded and validated immediately. Normal regions come
-from `res://assets/textures/products/black_outline/spritesheet.txt`; highlight
-regions use the matching entries from
-`res://assets/textures/products/white_outline/spritesheet.txt`.
+Aktueller Content nutzt `AtlasTexture`-Subresources aus
+`res://assets/textures/products/products_sheet.png`. Die Regionen stehen in
+`res://assets/textures/products/products_sheet.txt`; alle Sprites sind `32x32`.
 
-Before adding larger product batches or changing sprite regions in bulk, build a
-generator in `tools/import` that:
+Aktuelle Atlas-Reihenfolge von links nach rechts:
 
-- reads `spritesheet.txt`;
-- maps stable product IDs to source sprite names;
-- writes or updates `ProductVariantResource` files;
-- preserves price, weight and assortment values from an editable manifest;
-- fails visibly when a requested source sprite is missing.
-
-Current Phase-1 atlas choices:
-
-| Product ID | Source sprite |
+| Product ID / Actor | Region |
 | --- | --- |
-| `gum` | `outline_black/16x16/Seeds (carrot).png` |
-| `chips` | `outline_black/16x16/Grain sack.png` |
-| `chocolate_bar` | `outline_black/16x16/Cookie.png` |
-| `water` | `outline_black/16x16/Flask Full (blue).png` |
-| `soda` | `outline_black/16x16/Flask Full (orange).png` |
-| `energy_drink` | `outline_black/16x16/Flask Full (violet).png` |
-| `apple` | `outline_black/16x16/Apple (green).png` |
-| `banana` | `outline_black/16x16/Banana.png` |
-| `orange` | `outline_black/16x16/Orange.png` |
+| `apple` | `Rect2(0, 0, 32, 32)` |
+| `orange` | `Rect2(32, 0, 32, 32)` |
+| `banana` | `Rect2(64, 0, 32, 32)` |
+| `brown_snackbar` | `Rect2(96, 0, 32, 32)` |
+| CouponActor | `Rect2(128, 0, 32, 32)` |
+
+Wenn spaeter groessere Produktbatches dazukommen, soll ein Import-Tool:
+
+- `products_sheet.txt` lesen;
+- stabile Produkt-IDs auf Sprite-Namen mappen;
+- `ProductVariantResource`-Dateien schreiben oder aktualisieren;
+- Preis, Gewichtung und Sortiment-Level aus einem editierbaren Manifest erhalten;
+- sichtbar fehlschlagen, wenn eine gewuenschte Sprite-Region fehlt.

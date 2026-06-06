@@ -1,17 +1,20 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene format=3 uid="uid://btxe7l0q104i8"]
 
-[ext_resource type="Script" path="res://scripts/gameplay/components/checkout_table.gd" id="1_checkout_table"]
+[ext_resource type="Script" uid="uid://43dsrku7gbmo" path="res://scripts/gameplay/components/checkout_table.gd" id="1_checkout_table"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/scanner/scanner_station.tscn" id="2_scanner"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/belt/conveyor_belt_view.tscn" id="3_conveyor"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/bag/bag_zone.tscn" id="4_bag"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/trash/trash_zone.tscn" id="5_trash"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/customer/customer_hand_view.tscn" id="6_hand"]
 [ext_resource type="PackedScene" path="res://scenes/vfx/coin_burst_vfx.tscn" id="7_coin_burst"]
+[ext_resource type="Texture2D" uid="uid://c4i8322s07aui" path="res://assets/textures/environment/table.png" id="8_table"]
 
-[node name="CheckoutTable" type="Control"]
-mouse_filter = 2
-offset_right = 448.0
+[node name="CheckoutTable" type="Control" unique_id=845555887]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 640.0
 offset_bottom = 360.0
+mouse_filter = 2
 script = ExtResource("1_checkout_table")
 conveyor_belt_view = NodePath("ConveyorBeltView")
 scanner_station = NodePath("ScannerStation")
@@ -21,41 +24,27 @@ customer_hand_view = NodePath("CustomerHandView")
 vfx_container = NodePath("VfxContainer")
 coin_burst_scene = ExtResource("7_coin_burst")
 
-[node name="TableSurface" type="ColorRect" parent="."]
-mouse_filter = 2
-offset_right = 448.0
-offset_bottom = 360.0
-color = Color(0.29, 0.42, 0.37, 1)
+[node name="TableSprite" type="Sprite2D" parent="." unique_id=155917372]
+z_index = -100
+position = Vector2(320, 180)
+texture = ExtResource("8_table")
 
-[node name="TableLeftEdge" type="ColorRect" parent="."]
-mouse_filter = 2
-offset_right = 12.0
-offset_bottom = 360.0
-color = Color(0.2, 0.29, 0.27, 1)
+[node name="BagZone" parent="." unique_id=1494708852 instance=ExtResource("4_bag")]
+position = Vector2(201, 183)
 
-[node name="TableBottomEdge" type="ColorRect" parent="."]
-mouse_filter = 2
-offset_top = 338.0
-offset_right = 448.0
-offset_bottom = 360.0
-color = Color(0.2, 0.29, 0.27, 1)
+[node name="ScannerStation" parent="." unique_id=678997339 instance=ExtResource("2_scanner")]
+position = Vector2(320, 186)
 
-[node name="BagZone" parent="." instance=ExtResource("4_bag")]
-position = Vector2(72, 78)
+[node name="ConveyorBeltView" parent="." unique_id=364460971 instance=ExtResource("3_conveyor")]
+position = Vector2(382, 190)
 
-[node name="ScannerStation" parent="." instance=ExtResource("2_scanner")]
-position = Vector2(72, 180)
+[node name="TrashZone" parent="." unique_id=345382906 instance=ExtResource("5_trash")]
+position = Vector2(492, 306)
 
-[node name="ConveyorBeltView" parent="." instance=ExtResource("3_conveyor")]
-position = Vector2(154, 188)
+[node name="CustomerHandView" parent="." unique_id=1485899984 instance=ExtResource("6_hand")]
+position = Vector2(201, 47)
 
-[node name="TrashZone" parent="." instance=ExtResource("5_trash")]
-position = Vector2(382, 292)
+[node name="VfxAnchor" type="Marker2D" parent="." unique_id=89939026]
+position = Vector2(320, 146)
 
-[node name="CustomerHandView" parent="." instance=ExtResource("6_hand")]
-position = Vector2(356, 78)
-
-[node name="VfxAnchor" type="Marker2D" parent="."]
-position = Vector2(72, 146)
-
-[node name="VfxContainer" type="Node2D" parent="."]
+[node name="VfxContainer" type="Node2D" parent="." unique_id=430781294]

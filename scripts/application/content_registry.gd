@@ -240,8 +240,6 @@ func _validate_suspicion_curve(errors: PackedStringArray) -> void:
 
 	if suspicion_curve.stage_percentages.is_empty():
 		errors.append("Suspicion curve needs at least one stage.")
-	if suspicion_curve.stage_percentages.size() != suspicion_curve.mood_ring_colors.size():
-		errors.append("Suspicion curve stage_percentages and mood_ring_colors must have the same size.")
 
 	var previous_percent: int = -1
 	for percent: int in suspicion_curve.stage_percentages:
@@ -272,10 +270,8 @@ func _validate_product_variants(errors: PackedStringArray) -> void:
 			errors.append("Product variant '%s' generator_weight must be greater than zero." % product_variant.id)
 		if product_variant.assortment_level <= 0:
 			errors.append("Product variant '%s' assortment_level must be greater than zero." % product_variant.id)
-		if product_variant.normal_texture == null:
-			errors.append("Product variant '%s' is missing normal_texture." % product_variant.id)
-		if product_variant.highlight_texture == null:
-			errors.append("Product variant '%s' is missing highlight_texture." % product_variant.id)
+		if product_variant.texture == null:
+			errors.append("Product variant '%s' is missing texture." % product_variant.id)
 
 
 func _validate_coupons(errors: PackedStringArray) -> void:

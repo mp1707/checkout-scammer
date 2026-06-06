@@ -50,7 +50,7 @@ Kernsysteme:
 - `EconomySystem`: Produktwerte, Rabatte, Multiplikatoren, Rundung, Payout.
 - `CouponSystem`: Aktivierung, Verzoegerung bis zum naechsten Kunden, Dauer bis Tagesende, Coupon-Scam.
 - `ComboSystem`: spaetere Multi-Scan-/Juice-/Reward-Fenster.
-- `SuspicionSystem`: Caught-Rolls, Suspicion-Stufen, Mood-Ring-Zustand.
+- `SuspicionSystem`: Caught-Rolls, Suspicion-Stufen, dreistufiger Kundenhand-Zustand.
 - `UpgradeSystem`: Sortiment-Level, Upgrade-Kosten, Wirkung ab naechstem Kunden.
 - `CustomerGenerator`: deterministische Kunden- und Produktfolgen per Seed.
 
@@ -66,11 +66,11 @@ Wichtige Szenen:
 
 - `CheckoutTable`: mittlerer Kassentisch als Root der spielbaren Flaeche.
 - `ConveyorBeltView`: sichtbare Belt-Slots, Bewegungsanimationen, Slot-Marker.
-- `ProductActor`: Drag, Rotation, Hover, Highlight, Schatten, Cursorbetrag-Anzeige.
-- `ScannerStation`: Scanner-Visual, Strahl, Hitbox/Area2D, Flash/SFX-Anker.
+- `ProductActor`: Drag, Rotation, Scannerkontakt, Schatten, Cursorbetrag-Anzeige.
+- `ScannerStation`: Scannerstrahl, Hitbox/Area2D, Flash/SFX-Anker. Der Scannerkoerper ist im Tisch-Sprite enthalten.
 - `BagZone`: Drop-Zone fuer finalen Verkauf.
 - `TrashZone`: Drop-Zone fuer Produkt-/Coupon-Entsorgung.
-- `CustomerHandView`: Hand-Visual und Mood-Ring-Farbe/Puls.
+- `CustomerHandView`: Hand-Sprite fuer Suspicion-Stufen gruen, gelb und rot.
 - `HudRoot`: linke Statusleiste, rechte Upgrade-Leiste, Dialoge und Popups.
 
 Node-Pfade werden nicht quer durch die Szene gesucht. Parent/Child-Kommunikation nutzt lokale Signals, `@export`-Referenzen oder kleine Controller-APIs.
@@ -82,11 +82,11 @@ Ordner: `content`
 Alles Konfigurierbare wird als Resource modelliert:
 
 - `GameBalanceResource`: Startgeld, Tagesmiete, Run-Laenge, Kunden pro Tag, Produkte pro Kunde, sichtbare Belt-Slots.
-- `ProductLineResource`: Produktlinie wie Snacks, Getraenke, Obst.
+- `ProductLineResource`: Produktlinie wie Obst oder Snacks.
 - `ProductVariantResource`: einzelne Produkte mit ID, Preis, Gewichtung, Sortiment-Level, Texturen.
 - `CouponResource`: Zielprodukt/-linie, Rabatt, Kaufpreis, Gewichtungsbonus, Dauer.
 - `UpgradeResource`: Sortiment-Level-Up und spaetere Upgrades.
-- `SuspicionCurveResource`: Startwert, Stufen, Ringfarben, Roll-Regeln.
+- `SuspicionCurveResource`: Startwert, Stufen und Roll-Regeln.
 - `CheckoutThemeResource`: Font, 9-Slice-Panel-Texture, Fontgroessen, UI-Farben.
 
 Definition-Resources sind immutable Runtime-Definitionen. Veraenderbarer Zustand liegt in Runtime-Instanzen.
@@ -101,8 +101,8 @@ Verbindlich sichtbar in Szenen:
 - Belt-Slot-Marker und Spawn-/Exit-Marker fuer das Fließband.
 - Scanner-Shape, Scannerstrahl, Scanner-Hitbox und Feedback-Anker.
 - Bag- und Trash-Drop-Zonen inklusive Collision-/Area-Nodes.
-- ProductActor-Root, Sprite-Anker, Schatten-Anker, Betrag-Label-Anker und Hover-/Drag-Feedback-Anker.
-- Kundenhand-Anker, Mood-Ring-Anker und AnimationPlayer.
+- ProductActor-Root, Sprite-Anker, Schatten-Anker, Betrag-Label-Anker und Drag-Feedback-Anker.
+- Kundenhand-Anker, Hand-Sprite und AnimationPlayer.
 - HUD-Panels, Dialoge, Popups, Buttons und Tooltip-Anker.
 - AnimationPlayer, Marker2D, Area2D, CollisionShape2D und VFX-Anker fuer alle wiederkehrenden Interaktionen.
 
@@ -127,7 +127,7 @@ Wenn eine Runtime-Erzeugung noetig ist, muss sie eine vorbereitete Scene instanz
 
 Eine Szene hat genau eine Hauptaufgabe:
 
-- `ProductActor`: sammelt Drag-/Rotate-/Hover-Input und zeigt Produktzustand.
+- `ProductActor`: sammelt Drag-/Rotate-Input, meldet Scannerkontakt und zeigt Produktzustand.
 - `ScannerStation`: meldet Scannerkontakte und zeigt Scannerfeedback.
 - `ConveyorBeltView`: zeigt Slots und animiert Nachruecken.
 - `BagZone` und `TrashZone`: melden Drop-Intents.
@@ -152,7 +152,7 @@ Keine UI-Komponente bucht Geld, scannt Produkte, veraendert Suspicion oder aktiv
 3. `ScanSystem` entscheidet, ob der Scan gueltig ist. Nur rechts nach links zaehlt.
 4. Bei Mehrfachscan fragt `ScanSystem` bzw. `SuspicionSystem` den Caught-Roll ab.
 5. `EconomySystem` berechnet den offenen Betrag.
-6. `RunController` aktualisiert Runtime-State und sendet Feedback-Events an Presentation: Beep, Coin-VFX, Scannerflash, Betrag am Cursor, Mood-Ring.
+6. `RunController` aktualisiert Runtime-State und sendet Feedback-Events an Presentation: Beep, Coin-VFX, Scannerflash, Betrag am Cursor, Kundenhand-State.
 
 ### Verkauf
 
@@ -217,9 +217,9 @@ Root-Assets werden nicht als dauerhafte Asset-Ablage genutzt. Dauerhafte Ziele:
 - Font: `assets/fonts/m6x11plus.ttf`
 - Scanner-SFX: `assets/audio/sfx/scanner/high_beep.mp3`
 - 9-Slice-Panel: `assets/textures/ui/panels/9slice_panel_white.png`
-- Produkt-Black-Outline: `assets/textures/products/black_outline`
-- Produkt-White-Outline: `assets/textures/products/white_outline`
-- Produkt-Spritesheet-Quellen: `assets/textures/products/source_sheets`
+- Produkt-Spritesheet: `assets/textures/products/products_sheet.png`
+- Produkt-Spritesheet-Mapping: `assets/textures/products/products_sheet.txt`
+- Environment-Sprites: `assets/textures/environment`
 - Coin-/Scanner-VFX: `assets/vfx/coin`, `assets/vfx/scanner`
 
 Produkt-Schatten werden nicht als Standardprodukt gebaked, sondern im `ProductActor` separat aufgebaut.
@@ -239,9 +239,6 @@ assets/
     customer/
     environment/
     products/
-      black_outline/
-      source_sheets/
-      white_outline/
     ui/
       icons/
       panels/
@@ -304,7 +301,7 @@ Fruehe Tests sollen pure Gameplay-Logik abdecken:
 - `ScanSystem`: Scannerkontakt, Bewegungsrichtung, Mehrfachscan, Rotation/Hit-Details.
 - `CouponSystem`: Aktivierung, Tagesdauer, Stack-/Delay-Regeln, Coupon-Scam.
 - `EconomySystem`: Basiswerte, Rabatte, Multiplikatoren, Rundung.
-- `SuspicionSystem`: deterministische Rolls mit Seed, Stufen, Ringzustand.
+- `SuspicionSystem`: deterministische Rolls mit Seed, Stufen, Kundenhand-Zustand.
 - `CustomerGenerator`: gleiche Seeds erzeugen gleiche Kunden- und Produktfolgen.
 
 Content-Validierung ist Pflicht, sobald mehrere Resource-Typen referenziert werden:

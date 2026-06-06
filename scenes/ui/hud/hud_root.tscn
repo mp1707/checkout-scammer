@@ -24,7 +24,7 @@ popup_layer = NodePath("PopupLayer")
 coupon_popup_scene = ExtResource("5_coupon_popup")
 
 [node name="LeftStatusPanel" type="PanelContainer" parent="."]
-offset_right = 96.0
+offset_right = 104.0
 offset_bottom = 360.0
 script = ExtResource("2_pixel_panel")
 theme_resource = ExtResource("4_theme")
@@ -84,7 +84,7 @@ text = "$10.00"
 horizontal_alignment = 2
 
 [node name="RightUpgradePanel" type="PanelContainer" parent="."]
-offset_left = 544.0
+offset_left = 536.0
 offset_right = 640.0
 offset_bottom = 360.0
 script = ExtResource("2_pixel_panel")
@@ -137,10 +137,10 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="CouponTooltipAnchor" type="Marker2D" parent="."]
-position = Vector2(548, 62)
+position = Vector2(540, 62)
 
 [node name="AssortmentTooltipAnchor" type="Marker2D" parent="."]
-position = Vector2(548, 96)
+position = Vector2(540, 96)
 
 [node name="DialogLayer" type="Control" parent="."]
 visible = false

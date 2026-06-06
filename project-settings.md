@@ -142,9 +142,9 @@ Fuer Pixel-Art-Sprites gilt:
 - Filter: Off/Nearest.
 - Mipmaps: Off.
 - Keine automatische Skalierung in der Szene.
-- Produkt-Runtime-Assets nutzen die `24px` Atlas-Regionen.
-- Produkt-Highlights nutzen white-outline Assets.
-- Produkt-Standardzustand nutzt black-outline Assets.
+- Produkt-Runtime-Assets nutzen die `32px` Atlas-Regionen aus `assets/textures/products/products_sheet.png`.
+- Produkte haben kein separates Highlight-/Outline-Sheet.
+- Coupon-Actors nutzen vorerst das gemeinsame Coupon-Sprite aus demselben Sheet.
 
 Wenn ein Sprite scharf im Editor, aber matschig im Spiel wirkt, zuerst pruefen:
 

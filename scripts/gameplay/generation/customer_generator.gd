@@ -5,9 +5,7 @@ const CouponSystemScript = preload("res://scripts/gameplay/systems/coupon_system
 
 const PRODUCT_ID_APPLE: String = "apple"
 const PRODUCT_ID_BANANA: String = "banana"
-const PRODUCT_ID_CHIPS: String = "chips"
-const PRODUCT_ID_GUM: String = "gum"
-const PRODUCT_ID_WATER: String = "water"
+const PRODUCT_ID_ORANGE: String = "orange"
 
 
 func generate_customer(registry: ContentRegistry, run_state: RunState) -> CustomerState:
@@ -148,42 +146,42 @@ func _get_scripted_first_day_product_ids(
 	match customer_number:
 		1:
 			return PackedStringArray([
-				PRODUCT_ID_GUM,
-				PRODUCT_ID_GUM,
-				PRODUCT_ID_CHIPS,
 				PRODUCT_ID_APPLE,
-				PRODUCT_ID_WATER,
+				PRODUCT_ID_ORANGE,
 				PRODUCT_ID_BANANA,
-				PRODUCT_ID_GUM,
-				PRODUCT_ID_CHIPS,
 				PRODUCT_ID_APPLE,
-				PRODUCT_ID_WATER,
+				PRODUCT_ID_BANANA,
+				PRODUCT_ID_ORANGE,
+				PRODUCT_ID_APPLE,
+				PRODUCT_ID_BANANA,
+				PRODUCT_ID_APPLE,
+				PRODUCT_ID_ORANGE,
 			])
 		2:
 			return PackedStringArray([
 				PRODUCT_ID_BANANA,
-				PRODUCT_ID_GUM,
-				PRODUCT_ID_CHIPS,
-				PRODUCT_ID_WATER,
+				PRODUCT_ID_ORANGE,
 				PRODUCT_ID_APPLE,
-				PRODUCT_ID_GUM,
 				PRODUCT_ID_BANANA,
-				PRODUCT_ID_CHIPS,
-				PRODUCT_ID_WATER,
-				PRODUCT_ID_GUM,
+				PRODUCT_ID_APPLE,
+				PRODUCT_ID_ORANGE,
+				PRODUCT_ID_BANANA,
+				PRODUCT_ID_APPLE,
+				PRODUCT_ID_ORANGE,
+				PRODUCT_ID_BANANA,
 			])
 		3:
 			return PackedStringArray([
-				PRODUCT_ID_CHIPS,
 				PRODUCT_ID_APPLE,
-				PRODUCT_ID_WATER,
-				PRODUCT_ID_GUM,
+				PRODUCT_ID_ORANGE,
 				PRODUCT_ID_BANANA,
-				PRODUCT_ID_CHIPS,
-				PRODUCT_ID_GUM,
+				PRODUCT_ID_ORANGE,
 				PRODUCT_ID_APPLE,
-				PRODUCT_ID_WATER,
-				PRODUCT_ID_GUM,
+				PRODUCT_ID_BANANA,
+				PRODUCT_ID_APPLE,
+				PRODUCT_ID_ORANGE,
+				PRODUCT_ID_BANANA,
+				PRODUCT_ID_APPLE,
 			])
 		_:
 			return PackedStringArray()

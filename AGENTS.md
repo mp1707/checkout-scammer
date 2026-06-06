@@ -78,8 +78,9 @@ Regeln:
 
 ## Produkt-Assets
 
-- Black-outline Produktassets sind der normale Runtime-Zustand.
-- White-outline Produktassets werden fuer Highlighting genutzt: Hover, Auswahl, Drag-Fokus, Coupon-Betroffenheit, perfekte Scans und Combo-Feedback.
+- Produktassets kommen aktuell aus `assets/textures/products/products_sheet.png` plus `products_sheet.txt`.
+- Es gibt keine separaten Black-/White-Outline-Produkte und kein Produkt-Highlighting.
+- Coupon-Actors nutzen vorerst das gemeinsame Coupon-Sprite aus dem Produkt-Sheet.
 - Produkt-Schatten nicht baked als Runtime-Standard nutzen. Schatten werden separat im `ProductActor` gebaut, damit Drag, Rotation und Tiefe korrekt wirken.
 - Spritesheets plus Text-Mapping duerfen als Source erhalten bleiben. Runtime-Varianten sollten ueber `AtlasTexture` oder generierte Resources referenziert werden.
 

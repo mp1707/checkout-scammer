@@ -51,11 +51,9 @@
 
 ### Scanner
 
-- Der Scanner ist links im Kassentisch eingelassen.
-- Er sitzt am linken Rand des mittleren Viewports.
-- Er ist vertikal mittig auf dem Tisch platziert.
-- Der Scanner ist quadratisch.
-- Der Scannerstrahl ist vertikal.
+- Der Scanner ist im Kassentisch-Sprite eingelassen.
+- Er sitzt vorerst in der Mitte des Tisches.
+- Der Scannerstrahl ist vertikal und wird als separates VFX-/Feedback-Element erzeugt.
 - Der Scanner funktioniert nur, wenn ein Produkt von rechts nach links über den Scanner gezogen wird.
 - Wird ein Produkt von links nach rechts über den Scanner gezogen, passiert nichts.
 - Dadurch fühlt sich der Scan wie eine bewusste Kassierbewegung an.
@@ -97,18 +95,16 @@
 - Das ist eine versteckte Scam-Mechanik.
 - Wird ein Produkt mit offenem Verkaufsbetrag in den Müll geworfen, verschwindet es und der offene Betrag wird nicht gebucht.
 
-### Kundenhand und Mood-Ring
+### Kundenhand
 
 - Rechts oben über dem Fließband ist eine Kundenhand sichtbar.
 - Die Hand deutet den Kunden an, ohne einen vollständigen Kunden zu zeigen.
-- Die Hand trägt einen Mood-Ring.
-- Der Mood-Ring zeigt die aktuelle Suspicion farblich an:
-  - Grün: niedrige Suspicion
-  - Gelb: erhöhte Suspicion
-  - Orange: hohe Suspicion
-  - Rot: sehr hohe Suspicion
+- Die Hand zeigt die aktuelle Suspicion über drei gezeichnete Sprite-Stufen:
+  - Grün: Anfangszustand.
+  - Gelb: nach einem erfolgreichen Doppel-Scan.
+  - Rot: nach zwei oder mehr erfolgreichen Doppel-Scans.
 - Es gibt keine plumpe Suspicion-Progressbar mit Zahl.
-- Der Ring ist die kreative, diegetische Anzeige des Suspicion-Meters.
+- Die Hand ist die kreative, diegetische Anzeige des Suspicion-Meters.
 
 ### Rechte Menüleiste
 
@@ -161,20 +157,14 @@
   - Sortiment-Level-Up-Kosten
   - Suspicion-Stufen
 
-### Erste Startprodukt-Werte
+### Aktuelle Produkt-Werte
 
-- Snacks:
-  - Kaugummi: `0,50$`
-  - Chips: `0,80$`
-  - Schokoriegel: `1,00$`
-- Getränke:
-  - Wasser: `0,90$`
-  - Limo: `1,20$`
-  - Energy Drink: `1,80$`
-- Obst:
+- Startsortiment:
   - Apfel: `0,60$`
   - Banane: `0,70$`
   - Orange: `1,10$`
+- Sortiment-Level 2:
+  - Brown Snackbar: `1,30$`
 
 ## Kunden-Produktfluss
 
@@ -209,7 +199,7 @@
 - Bei 90% bleibt es.
 - Mehrfachscans sind unbegrenzt möglich, bis der Spieler erwischt wird oder das Produkt verkauft.
 - Neuer Kunde = neues Suspicion-Meter bei 10%.
-- Die aktuelle Suspicion wird über den Mood-Ring an der Kundenhand angezeigt.
+- Die aktuelle Suspicion wird über den Sprite-Zustand der Kundenhand angezeigt.
 
 ## Erwischen / Strafe
 
@@ -317,11 +307,13 @@
 
 ## Start-Sortiment
 
-- Für den Anfang gibt es nur wenige Produktlinien:
-  - Snacks
-  - Getränke
-  - Obst
-- Diese drei Kategorien reichen für den ersten Prototyp.
+- Für den aktuellen Asset-Stand gibt es im Startsortiment nur:
+  - Apfel
+  - Orange
+  - Banane
+- Das Sortiment kann vorerst genau einmal erweitert werden.
+- Die erste Erweiterung fügt hinzu:
+  - Brown Snackbar
 
 ## Mögliche spätere Produktlinien
 
@@ -350,7 +342,7 @@ Out of scope für den Prototyp:
 - Der Spieler verarbeitet alle 10 Produkte des Kunden.
 - Produkte können mehrfach gescannt werden.
 - Mehrfaches Scannen erhöht die Suspicion.
-- Die Suspicion wird über den Mood-Ring an der Kundenhand angezeigt.
+- Die Suspicion wird über den Sprite-Zustand der Kundenhand angezeigt.
 - Nach dem letzten verarbeiteten Produkt erscheint nach einer Sekunde eine Textbox:
 
 `Thanks, byyyyyeeeeee`
@@ -419,8 +411,8 @@ Out of scope für den Prototyp:
 
 ### Suspicion-Juice
 
-- Der Mood-Ring färbt sich sichtbar um.
-- Bei steigender Suspicion kann der Ring kurz pulsieren.
+- Die Kundenhand wechselt zwischen gruenem, gelbem und rotem Sprite.
+- Bei steigender Suspicion kann die Hand kurz pulsieren.
 - Bei hoher Suspicion kann die Kundenhand minimal unruhig wirken.
 - Kein komplexes Animationssystem nötig.
 - Kleine visuelle Andeutungen reichen.
@@ -436,11 +428,11 @@ Für den ersten spielbaren Prototyp ist wichtig:
 - Conveyor Belt rechts neben Scanner
 - Maximal 4 sichtbare Belt-Objekte
 - 10 Produkte pro Kunde
-- Scanner links, quadratisch, vertikaler Strahl
+- Scanner im Tisch-Sprite, vorerst mittig, mit vertikalem Strahl
 - Scannen nur von rechts nach links
 - Tüte über dem Scanner
 - Müll-Loch rechts unten
-- Kundenhand rechts oben mit Mood-Ring
+- Kundenhand rechts oben mit drei Suspicion-Sprites
 - Offener Verkaufsbetrag am Cursor
 - Geld zählt beim Ablegen in der Tüte direkt hoch
 - Double-Scan erhöht Suspicion

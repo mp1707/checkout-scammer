@@ -44,20 +44,14 @@ func get_next_suspicion_percent(current_percent: int, curve: SuspicionCurveResou
 	return curve.stage_percentages[curve.stage_percentages.size() - 1]
 
 
-func get_mood_ring_stage_index(current_percent: int, curve: SuspicionCurveResource) -> int:
+func get_customer_hand_stage_index(current_percent: int, curve: SuspicionCurveResource) -> int:
 	if curve == null or curve.stage_percentages.is_empty():
 		return 0
 
-	for index: int in range(curve.stage_percentages.size()):
-		if current_percent <= curve.stage_percentages[index]:
-			return index
-
-	return curve.stage_percentages.size() - 1
-
-
-func get_mood_ring_color(current_percent: int, curve: SuspicionCurveResource) -> Color:
-	if curve == null or curve.mood_ring_colors.is_empty():
-		return Color.WHITE
-
-	var stage_index: int = get_mood_ring_stage_index(current_percent, curve)
-	return curve.mood_ring_colors[stage_index]
+	if curve.stage_percentages.size() < 3:
+		return 0
+	if current_percent < curve.stage_percentages[1]:
+		return 0
+	if current_percent < curve.stage_percentages[2]:
+		return 1
+	return 2
