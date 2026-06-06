@@ -1,7 +1,8 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/gameplay/actors/product_actor.gd" id="1_product_actor"]
 [ext_resource type="Resource" path="res://content/ui/checkout_theme.tres" id="2_theme"]
+[ext_resource type="Script" path="res://scripts/ui/panels/pixel_panel.gd" id="3_pixel_panel"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_product_pick"]
 size = Vector2(32, 32)
@@ -11,7 +12,8 @@ script = ExtResource("1_product_actor")
 theme_resource = ExtResource("2_theme")
 product_sprite = NodePath("SpriteRoot/ProductSprite")
 shadow_sprite = NodePath("ShadowAnchor/ShadowSprite")
-amount_label = NodePath("AmountLabel")
+amount_label_panel = NodePath("AmountLabelPanel")
+amount_label = NodePath("AmountLabelPanel/AmountLabel")
 amount_label_anchor = NodePath("AmountLabelAnchor")
 sprite_root = NodePath("SpriteRoot")
 interaction_area = NodePath("InteractionArea")
@@ -21,19 +23,26 @@ animation_player = NodePath("AnimationPlayer")
 position = Vector2(2, 3)
 
 [node name="ShadowSprite" type="Sprite2D" parent="ShadowAnchor"]
-modulate = Color(0, 0, 0, 0.28)
+modulate = Color(0.054902, 0.027451, 0.105882, 0.42)
 
 [node name="SpriteRoot" type="Node2D" parent="."]
 
 [node name="ProductSprite" type="Sprite2D" parent="SpriteRoot"]
 
-[node name="AmountLabel" type="Label" parent="."]
+[node name="AmountLabelPanel" type="PanelContainer" parent="."]
 visible = false
 mouse_filter = 2
-offset_left = -28.0
-offset_top = -30.0
-offset_right = 28.0
+offset_left = -31.0
+offset_top = -34.0
+offset_right = 31.0
 offset_bottom = -18.0
+script = ExtResource("3_pixel_panel")
+theme_resource = ExtResource("2_theme")
+panel_color = Color(1, 1, 1, 1)
+content_margin_override = 2
+
+[node name="AmountLabel" type="Label" parent="AmountLabelPanel"]
+layout_mode = 2
 horizontal_alignment = 1
 vertical_alignment = 1
 

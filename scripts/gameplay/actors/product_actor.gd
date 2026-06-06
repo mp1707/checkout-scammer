@@ -10,6 +10,7 @@ signal scanner_contact_changed(actor: ProductActor, is_touching_scanner: bool, c
 @export var theme_resource: CheckoutThemeResource = preload("res://content/ui/checkout_theme.tres")
 @export var product_sprite: Sprite2D
 @export var shadow_sprite: Sprite2D
+@export var amount_label_panel: PanelContainer
 @export var amount_label: Label
 @export var amount_label_anchor: Marker2D
 @export var sprite_root: Node2D
@@ -33,6 +34,7 @@ func _ready() -> void:
 	_resolve_child_references()
 	if product_instance != null and product_instance.variant != null:
 		_set_product_texture(product_instance.variant.texture)
+	_apply_shadow_theme()
 	_apply_label_theme()
 	_connect_interaction_area()
 	update_open_amount_label()
@@ -66,15 +68,21 @@ func set_touching_scanner(value: bool, contact_position: Vector2) -> void:
 
 
 func update_open_amount_label() -> void:
-	if amount_label == null:
+	if amount_label == null and amount_label_panel == null:
 		return
 	if product_instance == null or product_instance.open_amount_cents <= 0:
-		amount_label.visible = false
-		amount_label.text = ""
+		if amount_label_panel != null:
+			amount_label_panel.visible = false
+		if amount_label != null:
+			amount_label.visible = false
+			amount_label.text = ""
 		return
 
-	amount_label.visible = true
-	amount_label.text = _format_cents(product_instance.open_amount_cents)
+	if amount_label_panel != null:
+		amount_label_panel.visible = true
+	if amount_label != null:
+		amount_label.visible = true
+		amount_label.text = _format_cents(product_instance.open_amount_cents)
 
 
 func get_feedback_anchor_global_position() -> Vector2:
@@ -211,8 +219,8 @@ func _play_scan_wobble(scan_count: int) -> void:
 
 	if sprite_root != null:
 		sprite_root.scale = squash_scale
-	if amount_label != null and amount_label.visible:
-		amount_label.scale = Vector2(1.12, 1.12)
+	if amount_label_panel != null and amount_label_panel.visible:
+		amount_label_panel.scale = Vector2(1.12, 1.12)
 
 	_feedback_tween = create_tween()
 	_feedback_tween.set_parallel(true)
@@ -221,8 +229,8 @@ func _play_scan_wobble(scan_count: int) -> void:
 		_feedback_tween.tween_property(sprite_root, "scale", Vector2.ONE, 0.09).set_delay(0.045) \
 			.set_trans(Tween.TRANS_BACK) \
 			.set_ease(Tween.EASE_OUT)
-	if amount_label != null and amount_label.visible:
-		_feedback_tween.tween_property(amount_label, "scale", Vector2.ONE, 0.12) \
+	if amount_label_panel != null and amount_label_panel.visible:
+		_feedback_tween.tween_property(amount_label_panel, "scale", Vector2.ONE, 0.12) \
 			.set_trans(Tween.TRANS_BACK) \
 			.set_ease(Tween.EASE_OUT)
 	_feedback_tween.set_parallel(false)
@@ -237,6 +245,12 @@ func _apply_label_theme() -> void:
 	amount_label.add_theme_color_override("font_color", theme_resource.money_color)
 
 
+func _apply_shadow_theme() -> void:
+	if shadow_sprite == null or theme_resource == null:
+		return
+	shadow_sprite.modulate = theme_resource.shadow_color
+
+
 func _format_cents(cents: int) -> String:
 	var dollars: int = floori(float(cents) / 100.0)
 	return "$%d.%02d" % [dollars, cents % 100]
@@ -249,8 +263,12 @@ func _resolve_child_references() -> void:
 		product_sprite = get_node_or_null("SpriteRoot/ProductSprite") as Sprite2D
 	if shadow_sprite == null:
 		shadow_sprite = get_node_or_null("ShadowAnchor/ShadowSprite") as Sprite2D
+	if amount_label_panel == null:
+		amount_label_panel = get_node_or_null("AmountLabelPanel") as PanelContainer
 	if amount_label == null:
-		amount_label = get_node_or_null("AmountLabel") as Label
+		amount_label = get_node_or_null("AmountLabelPanel/AmountLabel") as Label
+		if amount_label == null:
+			amount_label = get_node_or_null("AmountLabel") as Label
 	if amount_label_anchor == null:
 		amount_label_anchor = get_node_or_null("AmountLabelAnchor") as Marker2D
 	if interaction_area == null:

@@ -74,7 +74,7 @@ func expire_coupons_after_day(run_state: RunState, completed_day: int) -> void:
 	run_state.active_coupons = still_active
 
 
-func create_customer_belt_coupon(run_state: RunState) -> CouponInstance:
+func create_customer_visible_coupon(run_state: RunState) -> CouponInstance:
 	if run_state == null:
 		return null
 

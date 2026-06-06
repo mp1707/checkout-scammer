@@ -5,14 +5,14 @@ signal product_scan_contact_started(actor: Node2D, contact_position: Vector2)
 signal product_scan_contact_ended(actor: Node2D)
 signal actor_scan_contact_started(actor: Node2D, contact_position: Vector2)
 signal actor_scan_contact_ended(actor: Node2D)
-signal actor_taken_from_belt(actor: Node2D)
+signal actor_taken_from_product_area(actor: Node2D)
 signal actor_bag_drop_requested(actor: Node2D)
 signal actor_trash_drop_requested(actor: Node2D)
 signal actor_released_outside_drop_zones(actor: Node2D)
 signal product_actor_spawned(actor: Node2D, slot_index: int)
 signal coupon_actor_spawned(actor: Node2D, slot_index: int)
 
-@export var conveyor_belt_view: ConveyorBeltView
+@export var product_scatter_view: ProductScatterView
 @export var scanner_station: ScannerStation
 @export var bag_zone: Area2D
 @export var trash_zone: Area2D
@@ -30,14 +30,14 @@ func _ready() -> void:
 	_connect_children()
 
 
-func display_belt_slots(slots: Array[BeltSlot]) -> void:
-	if conveyor_belt_view != null:
-		conveyor_belt_view.call("display_slots", slots)
+func display_visible_object_slots(slots: Array[VisibleObjectSlot]) -> void:
+	if product_scatter_view != null:
+		product_scatter_view.call("display_slots", slots)
 
 
-func clear_belt() -> void:
-	if conveyor_belt_view != null:
-		conveyor_belt_view.call("clear_actors")
+func clear_visible_objects() -> void:
+	if product_scatter_view != null:
+		product_scatter_view.call("clear_actors")
 
 
 func set_customer_hand_state(hand_stage_index: int, suspicion_percent: int) -> void:
@@ -52,14 +52,13 @@ func pulse_customer_hand() -> void:
 		customer_hand_view.call("pulse_customer_hand")
 
 
-func play_successful_scan_feedback(actor: Node2D, scan_count: int, contact_position: Vector2) -> void:
+func play_successful_scan_feedback(actor: Node2D, scan_count: int, _contact_position: Vector2) -> void:
 	if scanner_station != null and scanner_station.has_method("play_success_feedback"):
 		scanner_station.call("play_success_feedback", scan_count)
 
 	if actor != null and actor.has_method("play_successful_scan_feedback"):
 		actor.call("play_successful_scan_feedback", scan_count)
 
-	_spawn_coin_burst(_get_actor_feedback_position(actor, contact_position))
 	if scan_count > 1:
 		_play_table_jolt(scan_count)
 
@@ -69,6 +68,8 @@ func play_actor_finish_feedback(actor: Node2D, is_sale: bool) -> void:
 		return
 
 	var finish_position: Vector2 = _get_actor_finish_position(actor, is_sale)
+	if is_sale and _actor_is_product(actor):
+		_spawn_coin_burst(finish_position)
 	if actor.has_method("play_finish_feedback"):
 		actor.call("play_finish_feedback", finish_position, is_sale)
 	else:
@@ -82,9 +83,9 @@ func _connect_children() -> void:
 		_connect_signal_once(scanner_station, "product_contact_started", _on_product_scan_contact_started)
 		_connect_signal_once(scanner_station, "product_contact_ended", _on_product_scan_contact_ended)
 
-	if conveyor_belt_view != null:
-		_connect_signal_once(conveyor_belt_view, "product_actor_spawned", _on_product_actor_spawned)
-		_connect_signal_once(conveyor_belt_view, "coupon_actor_spawned", _on_coupon_actor_spawned)
+	if product_scatter_view != null:
+		_connect_signal_once(product_scatter_view, "product_actor_spawned", _on_product_actor_spawned)
+		_connect_signal_once(product_scatter_view, "coupon_actor_spawned", _on_coupon_actor_spawned)
 
 	_connect_signal_once(bag_zone, "actor_dropped", _on_bag_zone_actor_dropped)
 	_connect_signal_once(trash_zone, "actor_dropped", _on_trash_zone_actor_dropped)
@@ -103,9 +104,9 @@ func _on_coupon_actor_spawned(actor: Node2D, slot_index: int) -> void:
 
 
 func _on_actor_drag_started(actor: Node2D) -> void:
-	if conveyor_belt_view != null:
-		conveyor_belt_view.release_actor(actor)
-	actor_taken_from_belt.emit(actor)
+	if product_scatter_view != null:
+		product_scatter_view.release_actor(actor)
+	actor_taken_from_product_area.emit(actor)
 
 
 func _on_actor_drag_ended(actor: Node2D, _drop_position: Vector2) -> void:
@@ -170,14 +171,6 @@ func _spawn_coin_burst(burst_global_position: Vector2) -> void:
 		vfx_node.global_position = burst_global_position.round()
 
 
-func _get_actor_feedback_position(actor: Node2D, fallback_position: Vector2) -> Vector2:
-	if actor != null and actor.has_method("get_feedback_anchor_global_position"):
-		var feedback_position: Variant = actor.call("get_feedback_anchor_global_position")
-		if feedback_position is Vector2:
-			return feedback_position
-	return fallback_position
-
-
 func _get_actor_finish_position(actor: Node2D, is_sale: bool) -> Vector2:
 	var zone: Area2D = bag_zone if is_sale else trash_zone
 	if zone != null and zone.has_method("get_drop_position"):
@@ -187,6 +180,12 @@ func _get_actor_finish_position(actor: Node2D, is_sale: bool) -> Vector2:
 	if actor != null:
 		return actor.global_position
 	return global_position
+
+
+func _actor_is_product(actor: Node2D) -> bool:
+	if actor == null:
+		return false
+	return actor.get("product_instance") is ProductInstance
 
 
 func _play_table_jolt(scan_count: int) -> void:
@@ -204,8 +203,8 @@ func _play_table_jolt(scan_count: int) -> void:
 
 
 func _resolve_child_references() -> void:
-	if conveyor_belt_view == null:
-		conveyor_belt_view = get_node_or_null("ConveyorBeltView") as ConveyorBeltView
+	if product_scatter_view == null:
+		product_scatter_view = get_node_or_null("ProductScatterView") as ProductScatterView
 	if scanner_station == null:
 		scanner_station = get_node_or_null("ScannerStation") as ScannerStation
 	if bag_zone == null:

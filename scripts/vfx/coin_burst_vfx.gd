@@ -5,8 +5,8 @@ class_name CoinBurstVfx
 @export var spritesheet: Texture2D = preload("res://assets/vfx/coin/spritesheet.png")
 @export var frame_size: Vector2i = Vector2i(128, 128)
 @export var frame_count: int = 31
-@export var frame_duration_seconds: float = 0.018
-@export var pixel_scale: float = 0.22
+@export var frame_duration_seconds: float = 0.024
+@export var pixel_scale: float = 0.44
 
 var _play_tween: Tween
 

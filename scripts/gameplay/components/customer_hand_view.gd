@@ -1,6 +1,7 @@
 extends Node2D
 class_name CustomerHandView
 
+@export var theme_resource: CheckoutThemeResource = preload("res://content/ui/checkout_theme.tres")
 @export var hand_sprite: Sprite2D
 @export var green_texture: Texture2D = preload("res://assets/textures/environment/hand_green.png")
 @export var yellow_texture: Texture2D = preload("res://assets/textures/environment/hand_yellow.png")
@@ -42,7 +43,7 @@ func pulse_customer_hand() -> void:
 		_pulse_tween.kill()
 
 	hand_sprite.scale = Vector2(1.05, 1.05)
-	hand_sprite.modulate = Color(1.2, 1.2, 1.2, 1.0)
+	hand_sprite.modulate = theme_resource.hand_pulse_color if theme_resource != null else Color.WHITE
 	_pulse_tween = create_tween()
 	_pulse_tween.set_parallel(true)
 	_pulse_tween.tween_property(hand_sprite, "scale", Vector2.ONE, 0.16) \

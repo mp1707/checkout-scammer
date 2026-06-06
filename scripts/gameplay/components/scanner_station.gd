@@ -6,6 +6,7 @@ signal product_contact_ended(actor: Node2D)
 signal actor_contact_started(actor: Node2D, contact_position: Vector2)
 signal actor_contact_ended(actor: Node2D)
 
+@export var theme_resource: CheckoutThemeResource = preload("res://content/ui/checkout_theme.tres")
 @export var hit_area: Area2D
 @export var beam: CanvasItem
 @export var feedback_anchor: Marker2D
@@ -19,6 +20,7 @@ var _flash_tween: Tween
 
 func _ready() -> void:
 	_resolve_child_references()
+	_apply_theme()
 	if flash_rect != null:
 		flash_rect.visible = false
 	if hit_area == null:
@@ -106,9 +108,9 @@ func _play_beam_flash() -> void:
 		_beam_tween.kill()
 
 	beam.visible = true
-	beam.modulate = Color(1.45, 1.45, 1.45, 1.0)
+	beam.modulate = Color.WHITE
 	_beam_tween = create_tween()
-	_beam_tween.tween_property(beam, "modulate", Color.WHITE, 0.12) \
+	_beam_tween.tween_property(beam, "modulate", _get_scanner_beam_color(), 0.12) \
 		.set_trans(Tween.TRANS_QUAD) \
 		.set_ease(Tween.EASE_OUT)
 
@@ -123,7 +125,7 @@ func _play_anchor_flash(scan_count: int) -> void:
 	var flash_scale: float = 1.0 + minf(float(maxi(scan_count - 1, 0)) * 0.08, 0.30)
 	flash_rect.visible = true
 	flash_rect.scale = Vector2.ONE * flash_scale
-	flash_rect.modulate = Color(1.0, 0.92, 0.52, 0.72)
+	flash_rect.modulate = _get_scanner_flash_color()
 
 	_flash_tween = create_tween()
 	_flash_tween.set_parallel(true)
@@ -138,6 +140,27 @@ func _play_anchor_flash(scan_count: int) -> void:
 func _hide_flash_rect() -> void:
 	if flash_rect != null:
 		flash_rect.visible = false
+
+
+func _apply_theme() -> void:
+	if theme_resource == null:
+		return
+	if beam != null:
+		beam.modulate = theme_resource.scanner_beam_color
+	if flash_rect != null:
+		flash_rect.modulate = theme_resource.scanner_flash_color
+
+
+func _get_scanner_beam_color() -> Color:
+	if theme_resource != null:
+		return theme_resource.scanner_beam_color
+	return Color(1.0, 0.0, 0.25098, 0.86)
+
+
+func _get_scanner_flash_color() -> Color:
+	if theme_resource != null:
+		return theme_resource.scanner_flash_color
+	return Color(1.0, 0.921568, 0.341176, 0.72)
 
 
 func _resolve_child_references() -> void:

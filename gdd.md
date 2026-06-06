@@ -9,7 +9,7 @@
 
 - Ein Produkt über den Kassenscanner ziehen
 - Das satisfying „Beep“-Geräusch hören
-- Coin-Animation sehen
+- Coin-Animation beim Ablegen in die Tüte sehen
 - Den aktuellen Verkaufsbetrag direkt am gehaltenen Produkt sehen
 - Geld beim finalen Verkauf direkt hochzählen sehen
 - Der Scanner-Moment ist der wichtigste Kern des Spiels
@@ -23,6 +23,10 @@
 - Kein vollständig sichtbarer Kunde
 - Der Kunde wird nur durch eine Hand angedeutet
 - UI-Stil angelehnt an Scritchy Scratch / Balatro
+- Alle Spiel- und UI-Farben nutzen die Endesga-64-Palette: <https://lospec.com/palette-list/endesga-64>
+- Menüs, Schriften, Buttons, Tooltips, Scannerfeedback, Schatten und Popups verwenden nur Farben aus dieser Palette.
+- Neue UI-Farben werden als Theme-Tokens gepflegt, nicht frei pro Szene gemischt.
+- Transparenz darf genutzt werden, aber die zugrunde liegende RGB-Farbe bleibt aus Endesga 64.
 - Top-Down-Ansicht
 - Der Kassentisch ist das zentrale Spielfeld
 - Links und rechts davon befinden sich Menüleisten für Status, Geld und Upgrades
@@ -58,21 +62,22 @@
 - Wird ein Produkt von links nach rechts über den Scanner gezogen, passiert nichts.
 - Dadurch fühlt sich der Scan wie eine bewusste Kassierbewegung an.
 
-### Fließband / Conveyor Belt
+### Produktfläche
 
-- Rechts neben dem Scanner liegt das Fließband.
-- Produkte kommen von rechts über das Fließband herein.
-- Das Fließband reicht visuell aus dem mittleren Viewport heraus und wird dort abgeschnitten.
-- Dadurch entsteht der Eindruck, dass neue Produkte von außerhalb des sichtbaren Bereichs kommen.
-- Es werden immer maximal 4 Objekte gleichzeitig auf dem Fließband angezeigt.
+- Rechts neben dem Scanner liegen die Produkte verstreut auf dem Kassentisch.
+- Es gibt kein sichtbares Fließband mehr.
+- Neue Produkte rutschen weiterhin von rechts in die Produktfläche hinein.
+- Dadurch entsteht der Eindruck, dass neue Produkte von außerhalb des sichtbaren Bereichs kommen, ohne dass ein Band dargestellt wird.
+- Es werden immer maximal 4 aktive Objekte gleichzeitig auf der Produktfläche angezeigt.
 - Ohne Coupon sind das 4 Produkte.
 - Mit Coupon kann ein sichtbarer Slot durch den Coupon belegt sein.
 - Ein Kunde hat weiterhin 10 Produkte.
 - Initial fahren die ersten 4 Objekte ins Bild.
 - Wenn ein Coupon für diesen Kunden aktiv ist, ist er das erste Objekt, gefolgt von den ersten Produkten.
-- Sobald ein Produkt vom Fließband genommen wurde, rutscht ein neues Produkt nach.
+- Sobald ein Produkt nur aufgenommen wurde, rutscht noch kein neues Produkt nach.
+- Ein neues Produkt rutscht erst nach, wenn eines der 4 aktiven Objekte in der Tüte, im Müll oder durch Erwischen verschwunden ist.
 - Das wiederholt sich, bis alle 10 Produkte des Kunden verarbeitet wurden.
-- Wenn keine Produkte mehr im Kunden-Queue sind, bleibt das Fließband leer.
+- Wenn keine Produkte mehr im Kunden-Queue sind, bleibt die Produktfläche leer.
 
 ### Tüte
 
@@ -80,6 +85,7 @@
 - Gescannte Produkte werden in die Tüte gelegt, um den Verkauf final abzuschließen.
 - Ein Scan bucht noch kein Geld in den Total-Wert.
 - Solange der Spieler ein gescanntes Produkt hält, schwebt der aktuelle Verkaufsbetrag am Cursor leicht über dem Produkt.
+- Der aktuelle Verkaufsbetrag nutzt ein weißes 9-Slice-Panel als Hintergrund, damit er auf allen Produkt- und Tischfarben lesbar bleibt.
 - Beim Ablegen in der Tüte wird dieser aktuelle Verkaufsbetrag zum Total-Wert hinzugefügt.
 - Danach verschwindet das Produkt in der Tüte.
 - Ein in die Tüte gelegtes Produkt gilt als verkauft und kann nicht mehr aufgehoben oder erneut gescannt werden.
@@ -88,7 +94,7 @@
 ### Müll-Loch
 
 - Rechts unten im Eck des Kassentisches befindet sich das Müll-Loch.
-- Es liegt unter dem Fließband.
+- Es liegt unter der Produktfläche.
 - Es ist ein rundes Loch im Tisch mit Label `Trash`.
 - Produkte oder Coupons können dort hineingeworfen werden.
 - Wird ein Coupon in den Müll geworfen, wird er nicht gescannt.
@@ -97,7 +103,7 @@
 
 ### Kundenhand
 
-- Rechts oben über dem Fließband ist eine Kundenhand sichtbar.
+- Rechts oben über der Produktfläche ist eine Kundenhand sichtbar.
 - Die Hand deutet den Kunden an, ohne einen vollständigen Kunden zu zeigen.
 - Die Hand zeigt die aktuelle Suspicion über drei gezeichnete Sprite-Stufen:
   - Grün: Anfangszustand.
@@ -148,7 +154,7 @@
   - Tage pro Run
   - Kunden pro Tag
   - Produkte pro Kunde
-  - sichtbare Fließband-Slots
+  - sichtbare Objekt-Slots
   - Produktpreise
   - Produktgewichte für die Kundengenerierung
   - Coupon-Kosten
@@ -169,10 +175,11 @@
 ## Kunden-Produktfluss
 
 - Ein Kunde hat intern eine Queue aus 10 Produkten.
-- Zu Beginn eines Kunden fahren die ersten 4 Objekte von rechts auf das Fließband.
+- Zu Beginn eines Kunden rutschen die ersten 4 Objekte von rechts in die Produktfläche.
 - Nur diese 4 Objekte sind gleichzeitig sichtbar.
 - Wenn ein Coupon für diesen Kunden aktiv ist, ist der Coupon das erste Objekt und danach folgen die ersten Produkte.
-- Wenn ein Produkt vom Fließband genommen wird, rutscht das nächste Produkt aus der Queue nach.
+- Wenn ein Produkt nur aufgenommen wird, bleibt sein sichtbarer Slot reserviert.
+- Erst wenn ein aktives Objekt verkauft, weggeworfen oder durch Erwischen entfernt wurde, rutscht das nächste Produkt aus der Queue nach.
 - Dadurch bleibt das Spielfeld übersichtlich.
 - Der Spieler verarbeitet alle 10 Produkte nacheinander.
 - Die Reihenfolge innerhalb der sichtbaren Produkt-Slots ist frei wählbar.
@@ -254,10 +261,10 @@
 
 ### Coupon-Scam
 
-- Wenn ein Kunde Produkte kauft, die durch einen Coupon beeinflusst wurden, kommt der passende Coupon mit aufs Fließband.
+- Wenn ein Kunde Produkte kauft, die durch einen Coupon beeinflusst wurden, kommt der passende Coupon mit auf die Produktfläche.
 - Der Coupon ist ein Extra-Objekt und zählt nicht zu den 10 Produkten des Kunden.
-- Der Coupon wird immer als erstes Objekt auf das Fließband gelegt.
-- Er belegt einen sichtbaren Fließband-Slot, reduziert aber nicht die interne Produktanzahl des Kunden.
+- Der Coupon wird immer als erstes sichtbares Objekt auf die Produktfläche gelegt.
+- Er belegt einen sichtbaren Objekt-Slot, reduziert aber nicht die interne Produktanzahl des Kunden.
 - Der Spieler kann den Coupon ehrlich scannen.
 - Dann wird der Rabatt für alle danach gescannten passenden Produkte dieses Kunden angewendet.
 - Der Spieler kann den Coupon aber auch in das Müll-Loch werfen.
@@ -327,18 +334,18 @@ Out of scope für den Prototyp:
 ## Core-Gameplay-Loop
 
 - Kunde startet.
-- Die ersten 4 Objekte fahren von rechts auf das Fließband.
-- Falls für diesen Kunden ein Coupon aktiv ist, liegt er zuerst auf dem Fließband.
-- Der Spieler nimmt ein Produkt vom Fließband.
+- Die ersten 4 Objekte rutschen von rechts in die verstreute Produktfläche.
+- Falls für diesen Kunden ein Coupon aktiv ist, liegt er zuerst in der Produktfläche.
+- Der Spieler nimmt ein Produkt von der Produktfläche.
 - Der Spieler zieht das Produkt von rechts nach links über den vertikalen Scannerstrahl.
 - Scan löst aus:
   - Beep
-  - Coin-Animation
   - Verkaufsbetrag am Cursor erhöht sich
   - Scanner-Feedback
 - Danach kann der Spieler das Produkt nochmal scannen oder in die Tüte legen.
 - Beim Ablegen in die Tüte wird der offene Verkaufsbetrag zum Total-Wert gebucht.
-- Wenn ein Produkt vom Band genommen wurde, fährt das nächste Produkt nach.
+- Beim Ablegen in die Tüte spielt die Coin-Animation an der Tüte.
+- Wenn eines der 4 aktiven Objekte in der Tüte, im Müll oder durch Erwischen verschwunden ist, rutscht das nächste Produkt von rechts nach.
 - Der Spieler verarbeitet alle 10 Produkte des Kunden.
 - Produkte können mehrfach gescannt werden.
 - Mehrfaches Scannen erhöht die Suspicion.
@@ -376,7 +383,7 @@ Out of scope für den Prototyp:
 - Danach kann es abgelegt werden:
   - in der Tüte
   - im Müll-Loch
-  - optional zurück auf dem Fließband, falls nötig
+  - optional zurück auf dem Tisch, falls nötig
 - Beim Ablegen in der Tüte gilt das Produkt als verkauft und verarbeitet.
 - Der offene Verkaufsbetrag wird erst in diesem Moment zum Total-Wert gebucht.
 - Beim Ablegen im Müll-Loch verschwindet das Produkt oder der Coupon.
@@ -392,7 +399,6 @@ Out of scope für den Prototyp:
 
 - Angenehmer Beep-SFX
 - Pitch-Eskalation bei Double-, Triple- und Multi-Scans
-- Coin-Animation am Cursor
 - Offener Verkaufsbetrag schwebt gut lesbar über dem gehaltenen Produkt
 - Geld zählt links in der Menüleiste animiert hoch, wenn das Produkt in die Tüte gelegt wird
 - Kurzer Screen Shake bei Double Scans
@@ -401,12 +407,12 @@ Out of scope für den Prototyp:
 - Kleine Partikel entlang des Scannerstrahls
 - Produkt wobbelt oder squasht kurz beim erfolgreichen Scan
 
-### Conveyor-Juice
+### Produktflächen-Juice
 
 - Neue Produkte fahren weich von rechts rein.
-- Das Fließband hat subtile Bewegung.
-- Wenn ein Produkt vom Band genommen wird, rückt das nächste Produkt nach.
-- Die Bewegung soll mechanisch und satisfying wirken.
+- Die Produkte liegen leicht verstreut statt in einer perfekten Reihe.
+- Wenn ein aktives Objekt verarbeitet wurde, rückt das nächste Produkt nach.
+- Die Bewegung soll weich und satisfying wirken.
 - Nicht zu realistisch, eher abstrakt und toy-like.
 
 ### Suspicion-Juice
@@ -425,8 +431,8 @@ Für den ersten spielbaren Prototyp ist wichtig:
 - Linke Statusleiste
 - Mittlerer Kassentisch
 - Rechte Upgrade-Leiste
-- Conveyor Belt rechts neben Scanner
-- Maximal 4 sichtbare Belt-Objekte
+- Verstreute Produktfläche rechts neben Scanner
+- Maximal 4 sichtbare aktive Objekte
 - 10 Produkte pro Kunde
 - Scanner im Tisch-Sprite, vorerst mittig, mit vertikalem Strahl
 - Scannen nur von rechts nach links
@@ -434,6 +440,7 @@ Für den ersten spielbaren Prototyp ist wichtig:
 - Müll-Loch rechts unten
 - Kundenhand rechts oben mit drei Suspicion-Sprites
 - Offener Verkaufsbetrag am Cursor
+- Coin-Animation beim Ablegen in die Tüte
 - Geld zählt beim Ablegen in der Tüte direkt hoch
 - Double-Scan erhöht Suspicion
 - Miete am Tagesende

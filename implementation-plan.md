@@ -57,7 +57,7 @@ Empfohlener Session-Scope: eine Codex-Session.
 - [x] `CouponResource` erstellen.
 - [x] `UpgradeResource` erstellen.
 - [x] `SuspicionCurveResource` erstellen.
-- [x] Bestehende `CheckoutThemeResource` nur erweitern, wenn Phase-1-Content das wirklich braucht.
+- [x] `CheckoutThemeResource` mit Endesga-64-Tokens fuer Panels, Buttons, Text, Feedback und Schatten erweitern.
 
 ### Runtime-Daten
 
@@ -65,7 +65,7 @@ Empfohlener Session-Scope: eine Codex-Session.
 - [x] `CustomerState` erstellen.
 - [x] `ProductInstance` erstellen.
 - [x] `CouponInstance` erstellen.
-- [x] `BeltSlot` erstellen.
+- [x] `VisibleObjectSlot` erstellen.
 - [x] `ScanRequest` erstellen.
 - [x] `ScanResult` erstellen.
 - [x] `PayoutOutcome` erstellen.
@@ -75,7 +75,7 @@ Empfohlener Session-Scope: eine Codex-Session.
 
 - [x] `GameBalanceResource` mit Prototypwerten anlegen:
   Startgeld `10$`, Tagesmiete `40$`, 8 Tage, 3 Kunden pro Tag,
-  10 Produkte pro Kunde, 4 sichtbare Belt-Slots.
+  10 Produkte pro Kunde, 4 sichtbare Objekt-Slots.
 - [x] Produktlinien `fruit` und `snacks` anlegen.
 - [x] Aktuellen Asset-Stand als `ProductVariantResource` anlegen:
   Apfel, Orange, Banane und Brown Snackbar.
@@ -122,13 +122,13 @@ Empfohlener Session-Scope: ein bis zwei Codex-Sessions, je nach Testaufwand.
 - [x] Spaetere Kunden aus Produktpool, Sortiment-Level und Coupon-Gewichtungen generieren.
 - [x] Coupons beeinflussen Produktgewichtungen, ohne Runtime-Definitionen zu mutieren.
 
-### BeltSystem
+### VisibleObjectQueueSystem
 
 - [x] Kunden-Queue aus 10 Produkten verwalten.
-- [x] Maximal 4 sichtbare Belt-Slots bereitstellen.
-- [x] Optionalen Coupon als erstes sichtbares Belt-Objekt abbilden.
+- [x] Maximal 4 sichtbare Objekt-Slots bereitstellen.
+- [x] Optionalen Coupon als erstes sichtbares Objekt abbilden.
 - [x] Coupon zaehlt nicht gegen die 10 Produkte.
-- [x] Nachruecken aus der Queue nach Produkt-/Coupon-Verarbeitung testen.
+- [x] Nachruecken aus der Queue erst nach Produkt-/Coupon-Verarbeitung testen.
 - [x] Freie Auswahl innerhalb sichtbarer Slots erlauben.
 - [x] Verarbeitete Slots sauber entfernen, ohne UI-Nodes zu kennen.
 
@@ -174,7 +174,7 @@ Empfohlener Session-Scope: ein bis zwei Codex-Sessions, je nach Testaufwand.
 ### Tests
 
 - [x] Unit-Test fuer `CustomerGenerator`: gleiche Seeds, gleiche Folgen.
-- [x] Unit-Test fuer `BeltSystem`: sichtbare Slots, Coupon-Slot, Nachruecken.
+- [x] Unit-Test fuer `VisibleObjectQueueSystem`: sichtbare Slots, Coupon-Slot, Nachruecken.
 - [x] Unit-Test fuer `ScanSystem`: Richtung, Kontakt, gehalten/nicht gehalten.
 - [x] Unit-Test fuer `SuspicionSystem`: Roll, Stufen, Deckel.
 - [x] Unit-Test fuer `EconomySystem`: Scan-Betrag, Coupon-Rabatt, Trash, Payout.
@@ -211,12 +211,12 @@ angelegt und im Editor pruefbar bleiben muessen.
 - [x] `ScannerStation` als Hitbox, Strahl und Feedback fuer den im Tisch-Sprite enthaltenen Scanner anlegen.
 - [x] Vertikalen Scannerstrahl als editierbaren Node sichtbar machen.
 - [x] Scanner-Hitbox als `Area2D` mit sichtbarer `CollisionShape2D` anlegen.
-- [x] `ConveyorBeltView` rechts neben Scanner anlegen.
-- [x] Vier Belt-Slot-Marker sichtbar und editierbar platzieren.
-- [x] Spawn- und Exit-Marker fuer Belt-Bewegungen anlegen.
+- [x] `ProductScatterView` rechts neben Scanner anlegen.
+- [x] Vier Objekt-Slot-Marker verstreut, sichtbar und editierbar platzieren.
+- [x] Spawn- und Exit-Marker fuer Produktflaechen-Bewegungen anlegen.
 - [x] `BagZone` ueber dem Scanner anlegen.
-- [x] `TrashZone` rechts unten unter dem Band anlegen.
-- [x] `CustomerHandView` rechts oben ueber dem Band mit drei Hand-Sprites anlegen.
+- [x] `TrashZone` rechts unten unter der Produktflaeche anlegen.
+- [x] `CustomerHandView` rechts oben ueber der Produktflaeche mit drei Hand-Sprites anlegen.
 - [x] Alle Platzhalter so kapseln, dass spaetere echte Assets die Szene ersetzen oder befuellen koennen, ohne Gameplay-Systeme umzubauen.
 
 ### ProductActor und Drag
@@ -230,14 +230,14 @@ angelegt und im Editor pruefbar bleiben muessen.
 - [x] Betrag-Label-Anker am Produkt vorbereiten.
 - [x] Wobble/Squash-Anker oder AnimationPlayer vorbereiten.
 
-### Conveyor, Drop-Zonen und Scannerkontakte
+### Produktflaeche, Drop-Zonen und Scannerkontakte
 
-- [x] `ConveyorBeltView` instanziiert nur vorbereitete Product-/Coupon-Actor-Scenes in vorhandene Slot-Marker.
+- [x] `ProductScatterView` instanziiert nur vorbereitete Product-/Coupon-Actor-Scenes in vorhandene Slot-Marker.
 - [x] Slots, Spawn und Exit kommen aus der Szene, nicht aus magischen Script-Koordinaten.
 - [x] `ScannerStation` meldet Kontakte lokal an Parent/Controller.
 - [x] `BagZone` meldet Drop-Intent.
 - [x] `TrashZone` meldet Drop-Intent.
-- [ ] Optionales Zuruecklegen aufs Band nur vorbereiten, wenn es den Core-Loop nicht verkompliziert.
+- [ ] Optionales Zuruecklegen auf die Produktflaeche nur vorbereiten, wenn es den Core-Loop nicht verkompliziert.
 
 ### HUD und UI-Grundstruktur
 
@@ -274,20 +274,20 @@ Empfohlener Session-Scope: ein bis zwei Codex-Sessions.
 - [x] State-Updates werden an HUD und Gameplay-Views verteilt.
 - [x] UI sendet Intents; RunController entscheidet und mutiert Runtime-State.
 
-### Kunden- und Belt-Loop
+### Kunden- und Objekt-Loop
 
 - [x] Neuer Kunde erzeugt Queue aus 10 Produkten.
-- [x] Falls Coupon aktiv: Coupon als erstes sichtbares Belt-Objekt anzeigen.
+- [x] Falls Coupon aktiv: Coupon als erstes sichtbares Objekt anzeigen.
 - [x] Erste vier sichtbare Objekte fahren von rechts ein.
-- [x] Entferntes Objekt laesst naechstes Objekt nachruecken.
-- [x] Leeres Band nach verarbeitetem Kunden korrekt darstellen.
+- [x] Erst verarbeitetes Objekt laesst naechstes Objekt nachruecken.
+- [x] Leere Produktflaeche nach verarbeitetem Kunden korrekt darstellen.
 - [x] Nach letztem Produkt nach kurzer Pause Customer-Bye-Dialog zeigen.
 - [x] Dialog wird mit Enter geschlossen.
 - [x] Danach naechster Kunde oder Tagesende.
 
 ### Scan-, Bag- und Trash-Loop
 
-- [x] Produkt kann vom Band aufgenommen werden.
+- [x] Produkt kann von der Produktflaeche aufgenommen werden.
 - [x] Rechts-nach-links-Scan ueber Scanner loest `ScanSystem` aus.
 - [x] Erster Scan erhoeht offenen Betrag am Cursor.
 - [x] Weitere Scans desselben gehaltenen Produkts fuehren Caught-Roll aus.
@@ -352,15 +352,15 @@ und offene Fixes.
 - [x] Pitch-Eskalation fuer Double-, Triple- und Multi-Scans einbauen.
 - [x] Scannerstrahl kurz aufleuchten lassen.
 - [x] Scannerflash am vorbereiteten VFX-Anker abspielen.
-- [x] Coin-VFX am Cursor oder Produktanker mit vorhandenem Coin-Asset abspielen.
-- [x] Offener Verkaufsbetrag gut lesbar ueber gehaltenem Produkt darstellen.
+- [x] Coin-VFX beim Ablegen in die Tute mit vorhandenem Coin-Asset abspielen.
+- [x] Offener Verkaufsbetrag gut lesbar mit weissem 9-Slice-Hintergrund ueber gehaltenem Produkt darstellen.
 - [x] Produkt-Wobble oder Squash beim erfolgreichen Scan abspielen.
 - [x] Kurzer Screen-Shake bei Double-Scan oder hoeher pruefen, ohne Lesbarkeit zu stoeren.
 
-### Conveyor- und Drop-Juice
+### Produktflaechen- und Drop-Juice
 
 - [x] Neue Produkte fahren weich von rechts ein.
-- [x] Nachruecken wirkt mechanisch und klar.
+- [x] Nachruecken wirkt weich und klar.
 - [x] Drop in Tute hat kurze Verkaufsanimation.
 - [x] Geld in linker Leiste zaehlt sichtbar hoch.
 - [x] Trash-Drop laesst Produkt/Coupon sauber verschwinden.
@@ -406,7 +406,7 @@ und offene Fixes.
 ### Phase-5-Akzeptanz
 
 - [ ] Der Scanner-Moment fuehlt sich als Kern des Spiels befriedigend an.
-- [x] Der Prototyp nutzt echte Tisch-, Tueten- und Hand-Assets; Band-Visuals bleiben vorerst Platzhalter.
+- [x] Der Prototyp nutzt echte Tisch-, Tueten- und Hand-Assets; Produktflaechen-Guides bleiben bewusst subtil.
 - [x] Fehlende Assets sind durch saubere Platzhalter-Szenen ersetzt.
 - [x] Die Code- und Szenenstruktur bleibt kompatibel mit `architecture.md`.
 - [x] Der naechste Entwicklungsschritt kann mit echten Assets oder erweitertem Content beginnen, ohne zentrale Systeme umzubauen.
@@ -414,7 +414,7 @@ und offene Fixes.
 ## Definition of Done fuer den ersten spielbaren Prototyp
 
 - [x] 1-Screen-Gameplay mit linker Statusleiste, Kassentisch und rechter Upgrade-Leiste.
-- [x] Vier sichtbare Belt-Objekte und 10 Produkte pro Kunde.
+- [x] Vier sichtbare aktive Objekte und 10 Produkte pro Kunde.
 - [x] Scanner im Tisch-Sprite mit vertikalem Strahl.
 - [x] Scans zaehlen nur rechts nach links.
 - [x] Tute ueber Scanner finalisiert Verkauf.

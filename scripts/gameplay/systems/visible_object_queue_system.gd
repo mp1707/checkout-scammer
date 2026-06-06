@@ -1,5 +1,5 @@
 extends RefCounted
-class_name BeltSystem
+class_name VisibleObjectQueueSystem
 
 
 func start_customer(customer: CustomerState, visible_slot_count: int, coupon_instance: CouponInstance = null) -> void:
@@ -11,7 +11,7 @@ func start_customer(customer: CustomerState, visible_slot_count: int, coupon_ins
 	customer.is_complete = false
 
 	for slot_index: int in range(visible_slot_count):
-		customer.visible_slots.append(BeltSlot.new(slot_index))
+		customer.visible_slots.append(VisibleObjectSlot.new(slot_index))
 
 	var fill_start_index: int = 0
 	if coupon_instance != null and not customer.visible_slots.is_empty():
@@ -24,13 +24,13 @@ func start_customer(customer: CustomerState, visible_slot_count: int, coupon_ins
 	_update_customer_completion(customer)
 
 
-func take_slot_object(customer: CustomerState, slot_index: int) -> BeltSlot:
-	var slot: BeltSlot = _find_slot(customer, slot_index)
-	if slot == null or not slot.has_object():
-		return BeltSlot.new(slot_index)
+func take_slot_object(customer: CustomerState, slot_index: int) -> VisibleObjectSlot:
+	var slot: VisibleObjectSlot = _find_slot(customer, slot_index)
+	if slot == null or not slot.has_object() or slot.is_taken:
+		return VisibleObjectSlot.new(slot_index)
 
-	var taken_slot: BeltSlot = _copy_slot(slot)
-	_refill_slot_from_queue(customer, slot)
+	var taken_slot: VisibleObjectSlot = _copy_slot(slot)
+	slot.is_taken = true
 	_update_customer_completion(customer)
 	return taken_slot
 
@@ -44,6 +44,7 @@ func mark_product_processed(customer: CustomerState, product_instance: ProductIn
 	product_instance.is_processed = true
 	customer.processed_product_instance_ids.append(product_instance.instance_id)
 	customer.processed_product_count += 1
+	_refill_product_slot_after_processing(customer, product_instance)
 	_update_customer_completion(customer)
 
 
@@ -53,39 +54,54 @@ func mark_coupon_processed(customer: CustomerState, coupon_instance: CouponInsta
 
 	coupon_instance.was_trashed = was_trashed
 	coupon_instance.was_activated_honestly = not was_trashed
+	_refill_coupon_slot_after_processing(customer, coupon_instance)
 	_update_customer_completion(customer)
 
 
 func get_visible_product_count(customer: CustomerState) -> int:
 	var count: int = 0
-	for slot: BeltSlot in customer.visible_slots:
-		if slot.slot_kind == BeltSlot.SlotKind.PRODUCT:
+	for slot: VisibleObjectSlot in customer.visible_slots:
+		if slot.slot_kind == VisibleObjectSlot.SlotKind.PRODUCT:
 			count += 1
 	return count
 
 
 func get_visible_object_count(customer: CustomerState) -> int:
 	var count: int = 0
-	for slot: BeltSlot in customer.visible_slots:
+	for slot: VisibleObjectSlot in customer.visible_slots:
 		if slot.has_object():
 			count += 1
 	return count
 
 
 func get_first_occupied_slot_index(customer: CustomerState) -> int:
-	for slot: BeltSlot in customer.visible_slots:
+	for slot: VisibleObjectSlot in customer.visible_slots:
 		if slot.has_object():
 			return slot.slot_index
 	return -1
 
 
-func _refill_slot_from_queue(customer: CustomerState, slot: BeltSlot) -> void:
+func _refill_slot_from_queue(customer: CustomerState, slot: VisibleObjectSlot) -> void:
 	if customer.product_queue.is_empty():
 		slot.clear_object()
 		return
 
 	var next_product: ProductInstance = customer.product_queue.pop_front()
 	slot.set_product(next_product)
+
+
+func _refill_product_slot_after_processing(customer: CustomerState, product_instance: ProductInstance) -> void:
+	var slot: VisibleObjectSlot = _find_product_slot(customer, product_instance)
+	if slot == null:
+		return
+	_refill_slot_from_queue(customer, slot)
+
+
+func _refill_coupon_slot_after_processing(customer: CustomerState, coupon_instance: CouponInstance) -> void:
+	var slot: VisibleObjectSlot = _find_coupon_slot(customer, coupon_instance)
+	if slot == null:
+		return
+	_refill_slot_from_queue(customer, slot)
 
 
 func _update_customer_completion(customer: CustomerState) -> void:
@@ -96,19 +112,33 @@ func _update_customer_completion(customer: CustomerState) -> void:
 	)
 
 
-func _find_slot(customer: CustomerState, slot_index: int) -> BeltSlot:
-	for slot: BeltSlot in customer.visible_slots:
+func _find_slot(customer: CustomerState, slot_index: int) -> VisibleObjectSlot:
+	for slot: VisibleObjectSlot in customer.visible_slots:
 		if slot.slot_index == slot_index:
 			return slot
 	return null
 
 
-func _copy_slot(slot: BeltSlot) -> BeltSlot:
-	var copied_slot: BeltSlot = BeltSlot.new(slot.slot_index)
+func _find_product_slot(customer: CustomerState, product_instance: ProductInstance) -> VisibleObjectSlot:
+	for slot: VisibleObjectSlot in customer.visible_slots:
+		if slot.slot_kind == VisibleObjectSlot.SlotKind.PRODUCT and slot.product_instance == product_instance:
+			return slot
+	return null
+
+
+func _find_coupon_slot(customer: CustomerState, coupon_instance: CouponInstance) -> VisibleObjectSlot:
+	for slot: VisibleObjectSlot in customer.visible_slots:
+		if slot.slot_kind == VisibleObjectSlot.SlotKind.COUPON and slot.coupon_instance == coupon_instance:
+			return slot
+	return null
+
+
+func _copy_slot(slot: VisibleObjectSlot) -> VisibleObjectSlot:
+	var copied_slot: VisibleObjectSlot = VisibleObjectSlot.new(slot.slot_index)
 	match slot.slot_kind:
-		BeltSlot.SlotKind.PRODUCT:
+		VisibleObjectSlot.SlotKind.PRODUCT:
 			copied_slot.set_product(slot.product_instance)
-		BeltSlot.SlotKind.COUPON:
+		VisibleObjectSlot.SlotKind.COUPON:
 			copied_slot.set_coupon(slot.coupon_instance)
 		_:
 			copied_slot.clear_object()

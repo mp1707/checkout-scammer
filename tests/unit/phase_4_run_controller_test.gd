@@ -34,11 +34,11 @@ func _run() -> void:
 
 	_expect_equal_int(1, controller.run_state.current_day, "Run starts on day one")
 	_expect_equal_int(1, controller.run_state.current_customer_number, "Run starts on first customer")
-	_expect_equal_int(4, controller.run_state.current_customer.visible_slots.size(), "Run displays four belt slots")
+	_expect_equal_int(4, controller.run_state.current_customer.visible_slots.size(), "Run displays four visible object slots")
 
-	var actor_container: Node = app.get_node("CheckoutTable/ConveyorBeltView/ActorContainer")
+	var actor_container: Node = app.get_node("CheckoutTable/ProductScatterView/ActorContainer")
 	var product_actor: ProductActor = _get_first_product_actor(actor_container)
-	_expect_true(product_actor != null, "Belt spawns product actors")
+	_expect_true(product_actor != null, "Product scatter view spawns product actors")
 	if product_actor == null:
 		app.queue_free()
 		_finish()
@@ -47,7 +47,7 @@ func _run() -> void:
 	product_actor.emit_signal("drag_started", product_actor)
 	await process_frame
 	_expect_equal_int(4, controller.run_state.current_customer.visible_slots.size(), "Taking a product keeps visible slot records")
-	_expect_equal_int(5, controller.run_state.current_customer.product_queue.size(), "Taking a product refills from hidden queue")
+	_expect_equal_int(6, controller.run_state.current_customer.product_queue.size(), "Taking a product keeps hidden queue unchanged")
 
 	product_actor.is_held = true
 	product_actor.is_touching_scanner = true
@@ -60,6 +60,7 @@ func _run() -> void:
 	await process_frame
 	_expect_true(controller.run_state.cash_cents > cash_after_scan_before_payout, "Bag drop pays product into drawer")
 	_expect_equal_int(1, controller.run_state.current_customer.processed_product_count, "Bag drop marks product processed")
+	_expect_equal_int(5, controller.run_state.current_customer.product_queue.size(), "Bag drop refills from hidden queue")
 
 	var cash_before_coupon: int = controller.run_state.cash_cents
 	hud_root.emit_signal("coupon_selected", "apple_20_discount")

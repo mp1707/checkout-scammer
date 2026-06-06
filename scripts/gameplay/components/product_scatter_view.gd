@@ -1,5 +1,5 @@
 extends Node2D
-class_name ConveyorBeltView
+class_name ProductScatterView
 
 signal actor_spawned(actor: Node2D, slot_index: int)
 signal product_actor_spawned(actor: Node2D, slot_index: int)
@@ -24,7 +24,7 @@ func _ready() -> void:
 	_resolve_child_references()
 
 
-func display_slots(slots: Array[BeltSlot]) -> void:
+func display_slots(slots: Array[VisibleObjectSlot]) -> void:
 	_resolve_child_references()
 	var stale_object_keys: Dictionary[String, bool] = {}
 	for object_key: String in _actors_by_object_key.keys():
@@ -33,13 +33,13 @@ func display_slots(slots: Array[BeltSlot]) -> void:
 	_actors_by_slot.clear()
 	_object_keys_by_slot.clear()
 
-	for slot: BeltSlot in slots:
-		if slot == null or not slot.has_object():
+	for slot: VisibleObjectSlot in slots:
+		if slot == null or not slot.has_object() or slot.is_taken:
 			continue
 
 		var slot_marker: Marker2D = get_slot_marker(slot.slot_index)
 		if slot_marker == null:
-			push_warning("Missing conveyor slot marker for slot %d." % slot.slot_index)
+			push_warning("Missing product scatter slot marker for slot %d." % slot.slot_index)
 			continue
 
 		var object_key: String = _get_slot_object_key(slot)
@@ -114,19 +114,19 @@ func get_slot_marker(slot_index: int) -> Marker2D:
 	return null
 
 
-func _instantiate_actor_for_slot(slot: BeltSlot) -> Node2D:
+func _instantiate_actor_for_slot(slot: VisibleObjectSlot) -> Node2D:
 	match slot.slot_kind:
-		BeltSlot.SlotKind.PRODUCT:
+		VisibleObjectSlot.SlotKind.PRODUCT:
 			return _instantiate_product_actor(slot)
-		BeltSlot.SlotKind.COUPON:
+		VisibleObjectSlot.SlotKind.COUPON:
 			return _instantiate_coupon_actor(slot)
 		_:
 			return null
 
 
-func _instantiate_product_actor(slot: BeltSlot) -> Node2D:
+func _instantiate_product_actor(slot: VisibleObjectSlot) -> Node2D:
 	if product_actor_scene == null:
-		push_warning("ConveyorBeltView needs a ProductActor scene.")
+		push_warning("ProductScatterView needs a ProductActor scene.")
 		return null
 
 	var actor: Node2D = product_actor_scene.instantiate() as Node2D
@@ -140,9 +140,9 @@ func _instantiate_product_actor(slot: BeltSlot) -> Node2D:
 	return actor
 
 
-func _instantiate_coupon_actor(slot: BeltSlot) -> Node2D:
+func _instantiate_coupon_actor(slot: VisibleObjectSlot) -> Node2D:
 	if coupon_actor_scene == null:
-		push_warning("ConveyorBeltView needs a CouponActor scene.")
+		push_warning("ProductScatterView needs a CouponActor scene.")
 		return null
 
 	var actor: Node2D = coupon_actor_scene.instantiate() as Node2D
@@ -207,12 +207,12 @@ func _kill_spawn_tween(object_key: String) -> void:
 	_spawn_tweens_by_object_key.erase(object_key)
 
 
-func _get_slot_object_key(slot: BeltSlot) -> String:
+func _get_slot_object_key(slot: VisibleObjectSlot) -> String:
 	match slot.slot_kind:
-		BeltSlot.SlotKind.PRODUCT:
+		VisibleObjectSlot.SlotKind.PRODUCT:
 			if slot.product_instance != null:
 				return "product:%s" % slot.product_instance.instance_id
-		BeltSlot.SlotKind.COUPON:
+		VisibleObjectSlot.SlotKind.COUPON:
 			if slot.coupon_instance != null:
 				return "coupon:%s" % slot.coupon_instance.instance_id
 		_:

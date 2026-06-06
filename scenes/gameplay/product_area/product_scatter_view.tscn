@@ -1,0 +1,70 @@
+[gd_scene format=3 uid="uid://ccyjowplbywsf"]
+
+[ext_resource type="Script" uid="uid://c2txq08qv7pj0" path="res://scripts/gameplay/components/product_scatter_view.gd" id="1_scatter"]
+[ext_resource type="PackedScene" path="res://scenes/gameplay/products/product_actor.tscn" id="2_product_actor"]
+[ext_resource type="PackedScene" path="res://scenes/gameplay/products/coupon_actor.tscn" id="3_coupon_actor"]
+
+[node name="ProductScatterView" type="Node2D" unique_id=1156285210]
+script = ExtResource("1_scatter")
+actor_container = NodePath("ActorContainer")
+slot_marker_root = NodePath("SlotMarkers")
+spawn_marker = NodePath("SpawnMarker")
+exit_marker = NodePath("ExitMarker")
+product_actor_scene = ExtResource("2_product_actor")
+coupon_actor_scene = ExtResource("3_coupon_actor")
+
+[node name="SlotGuides" type="Node2D" parent="." unique_id=2043743291]
+
+[node name="SlotGuide0" type="ColorRect" parent="SlotGuides" unique_id=42937631]
+offset_left = 10.0
+offset_top = -48.0
+offset_right = 46.0
+offset_bottom = -12.0
+mouse_filter = 2
+color = Color(1, 1, 1, 0)
+
+[node name="SlotGuide1" type="ColorRect" parent="SlotGuides" unique_id=1475845267]
+offset_left = 80.0
+offset_top = -26.0
+offset_right = 116.0
+offset_bottom = 10.0
+mouse_filter = 2
+color = Color(1, 1, 1, 0)
+
+[node name="SlotGuide2" type="ColorRect" parent="SlotGuides" unique_id=1898052403]
+offset_left = 40.0
+offset_top = 20.0
+offset_right = 76.0
+offset_bottom = 56.0
+mouse_filter = 2
+color = Color(1, 1, 1, 0)
+
+[node name="SlotGuide3" type="ColorRect" parent="SlotGuides" unique_id=705952222]
+offset_left = 132.0
+offset_top = 12.0
+offset_right = 168.0
+offset_bottom = 48.0
+mouse_filter = 2
+color = Color(1, 1, 1, 0)
+
+[node name="SlotMarkers" type="Node2D" parent="." unique_id=240835313]
+
+[node name="Slot0" type="Marker2D" parent="SlotMarkers" unique_id=1031140100]
+position = Vector2(28, -30)
+
+[node name="Slot1" type="Marker2D" parent="SlotMarkers" unique_id=386507171]
+position = Vector2(98, -8)
+
+[node name="Slot2" type="Marker2D" parent="SlotMarkers" unique_id=990131921]
+position = Vector2(58, 38)
+
+[node name="Slot3" type="Marker2D" parent="SlotMarkers" unique_id=765269957]
+position = Vector2(150, 30)
+
+[node name="SpawnMarker" type="Marker2D" parent="." unique_id=858606807]
+position = Vector2(226, 2)
+
+[node name="ExitMarker" type="Marker2D" parent="." unique_id=1289659766]
+position = Vector2(-40, 0)
+
+[node name="ActorContainer" type="Node2D" parent="." unique_id=1828594367]

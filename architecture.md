@@ -1,6 +1,6 @@
 # Checkout Scammer - Architektur
 
-Stand: 2026-06-04
+Stand: 2026-06-07
 
 Diese Datei ist die verbindliche technische Grundlage fuer Checkout Scammer. Aenderungen an dieser Architektur brauchen vorherige Ruecksprache mit Marco, wenn sie Ownership, Datenfluss, Szenenstruktur, Autoloads, UI-Architektur oder zentrale Gameplay-Systeme betreffen.
 
@@ -8,7 +8,7 @@ Diese Datei ist die verbindliche technische Grundlage fuer Checkout Scammer. Aen
 
 - Godot 4.6, 2D Pixel-Art, interne Authoring-Aufloesung `640x360`.
 - Ein 1-Screen-Spiel mit klaren, editorseitig bearbeitbaren Bereichen: linke Statusleiste, Kassentisch, rechte Upgrade-Leiste.
-- Der Scanner-Moment ist der wichtigste Kern: Drag von rechts nach links, Beep, Geldfeedback, Scannerflash, Produktfeedback.
+- Der Scanner-Moment ist der wichtigste Kern: Drag von rechts nach links, Beep, Geldfeedback am Cursor, Scannerflash, Produktfeedback.
 - Gameplay-Regeln bleiben testbar und UI-unabhaengig.
 - Szenen bleiben Authoring-Flaechen. Layouts, Slots, Drop-Zonen, Hitboxen, Marker, AnimationPlayer und UI-Struktur muessen im Godot-Editor sichtbar und bearbeitbar bleiben.
 - Code erzeugt keine kompletten Gameplay- oder UI-Baeume von Grund auf. Code steuert vorhandene Szenen, befuellt vorbereitete Container und instanziiert nur fertige `PackedScene`s.
@@ -45,7 +45,7 @@ Simulation trifft Regelentscheidungen und mutiert Runtime-State. Sie hat keine A
 
 Kernsysteme:
 
-- `BeltSystem`: Kunden-Queue, sichtbare Slots, Nachruecken, Coupon-Objekt als optionaler erster Belt-Eintrag.
+- `VisibleObjectQueueSystem`: Kunden-Queue, vier sichtbare Objekt-Slots, Nachruecken erst nach Verarbeitung, Coupon-Objekt als optionaler erster sichtbarer Eintrag.
 - `ScanSystem`: Scan-Gueltigkeit, Scannerzone, Bewegungsrichtung, Rotation/Hit-Details, erster Scan vs. Mehrfachscan.
 - `EconomySystem`: Produktwerte, Rabatte, Multiplikatoren, Rundung, Payout.
 - `CouponSystem`: Aktivierung, Verzoegerung bis zum naechsten Kunden, Dauer bis Tagesende, Coupon-Scam.
@@ -54,7 +54,7 @@ Kernsysteme:
 - `UpgradeSystem`: Sortiment-Level, Upgrade-Kosten, Wirkung ab naechstem Kunden.
 - `CustomerGenerator`: deterministische Kunden- und Produktfolgen per Seed.
 
-Simulation arbeitet mit expliziten Datenobjekten wie `ScanRequest`, `ScanResult`, `PayoutOutcome`, `BeltSlot`, `RunState`, `CustomerState`, `ProductInstance` und `CouponInstance`.
+Simulation arbeitet mit expliziten Datenobjekten wie `ScanRequest`, `ScanResult`, `PayoutOutcome`, `VisibleObjectSlot`, `RunState`, `CustomerState`, `ProductInstance` und `CouponInstance`.
 
 ### Presentation
 
@@ -65,7 +65,7 @@ Presentation zeigt Zustand, sammelt Input und sendet Intents. Sie mutiert keinen
 Wichtige Szenen:
 
 - `CheckoutTable`: mittlerer Kassentisch als Root der spielbaren Flaeche.
-- `ConveyorBeltView`: sichtbare Belt-Slots, Bewegungsanimationen, Slot-Marker.
+- `ProductScatterView`: verstreute sichtbare Objekt-Slots rechts neben dem Scanner, Spawn-von-rechts-Animationen, Slot-Marker.
 - `ProductActor`: Drag, Rotation, Scannerkontakt, Schatten, Cursorbetrag-Anzeige.
 - `ScannerStation`: Scannerstrahl, Hitbox/Area2D, Flash/SFX-Anker. Der Scannerkoerper ist im Tisch-Sprite enthalten.
 - `BagZone`: Drop-Zone fuer finalen Verkauf.
@@ -81,13 +81,13 @@ Ordner: `content`
 
 Alles Konfigurierbare wird als Resource modelliert:
 
-- `GameBalanceResource`: Startgeld, Tagesmiete, Run-Laenge, Kunden pro Tag, Produkte pro Kunde, sichtbare Belt-Slots.
+- `GameBalanceResource`: Startgeld, Tagesmiete, Run-Laenge, Kunden pro Tag, Produkte pro Kunde, sichtbare Objekt-Slots.
 - `ProductLineResource`: Produktlinie wie Obst oder Snacks.
 - `ProductVariantResource`: einzelne Produkte mit ID, Preis, Gewichtung, Sortiment-Level, Texturen.
 - `CouponResource`: Zielprodukt/-linie, Rabatt, Kaufpreis, Gewichtungsbonus, Dauer.
 - `UpgradeResource`: Sortiment-Level-Up und spaetere Upgrades.
 - `SuspicionCurveResource`: Startwert, Stufen und Roll-Regeln.
-- `CheckoutThemeResource`: Font, 9-Slice-Panel-Texture, Fontgroessen, UI-Farben.
+- `CheckoutThemeResource`: Font, 9-Slice-Panel-Texture, Fontgroessen, Endesga-64-UI-Farben.
 
 Definition-Resources sind immutable Runtime-Definitionen. Veraenderbarer Zustand liegt in Runtime-Instanzen.
 
@@ -98,7 +98,7 @@ Gameplay- und UI-Szenen sind die primaere Authoring-Flaeche. Alles, was Marco im
 Verbindlich sichtbar in Szenen:
 
 - Layout-Container fuer linke Statusleiste, Kassentisch und rechte Upgrade-Leiste.
-- Belt-Slot-Marker und Spawn-/Exit-Marker fuer das Fließband.
+- Slot-Marker und Spawn-/Exit-Marker fuer die verstreute Produktflaeche rechts neben dem Scanner.
 - Scanner-Shape, Scannerstrahl, Scanner-Hitbox und Feedback-Anker.
 - Bag- und Trash-Drop-Zonen inklusive Collision-/Area-Nodes.
 - ProductActor-Root, Sprite-Anker, Schatten-Anker, Betrag-Label-Anker und Drag-Feedback-Anker.
@@ -116,12 +116,12 @@ Code darf:
 
 Code darf nicht:
 
-- das komplette HUD, den Kassentisch, das Fließband oder die Upgrade-Leiste rein zur Laufzeit bauen.
+- das komplette HUD, den Kassentisch, die Produktflaeche oder die Upgrade-Leiste rein zur Laufzeit bauen.
 - Drop-Zonen, Hitboxen, Slot-Positionen oder Scanner-Geometrie versteckt per Code definieren, wenn sie editorseitig bearbeitbar sein sollen.
 - UI-Strukturen ueber ad-hoc `new()`-Baeume erzeugen, statt vorbereitete Panel-/Popup-/Button-Szenen zu nutzen.
 - Animationen oder VFX-Positionen nur als magische Zahlen im Script halten.
 
-Wenn eine Runtime-Erzeugung noetig ist, muss sie eine vorbereitete Scene instanziieren und in einen editorseitig vorhandenen Container oder Marker einsetzen. Beispiele: neue Produkte auf vorhandenen Belt-Slots, Coin-VFX an vorhandenen VFX-Ankern, Dialoginstanzen in einem vorhandenen Dialog-Layer.
+Wenn eine Runtime-Erzeugung noetig ist, muss sie eine vorbereitete Scene instanziieren und in einen editorseitig vorhandenen Container oder Marker einsetzen. Beispiele: neue Produkte auf vorhandenen Objekt-Slots, Coin-VFX an vorhandenen VFX-Ankern, Dialoginstanzen in einem vorhandenen Dialog-Layer.
 
 ## Szene-Ownership
 
@@ -129,7 +129,7 @@ Eine Szene hat genau eine Hauptaufgabe:
 
 - `ProductActor`: sammelt Drag-/Rotate-Input, meldet Scannerkontakt und zeigt Produktzustand.
 - `ScannerStation`: meldet Scannerkontakte und zeigt Scannerfeedback.
-- `ConveyorBeltView`: zeigt Slots und animiert Nachruecken.
+- `ProductScatterView`: zeigt Slots verstreut rechts neben dem Scanner und animiert neue Objekte von rechts herein.
 - `BagZone` und `TrashZone`: melden Drop-Intents.
 - `HudRoot` und Panels: zeigen Run-State und senden Button-Intents.
 - `RunController`: nimmt Intents an, ruft Simulation-Systeme auf und veroeffentlicht neuen State fuer Presentation.
@@ -141,9 +141,9 @@ Keine UI-Komponente bucht Geld, scannt Produkte, veraendert Suspicion oder aktiv
 ### Kundenstart
 
 1. `RunController` fordert beim `CustomerGenerator` den naechsten Kunden an.
-2. `CouponSystem` bestimmt, ob ein aktiver Coupon als erstes sichtbares Belt-Objekt auftaucht.
-3. `BeltSystem` baut aus Coupon plus Produktqueue die sichtbaren `BeltSlot`s.
-4. `ConveyorBeltView` instanziiert vorbereitete `PackedScene`s fuer Coupon-/Produkt-Actors in vorhandene Slot-Marker.
+2. `CouponSystem` bestimmt, ob ein aktiver Coupon als erstes sichtbares Objekt auftaucht.
+3. `VisibleObjectQueueSystem` baut aus Coupon plus Produktqueue die sichtbaren `VisibleObjectSlot`s.
+4. `ProductScatterView` instanziiert vorbereitete `PackedScene`s fuer Coupon-/Produkt-Actors in vorhandene Slot-Marker.
 
 ### Scan
 
@@ -152,15 +152,16 @@ Keine UI-Komponente bucht Geld, scannt Produkte, veraendert Suspicion oder aktiv
 3. `ScanSystem` entscheidet, ob der Scan gueltig ist. Nur rechts nach links zaehlt.
 4. Bei Mehrfachscan fragt `ScanSystem` bzw. `SuspicionSystem` den Caught-Roll ab.
 5. `EconomySystem` berechnet den offenen Betrag.
-6. `RunController` aktualisiert Runtime-State und sendet Feedback-Events an Presentation: Beep, Coin-VFX, Scannerflash, Betrag am Cursor, Kundenhand-State.
+6. `RunController` aktualisiert Runtime-State und sendet Feedback-Events an Presentation: Beep, Scannerflash, Betrag am Cursor, Kundenhand-State.
 
 ### Verkauf
 
 1. `ProductActor` wird in `BagZone` gedroppt.
 2. `RunController` fragt `EconomySystem` nach `PayoutOutcome`.
 3. Offener Betrag wird dem Run-/Kunden-Total gutgeschrieben.
-4. `BeltSystem` markiert das Objekt als verarbeitet und rueckt nach.
+4. `VisibleObjectQueueSystem` markiert das Objekt als verarbeitet und rueckt erst jetzt nach.
 5. `ProductActor` verschwindet ueber vorbereitete Animation/VFX.
+6. Coin-VFX wird an der Tüte abgespielt, weil erst dort Geld gebucht wird.
 
 ### Trash
 
@@ -168,7 +169,7 @@ Keine UI-Komponente bucht Geld, scannt Produkte, veraendert Suspicion oder aktiv
 2. `RunController` entscheidet anhand Runtime-Typ:
    - Produkt: verschwindet, offener Betrag wird verworfen.
    - Coupon: Coupon-Rabatt wird fuer diesen Kunden nicht aktiviert, Produktgewichtungs-Vorteil bleibt erhalten.
-3. `BeltSystem` rueckt nach.
+3. `VisibleObjectQueueSystem` rueckt erst jetzt nach.
 
 ## 9-Slice-UI
 
@@ -191,6 +192,18 @@ Verbindliche Nutzung:
 - Farbvarianten entstehen ueber `modulate_color`/Theme-Varianten, nicht ueber neue Panel-Bilder.
 - Buttons, Dialoge, Upgrade-Karten, Statusboxen und Popups verwenden dieselbe Panel-Architektur.
 - Keine komplett per Code erzeugten UI-Baeume: Container, Marker und Panel-Struktur bleiben in `.tscn`-Szenen sichtbar.
+
+## Farbpalette
+
+Das gesamte Spiel nutzt Endesga 64 als verbindliche Farbpalette: <https://lospec.com/palette-list/endesga-64>.
+
+Regeln:
+
+- UI-, Tooltip-, Panel-, Button-, Scanner-, Schatten- und Feedback-Farben kommen aus `CheckoutThemeResource`.
+- Neue UI-Farben werden als explizite Theme-Tokens in `content/ui/checkout_theme.tres` gepflegt.
+- Keine freien `lightened()`-/`darkened()`-Ableitungen fuer Runtime-UI-Zustaende, weil sie Zwischenfarben ausserhalb der Palette erzeugen.
+- Transparenz darf fuer Overlays, Slot-Guides und Schatten genutzt werden, aber die RGB-Basisfarbe bleibt eine Endesga-64-Farbe.
+- Produkt- und Environment-Sprites sollen ebenfalls mit Endesga 64 gezeichnet werden, damit Assets und UI zusammenpassen.
 
 ## Pixel- und Font-Regeln
 
@@ -259,8 +272,8 @@ scenes/
   application/
   gameplay/
     bag/
-    belt/
     customer/
+    product_area/
     products/
     scanner/
     table/
@@ -297,7 +310,7 @@ tools/
 
 Fruehe Tests sollen pure Gameplay-Logik abdecken:
 
-- `BeltSystem`: Queue, sichtbare Slots, Coupon-Slot, Nachruecken.
+- `VisibleObjectQueueSystem`: Queue, sichtbare Slots, Coupon-Slot, Nachruecken erst nach Bag/Trash/Caught.
 - `ScanSystem`: Scannerkontakt, Bewegungsrichtung, Mehrfachscan, Rotation/Hit-Details.
 - `CouponSystem`: Aktivierung, Tagesdauer, Stack-/Delay-Regeln, Coupon-Scam.
 - `EconomySystem`: Basiswerte, Rabatte, Multiplikatoren, Rundung.

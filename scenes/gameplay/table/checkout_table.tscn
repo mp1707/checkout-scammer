@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://43dsrku7gbmo" path="res://scripts/gameplay/components/checkout_table.gd" id="1_checkout_table"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/scanner/scanner_station.tscn" id="2_scanner"]
-[ext_resource type="PackedScene" path="res://scenes/gameplay/belt/conveyor_belt_view.tscn" id="3_conveyor"]
+[ext_resource type="PackedScene" path="res://scenes/gameplay/product_area/product_scatter_view.tscn" id="3_product_scatter"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/bag/bag_zone.tscn" id="4_bag"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/trash/trash_zone.tscn" id="5_trash"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/customer/customer_hand_view.tscn" id="6_hand"]
@@ -16,7 +16,7 @@ offset_right = 640.0
 offset_bottom = 360.0
 mouse_filter = 2
 script = ExtResource("1_checkout_table")
-conveyor_belt_view = NodePath("ConveyorBeltView")
+product_scatter_view = NodePath("ProductScatterView")
 scanner_station = NodePath("ScannerStation")
 bag_zone = NodePath("BagZone")
 trash_zone = NodePath("TrashZone")
@@ -35,8 +35,8 @@ position = Vector2(201, 183)
 [node name="ScannerStation" parent="." unique_id=678997339 instance=ExtResource("2_scanner")]
 position = Vector2(320, 186)
 
-[node name="ConveyorBeltView" parent="." unique_id=364460971 instance=ExtResource("3_conveyor")]
-position = Vector2(382, 190)
+[node name="ProductScatterView" parent="." unique_id=364460971 instance=ExtResource("3_product_scatter")]
+position = Vector2(360, 190)
 
 [node name="TrashZone" parent="." unique_id=345382906 instance=ExtResource("5_trash")]
 position = Vector2(492, 306)

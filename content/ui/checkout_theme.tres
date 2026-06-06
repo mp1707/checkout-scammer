@@ -1,8 +1,8 @@
-[gd_resource type="Resource" script_class="CheckoutThemeResource" load_steps=4 format=3]
+[gd_resource type="Resource" script_class="CheckoutThemeResource" format=3 uid="uid://rhcht45jrjff"]
 
-[ext_resource type="Script" path="res://scripts/ui/theme/checkout_theme_resource.gd" id="1_theme"]
-[ext_resource type="FontFile" path="res://assets/fonts/m6x11plus.ttf" id="2_font"]
-[ext_resource type="Texture2D" path="res://assets/textures/ui/panels/9slice_panel_white.png" id="3_panel"]
+[ext_resource type="Script" uid="uid://ca4qq4wg0ymsb" path="res://scripts/ui/theme/checkout_theme_resource.gd" id="1_theme"]
+[ext_resource type="FontFile" uid="uid://bk8vkh8occxub" path="res://assets/fonts/m6x11plus.ttf" id="2_font"]
+[ext_resource type="Texture2D" uid="uid://bkpnb3mnkhcom" path="res://assets/textures/ui/panels/9slice_panel_white.png" id="3_panel"]
 
 [resource]
 script = ExtResource("1_theme")

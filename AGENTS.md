@@ -70,7 +70,7 @@ Alles Konfigurierbare als Resource modellieren, z. B.:
 Regeln:
 
 - Definition-Resources wie `ProductLineResource`, `ProductVariantResource`, `CouponResource` oder `UpgradeResource` zur Laufzeit nicht als mutable Runtime-State missbrauchen.
-- Runtime-Zustand liegt in Instanzen wie `RunState`, `CouponInstance`, `BeltSlot`, `ScanRequest`, `ScanResult`, `PayoutOutcome` oder spaeter Item-/Equipment-Instanzen.
+- Runtime-Zustand liegt in Instanzen wie `RunState`, `CouponInstance`, `VisibleObjectSlot`, `ScanRequest`, `ScanResult`, `PayoutOutcome` oder spaeter Item-/Equipment-Instanzen.
 - Neue Produkte, Coupons, Upgrades oder Balancing-Aenderungen sollen moeglichst ohne Code-Aenderung funktionieren.
 - Content-Validierung ist Pflicht, sobald mehrere Resource-Typen aufeinander referenzieren.
 - Resource-Ladepfade zentral ueber `ContentRegistry` oder klar definierte Loader fuehren, nicht ueber verstreute harte Pfade.
@@ -118,7 +118,7 @@ Auch wenn das Spiel klein startet, soll die Architektur spaeter wachsen koennen.
 
 - Pure Gameplay-Logik bevorzugt testbar ohne UI halten.
 - Besonders frueh testen:
-  - `BeltSystem`: Queue, sichtbare Slots, Nachruecken.
+  - `VisibleObjectQueueSystem`: Queue, sichtbare Slots, Nachruecken.
   - `ScanSystem`: Trefferzone, Rotation, Coupon/Produkt/Obst-Sonderfaelle.
   - `CouponSystem`: Aktivierung, Dauer, Stack-Regeln.
   - `EconomySystem`: Basiswerte, Multiplikatoren, Rundung.

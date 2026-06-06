@@ -29,7 +29,7 @@ var registry: ContentRegistry
 var run_state: RunState
 
 var _customer_generator: CustomerGenerator = CustomerGenerator.new()
-var _belt_system: BeltSystem = BeltSystem.new()
+var _visible_object_queue_system: VisibleObjectQueueSystem = VisibleObjectQueueSystem.new()
 var _scan_system: ScanSystem = ScanSystem.new()
 var _suspicion_system: SuspicionSystem = SuspicionSystem.new()
 var _economy_system: EconomySystem = EconomySystem.new()
@@ -56,7 +56,7 @@ func configure(content_registry: ContentRegistry) -> void:
 
 func _connect_presentation() -> void:
 	if checkout_table != null:
-		_connect_signal_once(checkout_table, "actor_taken_from_belt", _on_actor_taken_from_belt)
+		_connect_signal_once(checkout_table, "actor_taken_from_product_area", _on_actor_taken_from_product_area)
 		_connect_signal_once(checkout_table, "actor_scan_contact_started", _on_actor_scan_contact_started)
 		_connect_signal_once(checkout_table, "product_scan_contact_started", _on_product_scan_contact_started)
 		_connect_signal_once(checkout_table, "actor_bag_drop_requested", _on_actor_bag_drop_requested)
@@ -97,20 +97,20 @@ func _start_customer() -> void:
 
 	var customer: CustomerState = _customer_generator.generate_customer(registry, run_state)
 	_suspicion_system.setup_customer(customer, registry.suspicion_curve)
-	var customer_coupon: CouponInstance = _coupon_system.create_customer_belt_coupon(run_state)
-	_belt_system.start_customer(customer, registry.game_balance.visible_belt_slots, customer_coupon)
+	var customer_coupon: CouponInstance = _coupon_system.create_customer_visible_coupon(run_state)
+	_visible_object_queue_system.start_customer(customer, registry.game_balance.visible_object_slots, customer_coupon)
 	run_state.current_customer = customer
 
-	_update_belt_view()
+	_update_product_area_view()
 	_update_customer_hand()
 	_update_hud_state()
 
 
-func _update_belt_view() -> void:
+func _update_product_area_view() -> void:
 	if checkout_table == null or run_state == null or run_state.current_customer == null:
 		return
 
-	checkout_table.display_belt_slots(run_state.current_customer.visible_slots)
+	checkout_table.display_visible_object_slots(run_state.current_customer.visible_slots)
 
 
 func _update_hud_state() -> void:
@@ -226,7 +226,7 @@ func _on_actor_bag_drop_requested(actor: Node2D) -> void:
 	var product_instance: ProductInstance = _get_product_instance(actor)
 	if product_instance != null:
 		_economy_system.payout_product(run_state, product_instance)
-		_belt_system.mark_product_processed(run_state.current_customer, product_instance)
+		_visible_object_queue_system.mark_product_processed(run_state.current_customer, product_instance)
 		_finish_actor(actor, true)
 		_after_customer_object_processed()
 		return
@@ -244,7 +244,7 @@ func _on_actor_trash_drop_requested(actor: Node2D) -> void:
 	var product_instance: ProductInstance = _get_product_instance(actor)
 	if product_instance != null:
 		_economy_system.trash_product(run_state, product_instance)
-		_belt_system.mark_product_processed(run_state.current_customer, product_instance)
+		_visible_object_queue_system.mark_product_processed(run_state.current_customer, product_instance)
 		_finish_actor(actor, false)
 		_after_customer_object_processed()
 		return
@@ -252,12 +252,12 @@ func _on_actor_trash_drop_requested(actor: Node2D) -> void:
 	var coupon_instance: CouponInstance = _get_coupon_instance(actor)
 	if coupon_instance != null:
 		_coupon_system.mark_coupon_trashed(coupon_instance)
-		_belt_system.mark_coupon_processed(run_state.current_customer, coupon_instance, true)
+		_visible_object_queue_system.mark_coupon_processed(run_state.current_customer, coupon_instance, true)
 		_finish_actor(actor, false)
 		_after_customer_object_processed()
 
 
-func _on_actor_taken_from_belt(actor: Node2D) -> void:
+func _on_actor_taken_from_product_area(actor: Node2D) -> void:
 	if _should_ignore_player_input():
 		return
 	if run_state == null or run_state.current_customer == null:
@@ -271,12 +271,11 @@ func _on_actor_taken_from_belt(actor: Node2D) -> void:
 	if slot_index < 0:
 		return
 
-	var taken_slot: BeltSlot = _belt_system.take_slot_object(run_state.current_customer, slot_index)
+	var taken_slot: VisibleObjectSlot = _visible_object_queue_system.take_slot_object(run_state.current_customer, slot_index)
 	if not taken_slot.has_object():
 		return
 
 	_taken_actor_ids[actor_id] = true
-	_update_belt_view()
 
 
 func _on_actor_scan_contact_started(actor: Node2D, _contact_position: Vector2) -> void:
@@ -345,21 +344,23 @@ func _on_dialog_closed() -> void:
 
 func _process_coupon_honestly(actor: Node2D, coupon_instance: CouponInstance) -> void:
 	_coupon_system.mark_coupon_honestly_activated(coupon_instance)
-	_belt_system.mark_coupon_processed(run_state.current_customer, coupon_instance, false)
+	_visible_object_queue_system.mark_coupon_processed(run_state.current_customer, coupon_instance, false)
 	_finish_actor(actor, true)
 	_after_customer_object_processed()
 
 
 func _handle_caught_scan(actor: Node2D, product_instance: ProductInstance) -> void:
 	_economy_system.trash_product(run_state, product_instance)
-	_belt_system.mark_product_processed(run_state.current_customer, product_instance)
+	_visible_object_queue_system.mark_product_processed(run_state.current_customer, product_instance)
 	_finish_actor(actor, false)
+	_update_product_area_view()
 	_update_hud_state()
 	_update_customer_hand()
 	_show_dialog(CAUGHT_MESSAGE, DialogKind.CAUGHT)
 
 
 func _after_customer_object_processed() -> void:
+	_update_product_area_view()
 	_update_hud_state()
 	_update_customer_hand()
 	if run_state == null or run_state.current_customer == null:
@@ -376,7 +377,7 @@ func _queue_customer_done_dialog() -> void:
 
 	_is_advancing_customer = true
 	if checkout_table != null:
-		checkout_table.clear_belt()
+		checkout_table.clear_visible_objects()
 
 	await get_tree().create_timer(CUSTOMER_DONE_DELAY_SECONDS).timeout
 	if run_state == null or run_state.current_customer == null or not run_state.current_customer.is_complete:

@@ -3,7 +3,7 @@ class_name CustomerState
 
 var id: String = ""
 var product_queue: Array[ProductInstance] = []
-var visible_slots: Array[BeltSlot] = []
+var visible_slots: Array[VisibleObjectSlot] = []
 var coupon_instance: CouponInstance
 var total_product_count: int = 0
 var processed_product_count: int = 0

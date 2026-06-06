@@ -13,9 +13,13 @@ func apply_pixel_button_theme() -> void:
 	if theme_resource == null or theme_resource.panel_texture == null:
 		return
 
-	add_theme_stylebox_override("normal", _make_style(button_color))
-	add_theme_stylebox_override("hover", _make_style(button_color.lightened(0.12)))
-	add_theme_stylebox_override("pressed", _make_style(button_color.darkened(0.10)))
+	var normal_color: Color = button_color
+	if normal_color == Color.WHITE:
+		normal_color = theme_resource.button_color
+
+	add_theme_stylebox_override("normal", _make_style(normal_color))
+	add_theme_stylebox_override("hover", _make_style(theme_resource.button_hover_color))
+	add_theme_stylebox_override("pressed", _make_style(theme_resource.button_pressed_color))
 	add_theme_stylebox_override("disabled", _make_style(theme_resource.panel_disabled_color))
 	add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 
@@ -25,7 +29,7 @@ func apply_pixel_button_theme() -> void:
 	add_theme_color_override("font_color", theme_resource.text_color)
 	add_theme_color_override("font_hover_color", theme_resource.text_color)
 	add_theme_color_override("font_pressed_color", theme_resource.text_color)
-	add_theme_color_override("font_disabled_color", theme_resource.text_color.darkened(0.35))
+	add_theme_color_override("font_disabled_color", theme_resource.text_disabled_color)
 
 
 func _make_style(color: Color) -> StyleBoxTexture:

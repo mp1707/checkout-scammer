@@ -2,7 +2,7 @@ extends SceneTree
 class_name Phase2SimulationTest
 
 const CustomerGeneratorScript = preload("res://scripts/gameplay/generation/customer_generator.gd")
-const BeltSystemScript = preload("res://scripts/gameplay/systems/belt_system.gd")
+const VisibleObjectQueueSystemScript = preload("res://scripts/gameplay/systems/visible_object_queue_system.gd")
 const ScanSystemScript = preload("res://scripts/gameplay/systems/scan_system.gd")
 const SuspicionSystemScript = preload("res://scripts/gameplay/systems/suspicion_system.gd")
 const EconomySystemScript = preload("res://scripts/gameplay/systems/economy_system.gd")
@@ -12,7 +12,7 @@ const UpgradeSystemScript = preload("res://scripts/gameplay/systems/upgrade_syst
 var _failure_count: int = 0
 var _registry: ContentRegistry
 var _generator: CustomerGeneratorScript
-var _belt_system: BeltSystemScript
+var _visible_object_queue_system: VisibleObjectQueueSystemScript
 var _scan_system: ScanSystemScript
 var _suspicion_system: SuspicionSystemScript
 var _economy_system: EconomySystemScript
@@ -27,7 +27,7 @@ func _initialize() -> void:
 		_fail("content validation", message)
 
 	_generator = CustomerGeneratorScript.new()
-	_belt_system = BeltSystemScript.new()
+	_visible_object_queue_system = VisibleObjectQueueSystemScript.new()
 	_scan_system = ScanSystemScript.new()
 	_suspicion_system = SuspicionSystemScript.new()
 	_economy_system = EconomySystemScript.new()
@@ -35,7 +35,7 @@ func _initialize() -> void:
 	_upgrade_system = UpgradeSystemScript.new()
 
 	_test_customer_generator()
-	_test_belt_system()
+	_test_visible_object_queue_system()
 	_test_scan_system()
 	_test_suspicion_system()
 	_test_economy_system()
@@ -113,29 +113,35 @@ func _test_customer_generator() -> void:
 	_expect_equal_int(10, _registry.get_product_variant("apple").generator_weight, "Product resource weight remains immutable")
 
 
-func _test_belt_system() -> void:
+func _test_visible_object_queue_system() -> void:
 	var customer: CustomerState = _create_customer_with_products(10)
-	var coupon_instance: CouponInstance = CouponInstance.new(_registry.get_coupon("apple_20_discount"), "belt_coupon")
-	_belt_system.start_customer(customer, 4, coupon_instance)
+	var coupon_instance: CouponInstance = CouponInstance.new(_registry.get_coupon("apple_20_discount"), "visible_coupon")
+	_visible_object_queue_system.start_customer(customer, 4, coupon_instance)
 
-	_expect_equal_int(4, customer.visible_slots.size(), "BeltSystem creates visible slot records")
-	_expect_equal_int(BeltSlot.SlotKind.COUPON, customer.visible_slots[0].slot_kind, "BeltSystem puts coupon first")
-	_expect_equal_int(3, _belt_system.get_visible_product_count(customer), "BeltSystem fills remaining slots with products")
-	_expect_equal_int(7, customer.product_queue.size(), "BeltSystem keeps hidden queue after visible fill")
+	_expect_equal_int(4, customer.visible_slots.size(), "VisibleObjectQueueSystem creates visible slot records")
+	_expect_equal_int(VisibleObjectSlot.SlotKind.COUPON, customer.visible_slots[0].slot_kind, "VisibleObjectQueueSystem puts coupon first")
+	_expect_equal_int(3, _visible_object_queue_system.get_visible_product_count(customer), "VisibleObjectQueueSystem fills remaining slots with products")
+	_expect_equal_int(7, customer.product_queue.size(), "VisibleObjectQueueSystem keeps hidden queue after visible fill")
 
-	var taken_product_slot: BeltSlot = _belt_system.take_slot_object(customer, 2)
-	_expect_equal_int(BeltSlot.SlotKind.PRODUCT, taken_product_slot.slot_kind, "BeltSystem allows free product slot selection")
-	_expect_equal_int(BeltSlot.SlotKind.PRODUCT, customer.visible_slots[2].slot_kind, "BeltSystem refills selected product slot")
-	_expect_equal_int(6, customer.product_queue.size(), "BeltSystem advances queue after taking product")
+	var taken_product_slot: VisibleObjectSlot = _visible_object_queue_system.take_slot_object(customer, 2)
+	_expect_equal_int(VisibleObjectSlot.SlotKind.PRODUCT, taken_product_slot.slot_kind, "VisibleObjectQueueSystem allows free product slot selection")
+	_expect_true(customer.visible_slots[2].is_taken, "VisibleObjectQueueSystem keeps taken product slot reserved")
+	_expect_equal_int(7, customer.product_queue.size(), "VisibleObjectQueueSystem waits to advance queue until product is processed")
 
-	var taken_coupon_slot: BeltSlot = _belt_system.take_slot_object(customer, 0)
-	_expect_equal_int(BeltSlot.SlotKind.COUPON, taken_coupon_slot.slot_kind, "BeltSystem allows coupon processing")
-	_expect_equal_int(BeltSlot.SlotKind.PRODUCT, customer.visible_slots[0].slot_kind, "BeltSystem refills coupon slot with product")
-	_expect_equal_int(5, customer.product_queue.size(), "BeltSystem refills coupon slot from product queue")
-	_expect_equal_int(10, customer.total_product_count, "BeltSystem coupon does not count against total product count")
+	_visible_object_queue_system.mark_product_processed(customer, taken_product_slot.product_instance)
+	_expect_equal_int(VisibleObjectSlot.SlotKind.PRODUCT, customer.visible_slots[2].slot_kind, "VisibleObjectQueueSystem refills selected product slot after processing")
+	_expect_equal_int(6, customer.product_queue.size(), "VisibleObjectQueueSystem advances queue after product processing")
 
-	_belt_system.mark_product_processed(customer, taken_product_slot.product_instance)
-	_expect_equal_int(1, customer.processed_product_count, "BeltSystem counts processed products")
+	var taken_coupon_slot: VisibleObjectSlot = _visible_object_queue_system.take_slot_object(customer, 0)
+	_expect_equal_int(VisibleObjectSlot.SlotKind.COUPON, taken_coupon_slot.slot_kind, "VisibleObjectQueueSystem allows coupon processing")
+	_expect_true(customer.visible_slots[0].is_taken, "VisibleObjectQueueSystem keeps taken coupon slot reserved")
+	_expect_equal_int(6, customer.product_queue.size(), "VisibleObjectQueueSystem waits to refill coupon slot until processed")
+
+	_visible_object_queue_system.mark_coupon_processed(customer, taken_coupon_slot.coupon_instance, false)
+	_expect_equal_int(VisibleObjectSlot.SlotKind.PRODUCT, customer.visible_slots[0].slot_kind, "VisibleObjectQueueSystem refills coupon slot with product after processing")
+	_expect_equal_int(5, customer.product_queue.size(), "VisibleObjectQueueSystem refills coupon slot from product queue")
+	_expect_equal_int(10, customer.total_product_count, "VisibleObjectQueueSystem coupon does not count against total product count")
+	_expect_equal_int(1, customer.processed_product_count, "VisibleObjectQueueSystem counts processed products")
 
 
 func _test_scan_system() -> void:
@@ -260,8 +266,8 @@ func _test_coupon_system() -> void:
 	_expect_equal_int(1, run_state.active_coupons.size(), "CouponSystem activates due pending coupons")
 	_expect_equal_int(0, run_state.pending_coupons.size(), "CouponSystem removes activated pending coupons")
 
-	var customer_coupon: CouponInstance = _coupon_system.create_customer_belt_coupon(run_state)
-	_expect_true(customer_coupon != null and customer_coupon.instance_id != purchased_coupon.instance_id, "CouponSystem creates customer-scoped belt coupon")
+	var customer_coupon: CouponInstance = _coupon_system.create_customer_visible_coupon(run_state)
+	_expect_true(customer_coupon != null and customer_coupon.instance_id != purchased_coupon.instance_id, "CouponSystem creates customer-scoped visible coupon")
 	_coupon_system.mark_coupon_trashed(customer_coupon)
 	_expect_true(customer_coupon.was_trashed, "CouponSystem records coupon scam")
 	_expect_false(customer_coupon.was_activated_honestly, "CouponSystem keeps trashed coupon from discounting products")
@@ -304,18 +310,18 @@ func _test_complete_customer_flow_without_scenes() -> void:
 	var run_state: RunState = _create_run_state(5)
 	var customer: CustomerState = _generator.generate_customer(_registry, run_state)
 	_suspicion_system.setup_customer(customer, _registry.suspicion_curve)
-	_belt_system.start_customer(customer, _registry.game_balance.visible_belt_slots)
+	_visible_object_queue_system.start_customer(customer, _registry.game_balance.visible_object_slots)
 
 	while not customer.is_complete:
-		var slot_index: int = _belt_system.get_first_occupied_slot_index(customer)
+		var slot_index: int = _visible_object_queue_system.get_first_occupied_slot_index(customer)
 		if slot_index < 0:
 			_fail("complete customer flow", "No visible object remained before customer completion.")
 			return
 
-		var taken_slot: BeltSlot = _belt_system.take_slot_object(customer, slot_index)
-		if taken_slot.slot_kind == BeltSlot.SlotKind.COUPON:
+		var taken_slot: VisibleObjectSlot = _visible_object_queue_system.take_slot_object(customer, slot_index)
+		if taken_slot.slot_kind == VisibleObjectSlot.SlotKind.COUPON:
 			_coupon_system.mark_coupon_honestly_activated(taken_slot.coupon_instance)
-			_belt_system.mark_coupon_processed(customer, taken_slot.coupon_instance, false)
+			_visible_object_queue_system.mark_coupon_processed(customer, taken_slot.coupon_instance, false)
 			continue
 
 		var product: ProductInstance = taken_slot.product_instance
@@ -330,7 +336,7 @@ func _test_complete_customer_flow_without_scenes() -> void:
 		)
 		_economy_system.apply_successful_scan(scan_result, _coupon_system.get_honest_customer_coupons(customer))
 		_economy_system.payout_product(run_state, product)
-		_belt_system.mark_product_processed(customer, product)
+		_visible_object_queue_system.mark_product_processed(customer, product)
 
 	_expect_true(customer.is_complete, "Complete customer flow reaches completion without loading scenes")
 	_expect_equal_int(10, customer.processed_product_count, "Complete customer flow processes every product")
