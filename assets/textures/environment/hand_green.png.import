@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dwwj4076w5llj"
-path="res://.godot/imported/spritesheet.png-c150ee12337b658619511d16f73b7055.ctex"
+uid="uid://djrla5nqt16xo"
+path="res://.godot/imported/hand_green.png-157c897f25932e9fc81c90facc1085f1.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/textures/products/white_outline/spritesheet.png"
-dest_files=["res://.godot/imported/spritesheet.png-c150ee12337b658619511d16f73b7055.ctex"]
+source_file="res://assets/textures/environment/hand_green.png"
+dest_files=["res://.godot/imported/hand_green.png-157c897f25932e9fc81c90facc1085f1.ctex"]
 
 [params]
 

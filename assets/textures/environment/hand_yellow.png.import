@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b28rtb2o2e32w"
-path="res://.godot/imported/spritesheet.png-f221dbec63c1a7837c588a03dfe9834e.ctex"
+uid="uid://bricocq6talng"
+path="res://.godot/imported/hand_yellow.png-0b8c489436d9751badc835b0422d4d5c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/textures/products/black_outline/spritesheet.png"
-dest_files=["res://.godot/imported/spritesheet.png-f221dbec63c1a7837c588a03dfe9834e.ctex"]
+source_file="res://assets/textures/environment/hand_yellow.png"
+dest_files=["res://.godot/imported/hand_yellow.png-0b8c489436d9751badc835b0422d4d5c.ctex"]
 
 [params]
 

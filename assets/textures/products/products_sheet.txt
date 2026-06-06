@@ -1,0 +1,10 @@
+Measurements:
+- all sprites are 32x32
+- the sprite sheet has a width of 3200 and a height of 32
+
+Productnames from left to right
+- Apple
+- Orange
+- Banana
+- Brown Snackbar
+- Purple Coupon 
