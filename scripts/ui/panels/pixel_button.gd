@@ -1,8 +1,15 @@
+@tool
 extends Button
 class_name PixelButton
 
-@export var theme_resource: CheckoutThemeResource = preload("res://content/ui/checkout_theme.tres")
-@export var button_color: Color = Color.WHITE
+@export var theme_resource: CheckoutThemeResource = preload("res://content/ui/checkout_theme.tres"):
+	set(value):
+		theme_resource = value
+		apply_pixel_button_theme()
+@export var button_color: Color = Color.WHITE:
+	set(value):
+		button_color = value
+		apply_pixel_button_theme()
 
 
 func _ready() -> void:

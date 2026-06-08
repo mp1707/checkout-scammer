@@ -1,184 +1,74 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene format=3 uid="uid://cq5acv1k6x7ut"]
 
-[ext_resource type="Script" path="res://scripts/ui/hud/hud_root.gd" id="1_hud_root"]
-[ext_resource type="Script" path="res://scripts/ui/panels/pixel_panel.gd" id="2_pixel_panel"]
-[ext_resource type="Script" path="res://scripts/ui/panels/pixel_button.gd" id="3_pixel_button"]
-[ext_resource type="Resource" path="res://content/ui/checkout_theme.tres" id="4_theme"]
+[ext_resource type="Script" uid="uid://y31g6ewc3swb" path="res://scripts/ui/hud/hud_root.gd" id="1_hud_root"]
+[ext_resource type="Texture2D" uid="uid://bkpnb3mnkhcom" path="res://assets/textures/ui/panels/9slice_panel_white.png" id="4_ckp5f"]
+[ext_resource type="Script" uid="uid://mpqa4tny6r28" path="res://scripts/ui/panels/pixel_panel.gd" id="4_pixel_panel"]
 [ext_resource type="PackedScene" path="res://scenes/ui/popups/coupon_popup.tscn" id="5_coupon_popup"]
 
-[node name="HudRoot" type="Control"]
-mouse_filter = 2
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_wuxnk"]
+content_margin_left = 6.0
+content_margin_top = 6.0
+content_margin_right = 6.0
+content_margin_bottom = 6.0
+texture = ExtResource("4_ckp5f")
+texture_margin_left = 7.0
+texture_margin_top = 7.0
+texture_margin_right = 7.0
+texture_margin_bottom = 7.0
+modulate_color = Color(0.964706, 0.792157, 0.623529, 1)
+
+[node name="HudRoot" type="Control" unique_id=874295037]
+layout_mode = 3
+anchors_preset = 0
 offset_right = 640.0
 offset_bottom = 360.0
+mouse_filter = 2
 script = ExtResource("1_hud_root")
-theme_resource = ExtResource("4_theme")
-day_value_label = NodePath("LeftStatusPanel/Margin/StatusList/DayValue")
-customer_value_label = NodePath("LeftStatusPanel/Margin/StatusList/CustomerValue")
-rent_value_label = NodePath("LeftStatusPanel/Margin/StatusList/RentValue")
-cash_value_label = NodePath("LeftStatusPanel/Margin/StatusList/CashValue")
-coupon_button = NodePath("RightUpgradePanel/Margin/UpgradeList/CouponButton")
-assortment_upgrade_button = NodePath("RightUpgradePanel/Margin/UpgradeList/AssortmentButton")
 dialog_layer = NodePath("DialogLayer")
 dialog_message_label = NodePath("DialogLayer/DialogPanel/Margin/DialogMessage")
 popup_layer = NodePath("PopupLayer")
 coupon_popup_scene = ExtResource("5_coupon_popup")
 
-[node name="LeftStatusPanel" type="PanelContainer" parent="."]
-offset_right = 104.0
-offset_bottom = 360.0
-script = ExtResource("2_pixel_panel")
-theme_resource = ExtResource("4_theme")
-panel_color = Color(0.976471, 0.901961, 0.811765, 1)
-content_margin_override = 6
-
-[node name="Margin" type="MarginContainer" parent="LeftStatusPanel"]
-layout_mode = 2
-theme_override_constants/margin_left = 4
-theme_override_constants/margin_top = 4
-theme_override_constants/margin_right = 4
-theme_override_constants/margin_bottom = 4
-
-[node name="StatusList" type="VBoxContainer" parent="LeftStatusPanel/Margin"]
-layout_mode = 2
-theme_override_constants/separation = 4
-
-[node name="TitleLabel" type="Label" parent="LeftStatusPanel/Margin/StatusList"]
-layout_mode = 2
-text = "SHIFT"
-horizontal_alignment = 1
-
-[node name="DayLabel" type="Label" parent="LeftStatusPanel/Margin/StatusList"]
-layout_mode = 2
-text = "Day"
-
-[node name="DayValue" type="Label" parent="LeftStatusPanel/Margin/StatusList"]
-layout_mode = 2
-text = "1"
-horizontal_alignment = 2
-
-[node name="CustomerLabel" type="Label" parent="LeftStatusPanel/Margin/StatusList"]
-layout_mode = 2
-text = "Customer"
-
-[node name="CustomerValue" type="Label" parent="LeftStatusPanel/Margin/StatusList"]
-layout_mode = 2
-text = "1/3"
-horizontal_alignment = 2
-
-[node name="RentLabel" type="Label" parent="LeftStatusPanel/Margin/StatusList"]
-layout_mode = 2
-text = "Rent due"
-
-[node name="RentValue" type="Label" parent="LeftStatusPanel/Margin/StatusList"]
-layout_mode = 2
-text = "$40.00"
-horizontal_alignment = 2
-
-[node name="CashLabel" type="Label" parent="LeftStatusPanel/Margin/StatusList"]
-layout_mode = 2
-text = "Cash"
-
-[node name="CashValue" type="Label" parent="LeftStatusPanel/Margin/StatusList"]
-layout_mode = 2
-text = "$10.00"
-horizontal_alignment = 2
-
-[node name="RightUpgradePanel" type="PanelContainer" parent="."]
-offset_left = 536.0
-offset_right = 640.0
-offset_bottom = 360.0
-script = ExtResource("2_pixel_panel")
-theme_resource = ExtResource("4_theme")
-panel_color = Color(0.780392, 0.811765, 0.866667, 1)
-content_margin_override = 6
-
-[node name="Margin" type="MarginContainer" parent="RightUpgradePanel"]
-layout_mode = 2
-theme_override_constants/margin_left = 4
-theme_override_constants/margin_top = 4
-theme_override_constants/margin_right = 4
-theme_override_constants/margin_bottom = 4
-
-[node name="UpgradeList" type="VBoxContainer" parent="RightUpgradePanel/Margin"]
-layout_mode = 2
-theme_override_constants/separation = 5
-
-[node name="TitleLabel" type="Label" parent="RightUpgradePanel/Margin/UpgradeList"]
-layout_mode = 2
-text = "UPGRADES"
-horizontal_alignment = 1
-
-[node name="CouponButton" type="Button" parent="RightUpgradePanel/Margin/UpgradeList"]
-custom_minimum_size = Vector2(0, 28)
-layout_mode = 2
-text = "Coupon"
-script = ExtResource("3_pixel_button")
-theme_resource = ExtResource("4_theme")
-
-[node name="AssortmentButton" type="Button" parent="RightUpgradePanel/Margin/UpgradeList"]
-custom_minimum_size = Vector2(0, 28)
-layout_mode = 2
-text = "Stock Up"
-script = ExtResource("3_pixel_button")
-theme_resource = ExtResource("4_theme")
-
-[node name="FutureUpgradeSlot" type="PanelContainer" parent="RightUpgradePanel/Margin/UpgradeList"]
-custom_minimum_size = Vector2(0, 34)
-layout_mode = 2
-script = ExtResource("2_pixel_panel")
-theme_resource = ExtResource("4_theme")
-panel_color = Color(0.572549, 0.631373, 0.72549, 1)
-content_margin_override = 4
-
-[node name="Label" type="Label" parent="RightUpgradePanel/Margin/UpgradeList/FutureUpgradeSlot"]
-layout_mode = 2
-text = "..."
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="CouponTooltipAnchor" type="Marker2D" parent="."]
-position = Vector2(540, 62)
-
-[node name="AssortmentTooltipAnchor" type="Marker2D" parent="."]
-position = Vector2(540, 96)
-
-[node name="DialogLayer" type="Control" parent="."]
+[node name="DialogLayer" type="Control" parent="." unique_id=178337825]
 visible = false
-mouse_filter = 0
+anchors_preset = 0
 offset_right = 640.0
 offset_bottom = 360.0
 
-[node name="DialogDim" type="ColorRect" parent="DialogLayer"]
-mouse_filter = 2
+[node name="DialogDim" type="ColorRect" parent="DialogLayer" unique_id=64760716]
+layout_mode = 0
 offset_right = 640.0
 offset_bottom = 360.0
+mouse_filter = 2
 color = Color(0.054902, 0.027451, 0.105882, 0.58)
 
-[node name="DialogPanel" type="PanelContainer" parent="DialogLayer"]
+[node name="DialogPanel" type="PanelContainer" parent="DialogLayer" unique_id=1253254435]
+layout_mode = 0
 offset_left = 170.0
 offset_top = 236.0
 offset_right = 470.0
 offset_bottom = 318.0
-script = ExtResource("2_pixel_panel")
-theme_resource = ExtResource("4_theme")
+theme_override_styles/panel = SubResource("StyleBoxTexture_wuxnk")
+script = ExtResource("4_pixel_panel")
 panel_color = Color(0.964706, 0.792157, 0.623529, 1)
 content_margin_override = 6
 
-[node name="Margin" type="MarginContainer" parent="DialogLayer/DialogPanel"]
+[node name="Margin" type="MarginContainer" parent="DialogLayer/DialogPanel" unique_id=2097466333]
 layout_mode = 2
 theme_override_constants/margin_left = 4
 theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 4
 
-[node name="DialogMessage" type="Label" parent="DialogLayer/DialogPanel/Margin"]
+[node name="DialogMessage" type="Label" parent="DialogLayer/DialogPanel/Margin" unique_id=1415840619]
 layout_mode = 2
 text = "Customer: Hey, do you want to scam me? I want compensation!"
-autowrap_mode = 3
 vertical_alignment = 1
+autowrap_mode = 3
 
-[node name="PopupLayer" type="Control" parent="."]
+[node name="PopupLayer" type="Control" parent="." unique_id=165494486]
 visible = false
-mouse_filter = 2
+anchors_preset = 0
 offset_right = 640.0
 offset_bottom = 360.0
+mouse_filter = 2

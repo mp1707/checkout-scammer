@@ -1,9 +1,19 @@
+@tool
 extends PanelContainer
 class_name PixelPanel
 
-@export var theme_resource: CheckoutThemeResource = preload("res://content/ui/checkout_theme.tres")
-@export var panel_color: Color = Color.WHITE
-@export var content_margin_override: int = -1
+@export var theme_resource: CheckoutThemeResource = preload("res://content/ui/checkout_theme.tres"):
+	set(value):
+		theme_resource = value
+		apply_pixel_panel_theme()
+@export var panel_color: Color = Color.WHITE:
+	set(value):
+		panel_color = value
+		apply_pixel_panel_theme()
+@export var content_margin_override: int = -1:
+	set(value):
+		content_margin_override = value
+		apply_pixel_panel_theme()
 
 
 func _ready() -> void:
