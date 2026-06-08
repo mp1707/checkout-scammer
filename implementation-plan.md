@@ -379,7 +379,7 @@ und offene Fixes.
 - [ ] Linke und rechte Sidebar bleiben bei `640x360` lesbar.
 - [x] Buttons zeigen klare enabled/disabled-Zustaende.
 - [ ] Tooltips passen in den Viewport.
-- [x] Fontgroessen bleiben auf `11`, `22`, `33`, `44`.
+- [x] Fontgroessen bleiben auf `8`, `16`, `24`, `32`.
 - [ ] Keine UI-Texte ueberlappen.
 - [x] Pixel-Snap und nearest filtering bleiben erhalten.
 

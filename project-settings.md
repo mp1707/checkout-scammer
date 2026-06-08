@@ -1,13 +1,13 @@
 # Project Settings fuer Pixel-Font Rendering
 
-Dieses Dokument haelt die verbindlichen Godot-Settings fuer Checkout Scammer und zukuenftige Projekte mit `m6x11plus.ttf` fest. Der wichtigste Kontext: Im Godot-Editor kann die Schrift klar aussehen, waehrend sie im gestarteten Spiel unleserlich wird, wenn das Spiel erst in eine niedrige Viewport-Aufloesung rendert und danach hochskaliert.
+Dieses Dokument haelt die verbindlichen Godot-Settings fuer Checkout Scammer und zukuenftige Projekte mit `PixelOperator8.ttf` fest. Der wichtigste Kontext: Im Godot-Editor kann die Schrift klar aussehen, waehrend sie im gestarteten Spiel unleserlich wird, wenn das Spiel erst in eine niedrige Viewport-Aufloesung rendert und danach hochskaliert.
 
 ## Ziel
 
 - Interne Authoring-Aufloesung: `640x360`.
 - Entwicklungsfenster: `1280x720`, also exakt `2x`.
 - Pixel-Sprites bleiben scharf.
-- Dynamische TTF-Pixel-Fonts wie `m6x11plus.ttf` bleiben auch im gestarteten Spiel lesbar.
+- Dynamische TTF-Pixel-Fonts wie `PixelOperator8.ttf` bleiben auch im gestarteten Spiel lesbar.
 - Freie Fenster-Skalierung darf keine krummen Faktoren wie `3.2x` erzeugen.
 
 ## Wichtigste Regel
@@ -83,7 +83,7 @@ Ausserhalb der Editor-Einbettung erzwingt er ausserdem ein `1280x720` Fenster un
 
 ## Font Import Settings
 
-Fuer `assets/fonts/m6x11plus.ttf` muessen diese Import-Werte gelten:
+Fuer `assets/fonts/PixelOperator8.ttf` muessen diese Import-Werte gelten:
 
 ```ini
 antialiasing=0
@@ -107,14 +107,14 @@ multichannel_signed_distance_field=false
 
 ## Font Groessen
 
-`m6x11plus.ttf` soll nur in klaren Vielfachen genutzt werden:
+`PixelOperator8.ttf` soll nur in klaren Vielfachen genutzt werden:
 
-- Kleine UI/Receipt-Zeilen: `11`
-- Normale UI: `22`
-- Titel/grosse Zahlen: `33`
-- Sehr grosse Titel: `44`
+- Kleine UI/Receipt-Zeilen: `8`
+- Normale UI: `16`
+- Titel/grosse Zahlen: `24`
+- Sehr grosse Titel: `32`
 
-Diese Groessen vermeiden krumme Glyphenraster. Problematische Zwischenwerte sind z. B. `14`, `16`, `18`, `20`, `24`, `28`.
+Diese Groessen vermeiden krumme Glyphenraster. Problematische Zwischenwerte sind z. B. `9`, `10`, `11`, `14`, `18`, `20`, `28`.
 
 Alle Fontgroessen gehoeren in Theme-Resources, nicht lokal in einzelne Szenen. Fuer Checkout Scammer ist das `CheckoutThemeResource`.
 
@@ -170,7 +170,7 @@ Wenn die Schrift im Editor lesbar ist, aber im Spiel nicht:
 3. Pruefen, ob die Ausgabe ein ganzzahliger Faktor von `640x360` ist: `1280x720`, `1920x1080`, `2560x1440`, `3840x2160`.
 4. Pruefen, ob das Fenster frei resized oder maximiert wurde.
 5. Pruefen, ob der Font-Import Antialiasing, Subpixel, Hinting, Mipmaps und Oversampling deaktiviert hat.
-6. Pruefen, ob die Textgroesse `11`, `22`, `33` oder `44` ist.
+6. Pruefen, ob die Textgroesse `8`, `16`, `24` oder `32` ist.
 7. Pruefen, ob Label oder Parent-Control auf ganzen Pixeln liegen.
 8. Pruefen, ob der Text lokal ueber `scale` vergroessert oder verkleinert wird.
 

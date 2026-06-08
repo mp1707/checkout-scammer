@@ -219,15 +219,15 @@ Die verbindlichen Werte stehen in `project-settings.md` und sind in `project.god
 
 Font:
 
-- Runtime-Font: `res://assets/fonts/m6x11plus.ttf`
-- Erlaubte UI-Fontgroessen: `11`, `22`, `33`, `44`
+- Runtime-Font: `res://assets/fonts/PixelOperator8.ttf`
+- Erlaubte UI-Fontgroessen: `8`, `16`, `24`, `32`
 - Fontgroessen werden ueber Theme-Resources gesetzt, nicht lokal in Einzelszenen.
 
 ## Asset-Pipeline
 
 Root-Assets werden nicht als dauerhafte Asset-Ablage genutzt. Dauerhafte Ziele:
 
-- Font: `assets/fonts/m6x11plus.ttf`
+- Font: `assets/fonts/PixelOperator8.ttf`
 - Scanner-SFX: `assets/audio/sfx/scanner/high_beep.mp3`
 - 9-Slice-Panel: `assets/textures/ui/panels/9slice_panel_white.png`
 - Produkt-Spritesheet: `assets/textures/products/products_sheet.png`

@@ -9,10 +9,10 @@ const PANEL_CONTENT_MARGIN: int = 2
 @export var font: FontFile
 @export var panel_texture: Texture2D
 
-@export var font_size_small: int = 11
-@export var font_size_normal: int = 22
-@export var font_size_large: int = 33
-@export var font_size_title: int = 44
+@export var font_size_small: int = 8
+@export var font_size_normal: int = 16
+@export var font_size_large: int = 24
+@export var font_size_title: int = 32
 
 @export var panel_base_color: Color = Color(0.780392, 0.811765, 0.866667, 1.0)
 @export var panel_warm_color: Color = Color(0.976471, 0.901961, 0.811765, 1.0)

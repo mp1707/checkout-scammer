@@ -2,7 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://bkpnb3mnkhcom" path="res://assets/textures/ui/panels/9slice_panel_white.png" id="1_gqnbu"]
 [ext_resource type="Script" uid="uid://ct6rcfw4m7xpa" path="res://scripts/ui/hud/left_status_panel.gd" id="1_left_status_panel"]
-[ext_resource type="FontFile" uid="uid://bk8vkh8occxub" path="res://assets/fonts/m6x11plus.ttf" id="3_34ach"]
+[ext_resource type="FontFile" path="res://assets/fonts/PixelOperator8.ttf" id="3_34ach"]
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_4nmhy"]
 content_margin_left = 6.0
@@ -45,7 +45,7 @@ theme_override_constants/separation = 4
 layout_mode = 2
 theme_override_colors/font_color = Color(0.101961, 0.098039, 0.196078, 1)
 theme_override_fonts/font = ExtResource("3_34ach")
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 8
 text = "SHIFT"
 horizontal_alignment = 1
 
@@ -53,14 +53,14 @@ horizontal_alignment = 1
 layout_mode = 2
 theme_override_colors/font_color = Color(0.101961, 0.098039, 0.196078, 1)
 theme_override_fonts/font = ExtResource("3_34ach")
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 8
 text = "Day"
 
 [node name="DayValue" type="Label" parent="Margin/StatusList" unique_id=119832696]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.101961, 0.098039, 0.196078, 1)
 theme_override_fonts/font = ExtResource("3_34ach")
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 8
 text = "1"
 horizontal_alignment = 2
 
@@ -68,14 +68,14 @@ horizontal_alignment = 2
 layout_mode = 2
 theme_override_colors/font_color = Color(0.101961, 0.098039, 0.196078, 1)
 theme_override_fonts/font = ExtResource("3_34ach")
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 8
 text = "Customer"
 
 [node name="CustomerValue" type="Label" parent="Margin/StatusList" unique_id=1421935430]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.101961, 0.098039, 0.196078, 1)
 theme_override_fonts/font = ExtResource("3_34ach")
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 8
 text = "1/3"
 horizontal_alignment = 2
 
@@ -83,14 +83,14 @@ horizontal_alignment = 2
 layout_mode = 2
 theme_override_colors/font_color = Color(0.101961, 0.098039, 0.196078, 1)
 theme_override_fonts/font = ExtResource("3_34ach")
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 8
 text = "Rent due"
 
 [node name="RentValue" type="Label" parent="Margin/StatusList" unique_id=683333022]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.101961, 0.098039, 0.196078, 1)
 theme_override_fonts/font = ExtResource("3_34ach")
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 8
 text = "$40.00"
 horizontal_alignment = 2
 
@@ -98,13 +98,13 @@ horizontal_alignment = 2
 layout_mode = 2
 theme_override_colors/font_color = Color(0.101961, 0.098039, 0.196078, 1)
 theme_override_fonts/font = ExtResource("3_34ach")
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 8
 text = "Cash"
 
 [node name="CashValue" type="Label" parent="Margin/StatusList" unique_id=221425116]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.101961, 0.098039, 0.196078, 1)
 theme_override_fonts/font = ExtResource("3_34ach")
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 8
 text = "$10.00"
 horizontal_alignment = 2
