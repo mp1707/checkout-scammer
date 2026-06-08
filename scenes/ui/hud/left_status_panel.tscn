@@ -1,110 +1,191 @@
-[gd_scene format=3 uid="uid://4uyrabfcoewe"]
+[gd_scene load_steps=6 format=3 uid="uid://4uyrabfcoewe"]
 
-[ext_resource type="Texture2D" uid="uid://bkpnb3mnkhcom" path="res://assets/textures/ui/panels/9slice_panel_white.png" id="1_gqnbu"]
 [ext_resource type="Script" uid="uid://ct6rcfw4m7xpa" path="res://scripts/ui/hud/left_status_panel.gd" id="1_left_status_panel"]
-[ext_resource type="FontFile" path="res://assets/fonts/PixelOperator8.ttf" id="3_34ach"]
+[ext_resource type="Script" uid="uid://mpqa4tny6r28" path="res://scripts/ui/panels/pixel_panel.gd" id="2_pixel_panel"]
+[ext_resource type="FontFile" path="res://assets/fonts/PixelOperator8.ttf" id="3_font"]
+[ext_resource type="FontFile" path="res://assets/fonts/PixelOperator8-Bold.ttf" id="4_bold_font"]
+[ext_resource type="FontVariation" path="res://content/ui/pixel_operator8_bold_compact.tres" id="5_compact_bold_font"]
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_4nmhy"]
-content_margin_left = 6.0
-content_margin_top = 6.0
-content_margin_right = 6.0
-content_margin_bottom = 6.0
-texture = ExtResource("1_gqnbu")
-texture_margin_left = 7.0
-texture_margin_top = 7.0
-texture_margin_right = 7.0
-texture_margin_bottom = 7.0
-modulate_color = Color(0.976471, 0.901961, 0.811765, 1)
-
-[node name="LeftStatusPanel" type="PanelContainer" unique_id=1654762765 node_paths=PackedStringArray("title_label", "day_value_label", "customer_value_label", "rent_value_label", "cash_value_label")]
-offset_top = 3.0
-offset_right = 104.0
-offset_bottom = 356.0
-theme_override_styles/panel = SubResource("StyleBoxTexture_4nmhy")
+[node name="LeftStatusPanel" type="Control" unique_id=1654762765 node_paths=PackedStringArray("main_panel", "shadow_panel", "title_label", "day_value_label", "customer_value_label", "rent_value_label", "cash_value_label")]
+offset_right = 106.0
+offset_bottom = 142.0
+mouse_filter = 2
 script = ExtResource("1_left_status_panel")
-title_label = NodePath("Margin/StatusList/TitleLabel")
-day_value_label = NodePath("Margin/StatusList/DayValue")
-customer_value_label = NodePath("Margin/StatusList/CustomerValue")
-rent_value_label = NodePath("Margin/StatusList/RentValue")
-cash_value_label = NodePath("Margin/StatusList/CashValue")
+main_panel = NodePath("MainPanel")
+shadow_panel = NodePath("ShadowPanel")
+panel_color = Color(0.976471, 0.901961, 0.811765, 1)
+content_margin_override = 6
+panel_width = 104
+shadow_offset = Vector2(2, 3)
+title_label = NodePath("MainPanel/StatusList/HeaderPanel/TitleLabel")
+day_value_label = NodePath("MainPanel/StatusList/TopStatsRow/DayStat/DayValuePanel/DayValue")
+customer_value_label = NodePath("MainPanel/StatusList/TopStatsRow/CustomerStat/CustomerValuePanel/CustomerValue")
+rent_value_label = NodePath("MainPanel/StatusList/RentGroup/RentValuePanel/RentValue")
+cash_value_label = NodePath("MainPanel/StatusList/CashGroup/CashValuePanel/CashValue")
+
+[node name="ShadowPanel" type="PanelContainer" parent="." unique_id=1807292892]
+layout_mode = 0
+offset_left = 2.0
+offset_top = 3.0
+offset_right = 106.0
+offset_bottom = 142.0
+mouse_filter = 2
+script = ExtResource("2_pixel_panel")
+panel_color = Color(0.054902, 0.027451, 0.105882, 0.42)
+content_margin_override = 6
+
+[node name="MainPanel" type="PanelContainer" parent="." unique_id=1808617325]
+layout_mode = 0
+offset_right = 104.0
+offset_bottom = 139.0
+script = ExtResource("2_pixel_panel")
 panel_color = Color(0.976471, 0.901961, 0.811765, 1)
 content_margin_override = 6
 
-[node name="Margin" type="MarginContainer" parent="." unique_id=1807292892]
+[node name="StatusList" type="VBoxContainer" parent="MainPanel" unique_id=744478028]
 layout_mode = 2
-theme_override_constants/margin_left = 4
-theme_override_constants/margin_top = 4
-theme_override_constants/margin_right = 4
-theme_override_constants/margin_bottom = 4
+theme_override_constants/separation = 7
 
-[node name="StatusList" type="VBoxContainer" parent="Margin" unique_id=1808617325]
+[node name="HeaderPanel" type="PanelContainer" parent="MainPanel/StatusList" unique_id=1134917545]
+custom_minimum_size = Vector2(0, 18)
 layout_mode = 2
-theme_override_constants/separation = 4
+script = ExtResource("2_pixel_panel")
+panel_color = Color(0.964706, 0.792157, 0.623529, 1)
+content_margin_override = 2
 
-[node name="TitleLabel" type="Label" parent="Margin/StatusList" unique_id=744478028]
+[node name="TitleLabel" type="Label" parent="MainPanel/StatusList/HeaderPanel" unique_id=119832696]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.101961, 0.098039, 0.196078, 1)
-theme_override_fonts/font = ExtResource("3_34ach")
+theme_override_fonts/font = ExtResource("4_bold_font")
 theme_override_font_sizes/font_size = 8
 text = "SHIFT"
 horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="DayLabel" type="Label" parent="Margin/StatusList" unique_id=1134917545]
+[node name="TopStatsRow" type="HBoxContainer" parent="MainPanel/StatusList" unique_id=818384344]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="DayStat" type="VBoxContainer" parent="MainPanel/StatusList/TopStatsRow" unique_id=55760342]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 3
+
+[node name="DayLabel" type="Label" parent="MainPanel/StatusList/TopStatsRow/DayStat" unique_id=683333022]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.101961, 0.098039, 0.196078, 1)
-theme_override_fonts/font = ExtResource("3_34ach")
-theme_override_font_sizes/font_size = 8
+theme_override_fonts/font = ExtResource("5_compact_bold_font")
+theme_override_font_sizes/font_size = 6
 text = "Day"
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="DayValue" type="Label" parent="Margin/StatusList" unique_id=119832696]
+[node name="DayValuePanel" type="PanelContainer" parent="MainPanel/StatusList/TopStatsRow/DayStat" unique_id=1421935430]
+custom_minimum_size = Vector2(38, 14)
+layout_mode = 2
+size_flags_horizontal = 4
+script = ExtResource("2_pixel_panel")
+panel_color = Color(1, 1, 1, 1)
+content_margin_override = 3
+
+[node name="DayValue" type="Label" parent="MainPanel/StatusList/TopStatsRow/DayStat/DayValuePanel" unique_id=1406801183]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.101961, 0.098039, 0.196078, 1)
-theme_override_fonts/font = ExtResource("3_34ach")
-theme_override_font_sizes/font_size = 8
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 6
 text = "1"
-horizontal_alignment = 2
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="CustomerLabel" type="Label" parent="Margin/StatusList" unique_id=818384344]
+[node name="CustomerStat" type="VBoxContainer" parent="MainPanel/StatusList/TopStatsRow" unique_id=259536315]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 3
+
+[node name="CustomerLabel" type="Label" parent="MainPanel/StatusList/TopStatsRow/CustomerStat" unique_id=836670133]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.101961, 0.098039, 0.196078, 1)
-theme_override_fonts/font = ExtResource("3_34ach")
-theme_override_font_sizes/font_size = 8
+theme_override_fonts/font = ExtResource("5_compact_bold_font")
+theme_override_font_sizes/font_size = 6
 text = "Customer"
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="CustomerValue" type="Label" parent="Margin/StatusList" unique_id=1421935430]
+[node name="CustomerValuePanel" type="PanelContainer" parent="MainPanel/StatusList/TopStatsRow/CustomerStat" unique_id=221425116]
+custom_minimum_size = Vector2(38, 14)
+layout_mode = 2
+size_flags_horizontal = 4
+script = ExtResource("2_pixel_panel")
+panel_color = Color(1, 1, 1, 1)
+content_margin_override = 3
+
+[node name="CustomerValue" type="Label" parent="MainPanel/StatusList/TopStatsRow/CustomerStat/CustomerValuePanel" unique_id=2069317882]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.101961, 0.098039, 0.196078, 1)
-theme_override_fonts/font = ExtResource("3_34ach")
-theme_override_font_sizes/font_size = 8
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 6
 text = "1/3"
-horizontal_alignment = 2
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="RentLabel" type="Label" parent="Margin/StatusList" unique_id=55760342]
+[node name="RentGroup" type="VBoxContainer" parent="MainPanel/StatusList" unique_id=1225182304]
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="RentLabel" type="Label" parent="MainPanel/StatusList/RentGroup" unique_id=343672226]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.101961, 0.098039, 0.196078, 1)
-theme_override_fonts/font = ExtResource("3_34ach")
-theme_override_font_sizes/font_size = 8
+theme_override_fonts/font = ExtResource("5_compact_bold_font")
+theme_override_font_sizes/font_size = 6
 text = "Rent due"
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="RentValue" type="Label" parent="Margin/StatusList" unique_id=683333022]
+[node name="RentValuePanel" type="PanelContainer" parent="MainPanel/StatusList/RentGroup" unique_id=2068843900]
+custom_minimum_size = Vector2(70, 14)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.101961, 0.098039, 0.196078, 1)
-theme_override_fonts/font = ExtResource("3_34ach")
-theme_override_font_sizes/font_size = 8
+size_flags_horizontal = 4
+script = ExtResource("2_pixel_panel")
+panel_color = Color(1, 1, 1, 1)
+content_margin_override = 3
+
+[node name="RentValue" type="Label" parent="MainPanel/StatusList/RentGroup/RentValuePanel" unique_id=1471298891]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.768627, 0.141176, 0.188235, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 6
 text = "$40.00"
-horizontal_alignment = 2
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="CashLabel" type="Label" parent="Margin/StatusList" unique_id=259536315]
+[node name="CashGroup" type="VBoxContainer" parent="MainPanel/StatusList" unique_id=2121548306]
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="CashLabel" type="Label" parent="MainPanel/StatusList/CashGroup" unique_id=819997626]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.101961, 0.098039, 0.196078, 1)
-theme_override_fonts/font = ExtResource("3_34ach")
-theme_override_font_sizes/font_size = 8
+theme_override_fonts/font = ExtResource("5_compact_bold_font")
+theme_override_font_sizes/font_size = 6
 text = "Cash"
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="CashValue" type="Label" parent="Margin/StatusList" unique_id=221425116]
+[node name="CashValuePanel" type="PanelContainer" parent="MainPanel/StatusList/CashGroup" unique_id=481034567]
+custom_minimum_size = Vector2(70, 14)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.101961, 0.098039, 0.196078, 1)
-theme_override_fonts/font = ExtResource("3_34ach")
-theme_override_font_sizes/font_size = 8
+size_flags_horizontal = 4
+script = ExtResource("2_pixel_panel")
+panel_color = Color(1, 1, 1, 1)
+content_margin_override = 3
+
+[node name="CashValue" type="Label" parent="MainPanel/StatusList/CashGroup/CashValuePanel" unique_id=1539829922]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.117647, 0.435294, 0.313725, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 6
 text = "$10.00"
-horizontal_alignment = 2
+horizontal_alignment = 1
+vertical_alignment = 1

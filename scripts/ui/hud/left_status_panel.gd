@@ -1,5 +1,5 @@
 @tool
-extends "res://scripts/ui/panels/pixel_panel.gd"
+extends "res://scripts/ui/panels/pixel_panel_frame.gd"
 class_name LeftStatusPanel
 
 @export var title_label: Label
@@ -16,6 +16,8 @@ func _ready() -> void:
 	super()
 	_resolve_child_references()
 	_apply_label_theme(self)
+	_apply_status_value_colors()
+	queue_fit_to_content()
 
 
 func update_run_summary(
@@ -36,20 +38,47 @@ func update_run_summary(
 			_set_displayed_cash_cents(cash_cents)
 		elif _displayed_cash_cents != cash_cents:
 			_animate_cash_value(cash_cents)
+	queue_fit_to_content()
 
 
 func _apply_label_theme(root: Node) -> void:
-	if theme_resource == null:
+	if root == null or theme_resource == null:
 		return
 
 	for child: Node in root.get_children():
 		var label: Label = child as Label
 		if label != null:
-			if theme_resource.font != null:
-				label.add_theme_font_override("font", theme_resource.font)
-			label.add_theme_font_size_override("font_size", theme_resource.font_size_small)
+			var label_font: Font = theme_resource.font
+			if not _is_value_label(label) and theme_resource.bold_font != null:
+				label_font = theme_resource.bold_font
+				if label != title_label and theme_resource.compact_bold_font != null:
+					label_font = theme_resource.compact_bold_font
+			if label_font != null:
+				label.add_theme_font_override("font", label_font)
+			var font_size: int = theme_resource.font_size_detail
+			if label == title_label:
+				font_size = theme_resource.font_size_small
+			label.add_theme_font_size_override("font_size", font_size)
 			label.add_theme_color_override("font_color", theme_resource.text_color)
 		_apply_label_theme(child)
+
+
+func _is_value_label(label: Label) -> bool:
+	return (
+		label == day_value_label
+		or label == customer_value_label
+		or label == rent_value_label
+		or label == cash_value_label
+	)
+
+
+func _apply_status_value_colors() -> void:
+	if theme_resource == null:
+		return
+	if rent_value_label != null:
+		rent_value_label.add_theme_color_override("font_color", theme_resource.danger_color)
+	if cash_value_label != null:
+		cash_value_label.add_theme_color_override("font_color", theme_resource.money_color)
 
 
 func _animate_cash_value(target_cents: int) -> void:
@@ -90,12 +119,18 @@ func _format_cents(cents: int) -> String:
 
 func _resolve_child_references() -> void:
 	if title_label == null:
-		title_label = get_node_or_null("Margin/StatusList/TitleLabel") as Label
+		title_label = _get_main_panel_label("StatusList/HeaderPanel/TitleLabel")
 	if day_value_label == null:
-		day_value_label = get_node_or_null("Margin/StatusList/DayValue") as Label
+		day_value_label = _get_main_panel_label("StatusList/TopStatsRow/DayStat/DayValuePanel/DayValue")
 	if customer_value_label == null:
-		customer_value_label = get_node_or_null("Margin/StatusList/CustomerValue") as Label
+		customer_value_label = _get_main_panel_label("StatusList/TopStatsRow/CustomerStat/CustomerValuePanel/CustomerValue")
 	if rent_value_label == null:
-		rent_value_label = get_node_or_null("Margin/StatusList/RentValue") as Label
+		rent_value_label = _get_main_panel_label("StatusList/RentGroup/RentValuePanel/RentValue")
 	if cash_value_label == null:
-		cash_value_label = get_node_or_null("Margin/StatusList/CashValue") as Label
+		cash_value_label = _get_main_panel_label("StatusList/CashGroup/CashValuePanel/CashValue")
+
+
+func _get_main_panel_label(label_path: String) -> Label:
+	if main_panel == null:
+		return null
+	return main_panel.get_node_or_null(NodePath(label_path)) as Label

@@ -7,9 +7,12 @@ const PANEL_TEXTURE_MARGIN: int = PANEL_TEXTURE_OUTER_PADDING + PANEL_CORNER_SLI
 const PANEL_CONTENT_MARGIN: int = 2
 
 @export var font: FontFile
+@export var bold_font: Font
+@export var compact_bold_font: Font
 @export var panel_texture: Texture2D
 
 @export var font_size_small: int = 8
+@export var font_size_detail: int = 6
 @export var font_size_normal: int = 16
 @export var font_size_large: int = 24
 @export var font_size_title: int = 32

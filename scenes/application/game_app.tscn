@@ -3,34 +3,9 @@
 [ext_resource type="Script" uid="uid://dba8xojwb8eaf" path="res://scripts/application/game_app.gd" id="1_game_app"]
 [ext_resource type="Script" uid="uid://vjtlhvpl332c" path="res://scripts/application/run_controller.gd" id="2_run_controller"]
 [ext_resource type="PackedScene" uid="uid://btxe7l0q104i8" path="res://scenes/gameplay/table/checkout_table.tscn" id="3_checkout_table"]
-[ext_resource type="Texture2D" uid="uid://bkpnb3mnkhcom" path="res://assets/textures/ui/panels/9slice_panel_white.png" id="4_h2egy"]
 [ext_resource type="PackedScene" uid="uid://cq5acv1k6x7ut" path="res://scenes/ui/hud/hud_root.tscn" id="4_hud_root"]
 [ext_resource type="PackedScene" uid="uid://4uyrabfcoewe" path="res://scenes/ui/hud/left_status_panel.tscn" id="5_left_status_panel"]
 [ext_resource type="PackedScene" uid="uid://kfkdw8d7b8ya" path="res://scenes/ui/hud/right_upgrade_panel.tscn" id="6_right_upgrade_panel"]
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_h2egy"]
-content_margin_left = 6.0
-content_margin_top = 6.0
-content_margin_right = 6.0
-content_margin_bottom = 6.0
-texture = ExtResource("4_h2egy")
-texture_margin_left = 7.0
-texture_margin_top = 7.0
-texture_margin_right = 7.0
-texture_margin_bottom = 7.0
-modulate_color = Color(0.976471, 0.901961, 0.811765, 1)
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_ybi82"]
-content_margin_left = 6.0
-content_margin_top = 6.0
-content_margin_right = 6.0
-content_margin_bottom = 6.0
-texture = ExtResource("4_h2egy")
-texture_margin_left = 7.0
-texture_margin_top = 7.0
-texture_margin_right = 7.0
-texture_margin_bottom = 7.0
-modulate_color = Color(0.780392, 0.811765, 0.866667, 1)
 
 [node name="GameApp" type="Control" unique_id=449391400]
 layout_mode = 3
@@ -48,16 +23,12 @@ layout_mode = 0
 [node name="LeftStatusPanel" parent="." unique_id=1150509343 instance=ExtResource("5_left_status_panel")]
 layout_mode = 0
 offset_top = 4.0
-offset_bottom = 357.0
-theme_override_styles/panel = SubResource("StyleBoxTexture_h2egy")
 
 [node name="RightUpgradePanel" parent="." unique_id=2026002258 instance=ExtResource("6_right_upgrade_panel")]
 layout_mode = 0
-offset_left = 536.0
+offset_left = 538.0
 offset_top = 4.0
 offset_right = 640.0
-offset_bottom = 357.0
-theme_override_styles/panel = SubResource("StyleBoxTexture_ybi82")
 
 [node name="HudRoot" parent="." unique_id=376225137 instance=ExtResource("4_hud_root")]
 layout_mode = 0

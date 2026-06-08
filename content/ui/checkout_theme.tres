@@ -3,8 +3,13 @@
 [ext_resource type="Script" uid="uid://ca4qq4wg0ymsb" path="res://scripts/ui/theme/checkout_theme_resource.gd" id="1_theme"]
 [ext_resource type="FontFile" path="res://assets/fonts/PixelOperator8.ttf" id="2_font"]
 [ext_resource type="Texture2D" uid="uid://bkpnb3mnkhcom" path="res://assets/textures/ui/panels/9slice_panel_white.png" id="3_panel"]
+[ext_resource type="FontFile" path="res://assets/fonts/PixelOperator8-Bold.ttf" id="4_bold_font"]
+[ext_resource type="FontVariation" path="res://content/ui/pixel_operator8_bold_compact.tres" id="5_compact_bold_font"]
 
 [resource]
 script = ExtResource("1_theme")
 font = ExtResource("2_font")
+bold_font = ExtResource("4_bold_font")
+compact_bold_font = ExtResource("5_compact_bold_font")
 panel_texture = ExtResource("3_panel")
+font_size_detail = 6

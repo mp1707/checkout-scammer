@@ -1,211 +1,94 @@
-[gd_scene format=3 uid="uid://kfkdw8d7b8ya"]
+[gd_scene load_steps=7 format=3 uid="uid://kfkdw8d7b8ya"]
 
 [ext_resource type="Script" uid="uid://bq7n1wvos51xj" path="res://scripts/ui/hud/right_upgrade_panel.gd" id="1_right_upgrade_panel"]
-[ext_resource type="Texture2D" uid="uid://bkpnb3mnkhcom" path="res://assets/textures/ui/panels/9slice_panel_white.png" id="1_yf5ag"]
 [ext_resource type="Script" uid="uid://3odypakth7b7" path="res://scripts/ui/panels/pixel_button.gd" id="2_pixel_button"]
-[ext_resource type="FontFile" path="res://assets/fonts/PixelOperator8.ttf" id="3_d2mhl"]
-[ext_resource type="Script" uid="uid://mpqa4tny6r28" path="res://scripts/ui/panels/pixel_panel.gd" id="3_pixel_panel"]
+[ext_resource type="FontFile" path="res://assets/fonts/PixelOperator8.ttf" id="3_font"]
+[ext_resource type="Script" uid="uid://mpqa4tny6r28" path="res://scripts/ui/panels/pixel_panel.gd" id="4_pixel_panel"]
+[ext_resource type="FontFile" path="res://assets/fonts/PixelOperator8-Bold.ttf" id="5_bold_font"]
+[ext_resource type="FontVariation" path="res://content/ui/pixel_operator8_bold_compact.tres" id="6_compact_bold_font"]
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_4fmyf"]
-content_margin_left = 6.0
-content_margin_top = 6.0
-content_margin_right = 6.0
-content_margin_bottom = 6.0
-texture = ExtResource("1_yf5ag")
-texture_margin_left = 7.0
-texture_margin_top = 7.0
-texture_margin_right = 7.0
-texture_margin_bottom = 7.0
-modulate_color = Color(0.780392, 0.811765, 0.866667, 1)
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_n82bs"]
-content_margin_left = 2.0
-content_margin_top = 2.0
-content_margin_right = 2.0
-content_margin_bottom = 2.0
-texture = ExtResource("1_yf5ag")
-texture_margin_left = 7.0
-texture_margin_top = 7.0
-texture_margin_right = 7.0
-texture_margin_bottom = 7.0
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_vl0rg"]
-content_margin_left = 2.0
-content_margin_top = 2.0
-content_margin_right = 2.0
-content_margin_bottom = 2.0
-texture = ExtResource("1_yf5ag")
-texture_margin_left = 7.0
-texture_margin_top = 7.0
-texture_margin_right = 7.0
-texture_margin_bottom = 7.0
-modulate_color = Color(0.929412, 0.670588, 0.313725, 1)
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_eoqky"]
-content_margin_left = 2.0
-content_margin_top = 2.0
-content_margin_right = 2.0
-content_margin_bottom = 2.0
-texture = ExtResource("1_yf5ag")
-texture_margin_left = 7.0
-texture_margin_top = 7.0
-texture_margin_right = 7.0
-texture_margin_bottom = 7.0
-modulate_color = Color(1, 0.921568, 0.341176, 1)
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_ptw7y"]
-content_margin_left = 2.0
-content_margin_top = 2.0
-content_margin_right = 2.0
-content_margin_bottom = 2.0
-texture = ExtResource("1_yf5ag")
-texture_margin_left = 7.0
-texture_margin_top = 7.0
-texture_margin_right = 7.0
-texture_margin_bottom = 7.0
-modulate_color = Color(0.396078, 0.45098, 0.572549, 1)
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_4fhub"]
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_d4ra3"]
-content_margin_left = 2.0
-content_margin_top = 2.0
-content_margin_right = 2.0
-content_margin_bottom = 2.0
-texture = ExtResource("1_yf5ag")
-texture_margin_left = 7.0
-texture_margin_top = 7.0
-texture_margin_right = 7.0
-texture_margin_bottom = 7.0
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_wx6fe"]
-content_margin_left = 2.0
-content_margin_top = 2.0
-content_margin_right = 2.0
-content_margin_bottom = 2.0
-texture = ExtResource("1_yf5ag")
-texture_margin_left = 7.0
-texture_margin_top = 7.0
-texture_margin_right = 7.0
-texture_margin_bottom = 7.0
-modulate_color = Color(0.929412, 0.670588, 0.313725, 1)
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_ylmne"]
-content_margin_left = 2.0
-content_margin_top = 2.0
-content_margin_right = 2.0
-content_margin_bottom = 2.0
-texture = ExtResource("1_yf5ag")
-texture_margin_left = 7.0
-texture_margin_top = 7.0
-texture_margin_right = 7.0
-texture_margin_bottom = 7.0
-modulate_color = Color(1, 0.921568, 0.341176, 1)
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_55nmy"]
-content_margin_left = 2.0
-content_margin_top = 2.0
-content_margin_right = 2.0
-content_margin_bottom = 2.0
-texture = ExtResource("1_yf5ag")
-texture_margin_left = 7.0
-texture_margin_top = 7.0
-texture_margin_right = 7.0
-texture_margin_bottom = 7.0
-modulate_color = Color(0.396078, 0.45098, 0.572549, 1)
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_enxsq"]
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_y31bx"]
-content_margin_left = 4.0
-content_margin_top = 4.0
-content_margin_right = 4.0
-content_margin_bottom = 4.0
-texture = ExtResource("1_yf5ag")
-texture_margin_left = 7.0
-texture_margin_top = 7.0
-texture_margin_right = 7.0
-texture_margin_bottom = 7.0
-modulate_color = Color(0.572549, 0.631373, 0.72549, 1)
-
-[node name="RightUpgradePanel" type="PanelContainer" unique_id=825617230 node_paths=PackedStringArray("title_label", "coupon_button", "assortment_upgrade_button")]
-offset_top = 3.0
-offset_right = 104.0
-offset_bottom = 356.0
-theme_override_styles/panel = SubResource("StyleBoxTexture_4fmyf")
+[node name="RightUpgradePanel" type="Control" unique_id=825617230 node_paths=PackedStringArray("main_panel", "shadow_panel", "title_label", "coupon_button", "assortment_upgrade_button")]
+offset_right = 102.0
+offset_bottom = 128.0
+mouse_filter = 2
 script = ExtResource("1_right_upgrade_panel")
-title_label = NodePath("Margin/UpgradeList/TitleLabel")
-coupon_button = NodePath("Margin/UpgradeList/CouponButton")
-assortment_upgrade_button = NodePath("Margin/UpgradeList/AssortmentButton")
+main_panel = NodePath("MainPanel")
+shadow_panel = NodePath("ShadowPanel")
+panel_color = Color(0.780392, 0.811765, 0.866667, 1)
+content_margin_override = 6
+panel_width = 100
+shadow_offset = Vector2(2, 3)
+title_label = NodePath("MainPanel/UpgradeList/HeaderPanel/TitleLabel")
+coupon_button = NodePath("MainPanel/UpgradeList/CouponButton")
+assortment_upgrade_button = NodePath("MainPanel/UpgradeList/AssortmentButton")
+
+[node name="ShadowPanel" type="PanelContainer" parent="." unique_id=1655621175]
+layout_mode = 0
+offset_left = 2.0
+offset_top = 3.0
+offset_right = 102.0
+offset_bottom = 128.0
+mouse_filter = 2
+script = ExtResource("4_pixel_panel")
+panel_color = Color(0.054902, 0.027451, 0.105882, 0.42)
+content_margin_override = 6
+
+[node name="MainPanel" type="PanelContainer" parent="." unique_id=1240788006]
+layout_mode = 0
+offset_right = 100.0
+offset_bottom = 125.0
+script = ExtResource("4_pixel_panel")
 panel_color = Color(0.780392, 0.811765, 0.866667, 1)
 content_margin_override = 6
 
-[node name="Margin" type="MarginContainer" parent="." unique_id=1655621175]
+[node name="UpgradeList" type="VBoxContainer" parent="MainPanel" unique_id=1139097804]
 layout_mode = 2
-theme_override_constants/margin_left = 4
-theme_override_constants/margin_top = 4
-theme_override_constants/margin_right = 4
-theme_override_constants/margin_bottom = 4
+theme_override_constants/separation = 4
 
-[node name="UpgradeList" type="VBoxContainer" parent="Margin" unique_id=1240788006]
+[node name="HeaderPanel" type="PanelContainer" parent="MainPanel/UpgradeList" unique_id=108961053]
+custom_minimum_size = Vector2(0, 18)
 layout_mode = 2
-theme_override_constants/separation = 5
+script = ExtResource("4_pixel_panel")
+panel_color = Color(0.572549, 0.631373, 0.72549, 1)
+content_margin_override = 2
 
-[node name="TitleLabel" type="Label" parent="Margin/UpgradeList" unique_id=1139097804]
+[node name="TitleLabel" type="Label" parent="MainPanel/UpgradeList/HeaderPanel" unique_id=1174583609]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.101961, 0.098039, 0.196078, 1)
-theme_override_fonts/font = ExtResource("3_d2mhl")
+theme_override_fonts/font = ExtResource("5_bold_font")
 theme_override_font_sizes/font_size = 8
 text = "UPGRADES"
 horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="CouponButton" type="Button" parent="Margin/UpgradeList" unique_id=108961053]
-custom_minimum_size = Vector2(0, 28)
+[node name="CouponButton" type="Button" parent="MainPanel/UpgradeList" unique_id=297158593]
+custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.101961, 0.098039, 0.196078, 1)
-theme_override_colors/font_pressed_color = Color(0.101961, 0.098039, 0.196078, 1)
-theme_override_colors/font_hover_color = Color(0.101961, 0.098039, 0.196078, 1)
-theme_override_colors/font_disabled_color = Color(0.054902, 0.027451, 0.105882, 1)
-theme_override_fonts/font = ExtResource("3_d2mhl")
-theme_override_font_sizes/font_size = 8
-theme_override_styles/normal = SubResource("StyleBoxTexture_n82bs")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_vl0rg")
-theme_override_styles/hover = SubResource("StyleBoxTexture_eoqky")
-theme_override_styles/disabled = SubResource("StyleBoxTexture_ptw7y")
-theme_override_styles/focus = SubResource("StyleBoxEmpty_4fhub")
+theme_override_fonts/font = ExtResource("6_compact_bold_font")
+theme_override_font_sizes/font_size = 6
 text = "Coupon"
 script = ExtResource("2_pixel_button")
 
-[node name="AssortmentButton" type="Button" parent="Margin/UpgradeList" unique_id=1174583609]
-custom_minimum_size = Vector2(0, 28)
+[node name="AssortmentButton" type="Button" parent="MainPanel/UpgradeList" unique_id=1905738448]
+custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.101961, 0.098039, 0.196078, 1)
-theme_override_colors/font_pressed_color = Color(0.101961, 0.098039, 0.196078, 1)
-theme_override_colors/font_hover_color = Color(0.101961, 0.098039, 0.196078, 1)
-theme_override_colors/font_disabled_color = Color(0.054902, 0.027451, 0.105882, 1)
-theme_override_fonts/font = ExtResource("3_d2mhl")
-theme_override_font_sizes/font_size = 8
-theme_override_styles/normal = SubResource("StyleBoxTexture_d4ra3")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_wx6fe")
-theme_override_styles/hover = SubResource("StyleBoxTexture_ylmne")
-theme_override_styles/disabled = SubResource("StyleBoxTexture_55nmy")
-theme_override_styles/focus = SubResource("StyleBoxEmpty_enxsq")
-text = "Stock Up"
+theme_override_fonts/font = ExtResource("6_compact_bold_font")
+theme_override_font_sizes/font_size = 6
+text = "Lvl 2 $6.00"
 script = ExtResource("2_pixel_button")
 
-[node name="FutureUpgradeSlot" type="PanelContainer" parent="Margin/UpgradeList" unique_id=297158593]
-custom_minimum_size = Vector2(0, 34)
+[node name="FutureUpgradeSlot" type="PanelContainer" parent="MainPanel/UpgradeList" unique_id=1072297720]
+custom_minimum_size = Vector2(0, 28)
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxTexture_y31bx")
-script = ExtResource("3_pixel_panel")
-panel_color = Color(0.572549, 0.631373, 0.72549, 1)
+script = ExtResource("4_pixel_panel")
+panel_color = Color(0.396078, 0.45098, 0.572549, 1)
 content_margin_override = 4
 
-[node name="Label" type="Label" parent="Margin/UpgradeList/FutureUpgradeSlot" unique_id=1905738448]
+[node name="Label" type="Label" parent="MainPanel/UpgradeList/FutureUpgradeSlot" unique_id=1536009743]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.101961, 0.098039, 0.196078, 1)
-theme_override_fonts/font = ExtResource("3_d2mhl")
-theme_override_font_sizes/font_size = 8
+theme_override_colors/font_color = Color(0.054902, 0.027451, 0.105882, 1)
+theme_override_fonts/font = ExtResource("6_compact_bold_font")
+theme_override_font_sizes/font_size = 6
 text = "..."
 horizontal_alignment = 1
 vertical_alignment = 1

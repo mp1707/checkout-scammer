@@ -10,8 +10,8 @@ signal assortment_upgrade_button_pressed()
 signal dialog_closed()
 
 @export var theme_resource: CheckoutThemeResource = preload("res://content/ui/checkout_theme.tres")
-@export var left_status_panel: PixelPanel
-@export var right_upgrade_panel: PixelPanel
+@export var left_status_panel: Control
+@export var right_upgrade_panel: Control
 @export var dialog_layer: Control
 @export var dialog_message_label: Label
 @export var popup_layer: Control
@@ -170,13 +170,13 @@ func _get_right_upgrade_panel() -> RightUpgradePanelScript:
 
 func _resolve_child_references() -> void:
 	if left_status_panel == null:
-		left_status_panel = get_node_or_null("LeftStatusPanel") as PixelPanel
+		left_status_panel = get_node_or_null("LeftStatusPanel") as Control
 	if left_status_panel == null:
-		left_status_panel = get_node_or_null("../LeftStatusPanel") as PixelPanel
+		left_status_panel = get_node_or_null("../LeftStatusPanel") as Control
 	if right_upgrade_panel == null:
-		right_upgrade_panel = get_node_or_null("RightUpgradePanel") as PixelPanel
+		right_upgrade_panel = get_node_or_null("RightUpgradePanel") as Control
 	if right_upgrade_panel == null:
-		right_upgrade_panel = get_node_or_null("../RightUpgradePanel") as PixelPanel
+		right_upgrade_panel = get_node_or_null("../RightUpgradePanel") as Control
 	if dialog_layer == null:
 		dialog_layer = get_node_or_null("DialogLayer") as Control
 	if dialog_message_label == null:
