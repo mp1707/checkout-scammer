@@ -2,6 +2,8 @@
 extends Button
 class_name PixelButton
 
+const TOOLTIP_PANEL_SCENE: PackedScene = preload("res://scenes/ui/tooltips/tooltip_panel.tscn")
+
 @export var theme_resource: CheckoutThemeResource = preload("res://content/ui/checkout_theme.tres"):
 	set(value):
 		theme_resource = value
@@ -37,6 +39,16 @@ func apply_pixel_button_theme() -> void:
 	add_theme_color_override("font_hover_color", theme_resource.text_color)
 	add_theme_color_override("font_pressed_color", theme_resource.text_color)
 	add_theme_color_override("font_disabled_color", theme_resource.text_disabled_color)
+
+
+func _make_custom_tooltip(for_text: String) -> Object:
+	if for_text.strip_edges().is_empty():
+		return null
+
+	var tooltip_node: Node = TOOLTIP_PANEL_SCENE.instantiate()
+	if tooltip_node.has_method("configure_text"):
+		tooltip_node.call("configure_text", for_text)
+	return tooltip_node
 
 
 func _make_style(color: Color) -> StyleBoxTexture:

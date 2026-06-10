@@ -1,0 +1,42 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/tooltips/tooltip_panel.gd" id="1_tooltip_panel"]
+[ext_resource type="Script" path="res://scripts/ui/panels/pixel_panel.gd" id="2_pixel_panel"]
+
+[node name="TooltipPanel" type="Control" node_paths=PackedStringArray("main_panel", "shadow_panel", "text_label")]
+offset_right = 168.0
+offset_bottom = 40.0
+mouse_filter = 2
+script = ExtResource("1_tooltip_panel")
+main_panel = NodePath("MainPanel")
+shadow_panel = NodePath("ShadowPanel")
+content_margin_override = 6
+panel_width = 164
+shadow_offset = Vector2(2, 3)
+text_label = NodePath("MainPanel/TooltipLabel")
+
+[node name="ShadowPanel" type="PanelContainer" parent="."]
+layout_mode = 0
+offset_left = 2.0
+offset_top = 3.0
+offset_right = 166.0
+offset_bottom = 40.0
+mouse_filter = 2
+script = ExtResource("2_pixel_panel")
+panel_color = Color(0.054902, 0.027451, 0.105882, 0.42)
+content_margin_override = 6
+
+[node name="MainPanel" type="PanelContainer" parent="."]
+layout_mode = 0
+offset_right = 164.0
+offset_bottom = 37.0
+mouse_filter = 2
+script = ExtResource("2_pixel_panel")
+panel_color = Color(0.780392, 0.811765, 0.866667, 1)
+content_margin_override = 6
+
+[node name="TooltipLabel" type="Label" parent="MainPanel"]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+text = "Tooltip"
+autowrap_mode = 3

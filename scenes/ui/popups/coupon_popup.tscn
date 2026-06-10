@@ -4,43 +4,72 @@
 [ext_resource type="Script" path="res://scripts/ui/panels/pixel_button.gd" id="2_pixel_button"]
 [ext_resource type="Resource" path="res://content/ui/checkout_theme.tres" id="3_theme"]
 [ext_resource type="PackedScene" path="res://scenes/ui/popups/coupon_option_button.tscn" id="4_option_button"]
+[ext_resource type="Script" path="res://scripts/ui/panels/pixel_panel.gd" id="5_pixel_panel"]
 
-[node name="CouponPopup" type="PanelContainer"]
-offset_left = 220.0
-offset_top = 78.0
-offset_right = 420.0
-offset_bottom = 212.0
+[node name="CouponPopup" type="Control" node_paths=PackedStringArray("main_panel", "shadow_panel", "title_label", "body_label", "options_container", "close_button")]
+offset_left = 218.0
+offset_top = 76.0
+offset_right = 424.0
+offset_bottom = 214.0
+mouse_filter = 2
 script = ExtResource("1_coupon_popup")
+theme_resource = ExtResource("3_theme")
+main_panel = NodePath("MainPanel")
+shadow_panel = NodePath("ShadowPanel")
+panel_color = Color(0.964706, 0.792157, 0.623529, 1)
+content_margin_override = 6
+panel_width = 204
+shadow_offset = Vector2(2, 3)
+title_label = NodePath("MainPanel/VBox/TitleLabel")
+body_label = NodePath("MainPanel/VBox/BodyLabel")
+options_container = NodePath("MainPanel/VBox/OptionsAnchor")
+close_button = NodePath("MainPanel/VBox/CloseButton")
+coupon_option_button_scene = ExtResource("4_option_button")
+
+[node name="ShadowPanel" type="PanelContainer" parent="."]
+layout_mode = 0
+offset_left = 2.0
+offset_top = 3.0
+offset_right = 206.0
+offset_bottom = 138.0
+mouse_filter = 2
+script = ExtResource("5_pixel_panel")
+theme_resource = ExtResource("3_theme")
+panel_color = Color(0.054902, 0.027451, 0.105882, 0.42)
+content_margin_override = 6
+
+[node name="MainPanel" type="PanelContainer" parent="."]
+layout_mode = 0
+offset_right = 204.0
+offset_bottom = 135.0
+mouse_filter = 2
+script = ExtResource("5_pixel_panel")
 theme_resource = ExtResource("3_theme")
 panel_color = Color(0.964706, 0.792157, 0.623529, 1)
 content_margin_override = 6
-title_label = NodePath("VBox/TitleLabel")
-body_label = NodePath("VBox/BodyLabel")
-options_container = NodePath("VBox/OptionsAnchor")
-close_button = NodePath("VBox/CloseButton")
-coupon_option_button_scene = ExtResource("4_option_button")
 
-[node name="VBox" type="VBoxContainer" parent="."]
+[node name="VBox" type="VBoxContainer" parent="MainPanel"]
 layout_mode = 2
 theme_override_constants/separation = 4
 
-[node name="TitleLabel" type="Label" parent="VBox"]
+[node name="TitleLabel" type="Label" parent="MainPanel/VBox"]
 layout_mode = 2
 text = "Coupons"
 horizontal_alignment = 1
 
-[node name="BodyLabel" type="Label" parent="VBox"]
+[node name="BodyLabel" type="Label" parent="MainPanel/VBox"]
+custom_minimum_size = Vector2(160, 0)
 layout_mode = 2
 text = "Coupon choices appear here."
 autowrap_mode = 3
 horizontal_alignment = 1
 
-[node name="OptionsAnchor" type="VBoxContainer" parent="VBox"]
+[node name="OptionsAnchor" type="VBoxContainer" parent="MainPanel/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/separation = 3
 
-[node name="CloseButton" type="Button" parent="VBox"]
+[node name="CloseButton" type="Button" parent="MainPanel/VBox"]
 custom_minimum_size = Vector2(0, 22)
 layout_mode = 2
 text = "Close"

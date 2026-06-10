@@ -1,4 +1,5 @@
-extends "res://scripts/ui/panels/pixel_panel.gd"
+@tool
+extends "res://scripts/ui/panels/pixel_panel_frame.gd"
 class_name CouponPopup
 
 signal popup_closed()
@@ -22,6 +23,7 @@ func _ready() -> void:
 func set_placeholder_text(message: String) -> void:
 	if body_label != null:
 		body_label.text = message
+	queue_fit_to_content()
 
 
 func configure_options(coupons: Array[CouponResource], affordable_coupon_ids: PackedStringArray) -> void:
@@ -33,6 +35,7 @@ func configure_options(coupons: Array[CouponResource], affordable_coupon_ids: Pa
 
 	for coupon: CouponResource in coupons:
 		_add_coupon_option(coupon, affordable_coupon_ids.has(coupon.id))
+	queue_fit_to_content()
 
 
 func _on_close_button_pressed() -> void:
@@ -82,6 +85,7 @@ func _clear_options() -> void:
 
 	for child: Node in options_container.get_children():
 		child.queue_free()
+	queue_fit_to_content()
 
 
 func _format_cents(cents: int) -> String:
@@ -91,10 +95,10 @@ func _format_cents(cents: int) -> String:
 
 func _resolve_child_references() -> void:
 	if title_label == null:
-		title_label = get_node_or_null("VBox/TitleLabel") as Label
+		title_label = get_node_or_null("MainPanel/VBox/TitleLabel") as Label
 	if body_label == null:
-		body_label = get_node_or_null("VBox/BodyLabel") as Label
+		body_label = get_node_or_null("MainPanel/VBox/BodyLabel") as Label
 	if options_container == null:
-		options_container = get_node_or_null("VBox/OptionsAnchor") as VBoxContainer
+		options_container = get_node_or_null("MainPanel/VBox/OptionsAnchor") as VBoxContainer
 	if close_button == null:
-		close_button = get_node_or_null("VBox/CloseButton") as Button
+		close_button = get_node_or_null("MainPanel/VBox/CloseButton") as Button
