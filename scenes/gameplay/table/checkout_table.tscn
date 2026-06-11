@@ -30,10 +30,10 @@ position = Vector2(320, 180)
 texture = ExtResource("8_table")
 
 [node name="BagZone" parent="." unique_id=1494708852 instance=ExtResource("4_bag")]
-position = Vector2(199, 226)
+position = Vector2(206, 241)
 
 [node name="ScannerStation" parent="." unique_id=678997339 instance=ExtResource("2_scanner")]
-position = Vector2(317, 167)
+position = Vector2(334, 161)
 
 [node name="ProductScatterView" parent="." unique_id=364460971 instance=ExtResource("3_product_scatter")]
 position = Vector2(360, 190)
