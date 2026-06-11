@@ -1,13 +1,14 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/gameplay/actors/product_actor.gd" id="1_product_actor"]
 [ext_resource type="Resource" path="res://content/ui/checkout_theme.tres" id="2_theme"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/stickers/sticker_visual.tscn" id="3_sticker_visual"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/ui/sticker_apply.wav" id="4_sticker_apply"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_product_pick"]
 size = Vector2(32, 32)
 
-[node name="ProductActor" type="Node2D"]
+[node name="ProductActor" type="Node2D" node_paths=PackedStringArray("product_sprite", "shadow_sprite", "sprite_root", "sticker_layer", "interaction_area", "collision_shape", "animation_player", "sticker_apply_player")]
 script = ExtResource("1_product_actor")
 theme_resource = ExtResource("2_theme")
 product_sprite = NodePath("SpriteRoot/ProductSprite")
@@ -17,6 +18,7 @@ sticker_layer = NodePath("SpriteRoot/StickerLayer")
 interaction_area = NodePath("InteractionArea")
 collision_shape = NodePath("InteractionArea/CollisionShape2D")
 animation_player = NodePath("AnimationPlayer")
+sticker_apply_player = NodePath("StickerApplyPlayer")
 sticker_visual_scene = ExtResource("3_sticker_visual")
 
 [node name="ShadowAnchor" type="Node2D" parent="."]
@@ -38,5 +40,9 @@ input_pickable = true
 shape = SubResource("RectangleShape2D_product_pick")
 
 [node name="WobbleAnchor" type="Marker2D" parent="."]
+
+[node name="StickerApplyPlayer" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("4_sticker_apply")
+volume_db = -3.0
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]

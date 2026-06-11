@@ -4,17 +4,18 @@ class_name TrashZone
 signal actor_dropped(actor: Node2D)
 
 @export var drop_anchor: Marker2D
+@export var swoosh_player: AudioStreamPlayer2D
 
 
 func _ready() -> void:
-	if drop_anchor == null:
-		drop_anchor = get_node_or_null("DropAnchor") as Marker2D
+	_resolve_child_references()
 
 
 func try_drop_actor(actor: Node2D) -> bool:
 	if not can_accept_actor(actor):
 		return false
 
+	_play_swoosh_sound()
 	actor_dropped.emit(actor)
 	return true
 
@@ -34,3 +35,18 @@ func _get_actor_contact_area(actor: Node2D) -> Area2D:
 	if actor == null or not actor.has_method("get_contact_area"):
 		return null
 	return actor.call("get_contact_area") as Area2D
+
+
+func _play_swoosh_sound() -> void:
+	if swoosh_player == null:
+		return
+
+	swoosh_player.stop()
+	swoosh_player.play()
+
+
+func _resolve_child_references() -> void:
+	if drop_anchor == null:
+		drop_anchor = get_node_or_null("DropAnchor") as Marker2D
+	if swoosh_player == null:
+		swoosh_player = get_node_or_null("SwooshPlayer") as AudioStreamPlayer2D

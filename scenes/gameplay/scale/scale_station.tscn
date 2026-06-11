@@ -1,21 +1,33 @@
-[gd_scene format=3 uid="uid://bsvrb5lcllis3"]
+[gd_scene load_steps=6 format=3 uid="uid://bsvrb5lcllis3"]
 
 [ext_resource type="Script" uid="uid://hr8jsyptv8dr" path="res://scripts/gameplay/components/scale_station.gd" id="1_scale_station"]
 [ext_resource type="Texture2D" uid="uid://dhx3pw4vq5cjg" path="res://assets/textures/environment/waage_sheet.png" id="2_waage_sheet"]
 [ext_resource type="FontFile" uid="uid://ilorfjrobin5" path="res://assets/fonts/PixelOperator8.ttf" id="3_pixel_font"]
+[ext_resource type="PackedScene" path="res://scenes/vfx/scale_impact_vfx.tscn" id="4_scale_impact"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/ui/weight_drop.wav" id="5_weight_drop"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_scale_drop"]
 size = Vector2(76, 54)
 
-[node name="ScaleStation" type="Area2D" unique_id=54455267 node_paths=PackedStringArray("scale_sprite", "drop_anchor", "weight_label")]
+[node name="ScaleStation" type="Area2D" unique_id=54455267 node_paths=PackedStringArray("scale_sprite", "drop_anchor", "weight_label", "impact_vfx", "drop_sound_player")]
 script = ExtResource("1_scale_station")
 scale_sprite = NodePath("ScaleSprite")
 drop_anchor = NodePath("DropAnchor")
 weight_label = NodePath("WeightLabel")
+impact_vfx = NodePath("ImpactVfx")
+drop_sound_player = NodePath("DropSoundPlayer")
 
 [node name="ScaleSprite" type="Sprite2D" parent="." unique_id=1193603286]
 texture = ExtResource("2_waage_sheet")
 hframes = 3
+
+[node name="ImpactVfx" parent="." instance=ExtResource("4_scale_impact")]
+z_index = 20
+position = Vector2(0, -14)
+
+[node name="DropSoundPlayer" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("5_weight_drop")
+volume_db = -3.0
 
 [node name="WeightLabel" type="Label" parent="." unique_id=1997652582]
 z_index = 1

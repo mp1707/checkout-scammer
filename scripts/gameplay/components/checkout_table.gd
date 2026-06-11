@@ -71,6 +71,16 @@ func pulse_customer_hand() -> void:
 		customer_hand_view.call("pulse_customer_hand")
 
 
+func play_customer_alert_sound() -> void:
+	if customer_hand_view != null and customer_hand_view.has_method("play_alert_sound"):
+		customer_hand_view.call("play_alert_sound")
+
+
+func play_customer_caught_sound() -> void:
+	if customer_hand_view != null and customer_hand_view.has_method("play_caught_sound"):
+		customer_hand_view.call("play_caught_sound")
+
+
 func play_successful_scan_feedback(actor: Node2D, scan_count: int, _contact_position: Vector2) -> void:
 	if scanner_station != null and scanner_station.has_method("play_success_feedback"):
 		scanner_station.call("play_success_feedback", scan_count)
@@ -106,6 +116,11 @@ func play_rejected_drop_feedback(actor: Node2D) -> void:
 func refresh_product_actor(actor: Node2D) -> void:
 	if actor != null and actor.has_method("refresh_product_state"):
 		actor.call("refresh_product_state")
+
+
+func play_sticker_apply_feedback(actor: Node2D) -> void:
+	if actor != null and actor.has_method("play_sticker_apply_feedback"):
+		actor.call("play_sticker_apply_feedback")
 
 
 func find_product_actor_at_global_position(global_point: Vector2) -> ProductActor:

@@ -406,6 +406,7 @@ func _on_sticker_drag_released(sticker_id: String, global_drop_position: Vector2
 		return
 
 	checkout_table.refresh_product_actor(product_actor)
+	checkout_table.play_sticker_apply_feedback(product_actor)
 	if _active_scale_actor == product_actor:
 		_refresh_active_scale_amount(product_instance)
 	if hud_root != null:
@@ -438,6 +439,7 @@ func _handle_caught_scan(actor: Node2D, product_instance: ProductInstance) -> vo
 	if checkout_table != null:
 		checkout_table.release_scale_actor(actor)
 		checkout_table.clear_scanned_product_amount()
+		checkout_table.play_customer_caught_sound()
 	_visible_object_queue_system.mark_product_processed(run_state.current_customer, product_instance)
 	_finish_actor(actor, false)
 	_update_product_area_view()

@@ -10,7 +10,7 @@
 [ext_resource type="PackedScene" path="res://scenes/vfx/coin_burst_vfx.tscn" id="7_coin_burst"]
 [ext_resource type="Texture2D" uid="uid://c4i8322s07aui" path="res://assets/textures/environment/table.png" id="8_table"]
 [ext_resource type="Script" uid="uid://cqe1rqlfh7jru" path="res://scripts/gameplay/components/register_display.gd" id="9_register_display"]
-[ext_resource type="PackedScene" uid="uid://bsvrb5lcllis3" path="res://scenes/gameplay/scale/scale_station.tscn" id="10_scale_station"]
+[ext_resource type="PackedScene" path="res://scenes/gameplay/scale/scale_station.tscn" id="10_scale_station"]
 
 [node name="CheckoutTable" type="Control" unique_id=845555887 node_paths=PackedStringArray("product_scatter_view", "scanner_station", "register_display", "bag_zone", "trash_zone", "scale_station", "customer_hand_view", "vfx_container")]
 layout_mode = 3

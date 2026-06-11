@@ -1,58 +1,62 @@
-extends Node2D
+extends "res://scripts/vfx/one_shot_animated_vfx.gd"
 class_name CoinBurstVfx
 
-@export var sprite: Sprite2D
-@export var spritesheet: Texture2D = preload("res://assets/vfx/coin/spritesheet.png")
-@export var frame_size: Vector2i = Vector2i(128, 128)
-@export var frame_count: int = 31
-@export var frame_duration_seconds: float = 0.024
-@export var pixel_scale: float = 0.44
+@export var coin_sound_player_1: AudioStreamPlayer2D
+@export var coin_sound_player_2: AudioStreamPlayer2D
+@export var coin_sound_player_3: AudioStreamPlayer2D
+@export var coin_sound_cutoff_seconds: float = 0.72
 
-var _play_tween: Tween
+var _sound_stop_tween: Tween
+var _coin_sound_random: RandomNumberGenerator = RandomNumberGenerator.new()
 
 
 func _ready() -> void:
-	_resolve_child_references()
-	if sprite == null:
+	_coin_sound_random.randomize()
+	super._ready()
+
+
+func play() -> void:
+	super.play()
+	_play_random_coin_sound()
+
+
+func _play_random_coin_sound() -> void:
+	var available_players: Array[AudioStreamPlayer2D] = []
+	if coin_sound_player_1 != null:
+		available_players.append(coin_sound_player_1)
+	if coin_sound_player_2 != null:
+		available_players.append(coin_sound_player_2)
+	if coin_sound_player_3 != null:
+		available_players.append(coin_sound_player_3)
+	if available_players.is_empty():
 		return
 
-	sprite.texture = spritesheet
-	sprite.region_enabled = true
-	sprite.centered = true
-	sprite.scale = Vector2.ONE * pixel_scale
-	_set_frame_index(0.0)
-	visible = false
+	_stop_coin_sounds()
+	var selected_index: int = _coin_sound_random.randi_range(0, available_players.size() - 1)
+	var selected_player: AudioStreamPlayer2D = available_players[selected_index]
+	selected_player.play()
+
+	if _sound_stop_tween != null and _sound_stop_tween.is_valid():
+		_sound_stop_tween.kill()
+	_sound_stop_tween = create_tween()
+	_sound_stop_tween.tween_interval(maxf(coin_sound_cutoff_seconds, 0.0))
+	_sound_stop_tween.tween_callback(_stop_coin_sounds)
 
 
-func play_at(start_global_position: Vector2) -> void:
-	global_position = start_global_position.round()
-	visible = true
-	modulate = Color.WHITE
-
-	if _play_tween != null and _play_tween.is_valid():
-		_play_tween.kill()
-
-	_play_tween = create_tween()
-	_play_tween.tween_method(
-		Callable(self, "_set_frame_index"),
-		0.0,
-		float(maxi(frame_count - 1, 0)),
-		frame_duration_seconds * float(frame_count)
-	)
-	_play_tween.tween_callback(queue_free)
-
-
-func _set_frame_index(frame_value: float) -> void:
-	if sprite == null or frame_size.x <= 0 or frame_size.y <= 0:
-		return
-
-	var frame_index: int = clampi(roundi(frame_value), 0, maxi(frame_count - 1, 0))
-	sprite.region_rect = Rect2(
-		Vector2(float(frame_index * frame_size.x), 0.0),
-		Vector2(float(frame_size.x), float(frame_size.y))
-	)
+func _stop_coin_sounds() -> void:
+	if coin_sound_player_1 != null:
+		coin_sound_player_1.stop()
+	if coin_sound_player_2 != null:
+		coin_sound_player_2.stop()
+	if coin_sound_player_3 != null:
+		coin_sound_player_3.stop()
 
 
 func _resolve_child_references() -> void:
-	if sprite == null:
-		sprite = get_node_or_null("Sprite") as Sprite2D
+	super._resolve_child_references()
+	if coin_sound_player_1 == null:
+		coin_sound_player_1 = get_node_or_null("CoinSoundPlayer1") as AudioStreamPlayer2D
+	if coin_sound_player_2 == null:
+		coin_sound_player_2 = get_node_or_null("CoinSoundPlayer2") as AudioStreamPlayer2D
+	if coin_sound_player_3 == null:
+		coin_sound_player_3 = get_node_or_null("CoinSoundPlayer3") as AudioStreamPlayer2D

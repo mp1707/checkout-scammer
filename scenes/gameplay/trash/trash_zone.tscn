@@ -1,13 +1,15 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/gameplay/components/trash_zone.gd" id="1_trash_zone"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/ui/trash_swoosh.wav" id="2_trash_swoosh"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_trash_zone"]
 radius = 28.0
 
-[node name="TrashZone" type="Area2D"]
+[node name="TrashZone" type="Area2D" node_paths=PackedStringArray("drop_anchor", "swoosh_player")]
 script = ExtResource("1_trash_zone")
 drop_anchor = NodePath("DropAnchor")
+swoosh_player = NodePath("SwooshPlayer")
 monitoring = true
 monitorable = true
 
@@ -15,3 +17,7 @@ monitorable = true
 shape = SubResource("CircleShape2D_trash_zone")
 
 [node name="DropAnchor" type="Marker2D" parent="."]
+
+[node name="SwooshPlayer" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("2_trash_swoosh")
+volume_db = -3.0

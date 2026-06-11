@@ -2,6 +2,8 @@
 extends Area2D
 class_name ScaleStation
 
+const OneShotAnimatedVfxScript = preload("res://scripts/vfx/one_shot_animated_vfx.gd")
+
 signal actor_dropped(actor: Node2D)
 signal actor_removed(actor: Node2D)
 
@@ -15,6 +17,8 @@ signal actor_removed(actor: Node2D)
 	set(value):
 		weight_label = value
 		_apply_weight_label_theme()
+@export var impact_vfx: OneShotAnimatedVfxScript
+@export var drop_sound_player: AudioStreamPlayer2D
 
 var _current_actor: Node2D
 var _press_tween: Tween
@@ -39,6 +43,8 @@ func try_drop_actor(actor: Node2D) -> bool:
 	actor.z_index = 40
 	_show_actor_weight(actor)
 	_play_press_animation()
+	_play_impact_vfx()
+	_play_drop_sound()
 	actor_dropped.emit(actor)
 	return true
 
@@ -126,6 +132,19 @@ func _play_press_animation() -> void:
 	_press_tween.tween_callback(_set_frame.bind(2))
 
 
+func _play_impact_vfx() -> void:
+	if impact_vfx != null:
+		impact_vfx.play()
+
+
+func _play_drop_sound() -> void:
+	if drop_sound_player == null:
+		return
+
+	drop_sound_player.stop()
+	drop_sound_player.play()
+
+
 func _play_scale_tint(color: Color, duration: float) -> void:
 	if _feedback_tween != null and _feedback_tween.is_valid():
 		_feedback_tween.kill()
@@ -192,3 +211,7 @@ func _resolve_child_references() -> void:
 		drop_anchor = get_node_or_null("DropAnchor") as Marker2D
 	if weight_label == null:
 		weight_label = get_node_or_null("WeightLabel") as Label
+	if impact_vfx == null:
+		impact_vfx = get_node_or_null("ImpactVfx") as OneShotAnimatedVfxScript
+	if drop_sound_player == null:
+		drop_sound_player = get_node_or_null("DropSoundPlayer") as AudioStreamPlayer2D

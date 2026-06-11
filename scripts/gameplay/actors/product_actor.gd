@@ -15,6 +15,7 @@ signal scanner_contact_changed(actor: ProductActor, is_touching_scanner: bool, c
 @export var interaction_area: Area2D
 @export var collision_shape: CollisionShape2D
 @export var animation_player: AnimationPlayer
+@export var sticker_apply_player: AudioStreamPlayer2D
 @export var sticker_visual_scene: PackedScene = preload("res://scenes/gameplay/stickers/sticker_visual.tscn")
 
 var actor_id: String = ""
@@ -58,6 +59,14 @@ func get_contact_area() -> Area2D:
 
 func refresh_product_state() -> void:
 	_refresh_product_visuals()
+
+
+func play_sticker_apply_feedback() -> void:
+	if sticker_apply_player == null:
+		return
+
+	sticker_apply_player.stop()
+	sticker_apply_player.play()
 
 
 func contains_global_point(global_point: Vector2) -> bool:
@@ -309,3 +318,5 @@ func _resolve_child_references() -> void:
 		collision_shape = get_node_or_null("InteractionArea/CollisionShape2D") as CollisionShape2D
 	if animation_player == null:
 		animation_player = get_node_or_null("AnimationPlayer") as AnimationPlayer
+	if sticker_apply_player == null:
+		sticker_apply_player = get_node_or_null("StickerApplyPlayer") as AudioStreamPlayer2D

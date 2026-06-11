@@ -1,10 +1,258 @@
 [gd_scene format=3 uid="uid://d3jmfhyp3jonm"]
 
 [ext_resource type="Script" uid="uid://bserxqrlnh55h" path="res://scripts/vfx/coin_burst_vfx.gd" id="1_coin_burst"]
+[ext_resource type="Texture2D" uid="uid://bn54ed7d5ts0l" path="res://assets/vfx/coin/spritesheet.png" id="2_coin_sheet"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/ui/coinfx1_loop.mp3" id="3_coinfx1"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/ui/coinfx2_loop.mp3" id="4_coinfx2"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/ui/coinfx3_loop.mp3" id="5_coinfx3"]
 
-[node name="CoinBurstVfx" type="Node2D" unique_id=214863132]
-scale = Vector2(2, 2)
+[sub_resource type="AtlasTexture" id="AtlasTexture_coin_00"]
+atlas = ExtResource("2_coin_sheet")
+region = Rect2(0, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_coin_01"]
+atlas = ExtResource("2_coin_sheet")
+region = Rect2(128, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_coin_02"]
+atlas = ExtResource("2_coin_sheet")
+region = Rect2(256, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_coin_03"]
+atlas = ExtResource("2_coin_sheet")
+region = Rect2(384, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_coin_04"]
+atlas = ExtResource("2_coin_sheet")
+region = Rect2(512, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_coin_05"]
+atlas = ExtResource("2_coin_sheet")
+region = Rect2(640, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_coin_06"]
+atlas = ExtResource("2_coin_sheet")
+region = Rect2(768, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_coin_07"]
+atlas = ExtResource("2_coin_sheet")
+region = Rect2(896, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_coin_08"]
+atlas = ExtResource("2_coin_sheet")
+region = Rect2(1024, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_coin_09"]
+atlas = ExtResource("2_coin_sheet")
+region = Rect2(1152, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_coin_10"]
+atlas = ExtResource("2_coin_sheet")
+region = Rect2(1280, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_coin_11"]
+atlas = ExtResource("2_coin_sheet")
+region = Rect2(1408, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_coin_12"]
+atlas = ExtResource("2_coin_sheet")
+region = Rect2(1536, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_coin_13"]
+atlas = ExtResource("2_coin_sheet")
+region = Rect2(1664, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_coin_14"]
+atlas = ExtResource("2_coin_sheet")
+region = Rect2(1792, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_coin_15"]
+atlas = ExtResource("2_coin_sheet")
+region = Rect2(1920, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_coin_16"]
+atlas = ExtResource("2_coin_sheet")
+region = Rect2(2048, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_coin_17"]
+atlas = ExtResource("2_coin_sheet")
+region = Rect2(2176, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_coin_18"]
+atlas = ExtResource("2_coin_sheet")
+region = Rect2(2304, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_coin_19"]
+atlas = ExtResource("2_coin_sheet")
+region = Rect2(2432, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_coin_20"]
+atlas = ExtResource("2_coin_sheet")
+region = Rect2(2560, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_coin_21"]
+atlas = ExtResource("2_coin_sheet")
+region = Rect2(2688, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_coin_22"]
+atlas = ExtResource("2_coin_sheet")
+region = Rect2(2816, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_coin_23"]
+atlas = ExtResource("2_coin_sheet")
+region = Rect2(2944, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_coin_24"]
+atlas = ExtResource("2_coin_sheet")
+region = Rect2(3072, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_coin_25"]
+atlas = ExtResource("2_coin_sheet")
+region = Rect2(3200, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_coin_26"]
+atlas = ExtResource("2_coin_sheet")
+region = Rect2(3328, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_coin_27"]
+atlas = ExtResource("2_coin_sheet")
+region = Rect2(3456, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_coin_28"]
+atlas = ExtResource("2_coin_sheet")
+region = Rect2(3584, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_coin_29"]
+atlas = ExtResource("2_coin_sheet")
+region = Rect2(3712, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_coin_30"]
+atlas = ExtResource("2_coin_sheet")
+region = Rect2(3840, 0, 128, 128)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_coin"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_coin_00")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_coin_01")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_coin_02")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_coin_03")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_coin_04")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_coin_05")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_coin_06")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_coin_07")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_coin_08")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_coin_09")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_coin_10")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_coin_11")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_coin_12")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_coin_13")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_coin_14")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_coin_15")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_coin_16")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_coin_17")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_coin_18")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_coin_19")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_coin_20")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_coin_21")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_coin_22")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_coin_23")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_coin_24")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_coin_25")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_coin_26")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_coin_27")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_coin_28")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_coin_29")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_coin_30")
+}],
+"loop": false,
+"name": &"default",
+"speed": 30.0
+}]
+
+[node name="CoinBurstVfx" type="Node2D" unique_id=214863132 node_paths=PackedStringArray("animated_sprite", "coin_sound_player_1", "coin_sound_player_2", "coin_sound_player_3")]
 script = ExtResource("1_coin_burst")
-sprite = NodePath("Sprite")
+animated_sprite = NodePath("AnimatedSprite2D")
+coin_sound_player_1 = NodePath("CoinSoundPlayer1")
+coin_sound_player_2 = NodePath("CoinSoundPlayer2")
+coin_sound_player_3 = NodePath("CoinSoundPlayer3")
 
-[node name="Sprite" type="Sprite2D" parent="." unique_id=2107639242]
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=2107639242]
+texture_filter = 1
+scale = Vector2(0.88, 0.88)
+sprite_frames = SubResource("SpriteFrames_coin")
+frame = 30
+frame_progress = 1.0
+
+[node name="CoinSoundPlayer1" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("3_coinfx1")
+volume_db = -5.0
+
+[node name="CoinSoundPlayer2" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("4_coinfx2")
+volume_db = -5.0
+
+[node name="CoinSoundPlayer3" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("5_coinfx3")
+volume_db = -5.0
