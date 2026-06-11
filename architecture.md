@@ -1,6 +1,6 @@
 # Checkout Scammer - Architektur
 
-Stand: 2026-06-07
+Stand: 2026-06-11
 
 Diese Datei ist die verbindliche technische Grundlage fuer Checkout Scammer. Aenderungen an dieser Architektur brauchen vorherige Ruecksprache mit Marco, wenn sie Ownership, Datenfluss, Szenenstruktur, Autoloads, UI-Architektur oder zentrale Gameplay-Systeme betreffen.
 
@@ -260,12 +260,22 @@ Font:
 - Erlaubte UI-Fontgroessen: `8`, `16`, `24`, `32`
 - Fontgroessen werden ueber Theme-Resources gesetzt, nicht lokal in Einzelszenen.
 
+## Audio- und VFX-Feedback
+
+Audio- und VFX-Feedback gehoert zur Presentation-Schicht. Gameplay-Systeme liefern nur Ergebnis- oder Feedback-Events; Szenen wie `CheckoutTable`, `ProductActor`, `ScaleStation`, `ScannerStation`, `TrashZone` und `CustomerHandView` spielen daraus editorseitig authorierte AudioPlayer, AnimationPlayer oder VFX-Anker ab.
+
+- Wiederkehrende AudioPlayer, AnimationPlayer und VFX-Anker bleiben als sichtbare Child-Nodes in den Szenen.
+- Runtime-VFX werden nur als fertige `PackedScene`s in vorhandene VFX-Container oder Marker instanziiert.
+- Haeufig gespawnte VFX wie Coin-Bursts muessen leicht instanziierbar oder spaeter poolbar bleiben: keine grossen Node-/Resource-Baeume, keine Asset- oder Resource-Ladevorgaenge und keine unnoetigen AudioPlayer-Multiplikationen im Scan-/Payout-Flow.
+
 ## Asset-Pipeline
 
 Root-Assets werden nicht als dauerhafte Asset-Ablage genutzt. Dauerhafte Ziele:
 
 - Font: `assets/fonts/PixelOperator8.ttf`
 - Scanner-SFX: `assets/audio/sfx/scanner/high_beep.mp3`
+- Customer-SFX: `assets/audio/sfx/customer`
+- UI-SFX: `assets/audio/sfx/ui`
 - 9-Slice-Panel: `assets/textures/ui/panels/9slice_panel_white.png`
 - Produkt-Spritesheet: `assets/textures/products/products_sheet.png`
 - Produkt-Spritesheet-Mapping: `assets/textures/products/products_sheet.txt`
@@ -273,6 +283,7 @@ Root-Assets werden nicht als dauerhafte Asset-Ablage genutzt. Dauerhafte Ziele:
 - Waage: `assets/textures/environment/waage_sheet.png`, 3 Frames à `96x96`
 - Environment-Sprites: `assets/textures/environment`
 - Coin-/Scanner-VFX: `assets/vfx/coin`, `assets/vfx/scanner`
+- Customer-/Impact-VFX: `assets/vfx/customer`, `assets/vfx/impact`
 
 Produkt-Schatten werden nicht als Standardprodukt gebaked, sondern im `ProductActor` separat aufgebaut.
 
