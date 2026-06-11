@@ -22,12 +22,14 @@ func _run() -> void:
 
 	var controller: RunController = app.get_node("RunController") as RunController
 	var checkout_table: CheckoutTable = app.get_node("CheckoutTable") as CheckoutTable
+	var register_display: Node = app.get_node("CheckoutTable/RegisterDisplay")
 	var hud_root: HudRoot = app.get_node("HudRoot") as HudRoot
 	_expect_true(controller != null, "RunController node is present")
 	_expect_true(controller != null and controller.run_state != null, "RunController starts a run from GameApp")
 	_expect_true(checkout_table != null, "CheckoutTable is present")
+	_expect_true(register_display != null, "RegisterDisplay is present")
 	_expect_true(hud_root != null, "HudRoot is present")
-	if controller == null or controller.run_state == null or checkout_table == null or hud_root == null:
+	if controller == null or controller.run_state == null or checkout_table == null or register_display == null or hud_root == null:
 		app.queue_free()
 		_finish()
 		return
@@ -54,11 +56,17 @@ func _run() -> void:
 	product_actor.movement_direction = Vector2.LEFT
 	checkout_table.emit_signal("product_scan_contact_started", product_actor, product_actor.global_position)
 	_expect_true(product_actor.product_instance.open_amount_cents > 0, "Right-to-left scanner intent adds open product amount")
+	_expect_equal_string(
+		_format_cents(product_actor.product_instance.open_amount_cents),
+		_get_register_display_text(register_display),
+		"Right-to-left scanner intent updates register display"
+	)
 
 	var cash_after_scan_before_payout: int = controller.run_state.cash_cents
 	checkout_table.emit_signal("actor_bag_drop_requested", product_actor)
 	await process_frame
 	_expect_true(controller.run_state.cash_cents > cash_after_scan_before_payout, "Bag drop pays product into drawer")
+	_expect_equal_string("", _get_register_display_text(register_display), "Bag drop clears register display")
 	_expect_equal_int(1, controller.run_state.current_customer.processed_product_count, "Bag drop marks product processed")
 	_expect_equal_int(5, controller.run_state.current_customer.product_queue.size(), "Bag drop refills from hidden queue")
 
@@ -106,6 +114,32 @@ func _expect_true(value: bool, label: String) -> void:
 func _expect_equal_int(expected: int, actual: int, label: String) -> void:
 	if expected != actual:
 		_fail(label, "Expected %d, got %d." % [expected, actual])
+
+
+func _expect_equal_string(expected: String, actual: String, label: String) -> void:
+	if expected != actual:
+		_fail(label, "Expected '%s', got '%s'." % [expected, actual])
+
+
+func _get_register_display_text(register_display: Node) -> String:
+	if register_display == null or not register_display.has_method("get_display_text"):
+		return ""
+
+	var display_text: Variant = register_display.call("get_display_text")
+	if display_text is String:
+		return display_text
+	return ""
+
+
+func _format_cents(cents: int) -> String:
+	var sign_prefix: String = ""
+	var absolute_cents: int = cents
+	if cents < 0:
+		sign_prefix = "-"
+		absolute_cents = -cents
+
+	var dollars: int = floori(float(absolute_cents) / 100.0)
+	return "%s$%d.%02d" % [sign_prefix, dollars, absolute_cents % 100]
 
 
 func _fail(label: String, message: String) -> void:

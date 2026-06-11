@@ -14,6 +14,7 @@ signal coupon_actor_spawned(actor: Node2D, slot_index: int)
 
 @export var product_scatter_view: ProductScatterView
 @export var scanner_station: ScannerStation
+@export var register_display: Control
 @export var bag_zone: Area2D
 @export var trash_zone: Area2D
 @export var customer_hand_view: Node2D
@@ -38,6 +39,16 @@ func display_visible_object_slots(slots: Array[VisibleObjectSlot]) -> void:
 func clear_visible_objects() -> void:
 	if product_scatter_view != null:
 		product_scatter_view.call("clear_actors")
+
+
+func show_scanned_product_amount(amount_cents: int) -> void:
+	if register_display != null and register_display.has_method("show_amount_cents"):
+		register_display.call("show_amount_cents", amount_cents)
+
+
+func clear_scanned_product_amount() -> void:
+	if register_display != null and register_display.has_method("clear_amount"):
+		register_display.call("clear_amount")
 
 
 func set_customer_hand_state(hand_stage_index: int, suspicion_percent: int) -> void:
@@ -207,6 +218,8 @@ func _resolve_child_references() -> void:
 		product_scatter_view = get_node_or_null("ProductScatterView") as ProductScatterView
 	if scanner_station == null:
 		scanner_station = get_node_or_null("ScannerStation") as ScannerStation
+	if register_display == null:
+		register_display = get_node_or_null("RegisterDisplay") as Control
 	if bag_zone == null:
 		bag_zone = get_node_or_null("BagZone") as Area2D
 	if trash_zone == null:

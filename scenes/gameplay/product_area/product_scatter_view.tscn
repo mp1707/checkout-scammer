@@ -40,10 +40,10 @@ mouse_filter = 2
 color = Color(1, 1, 1, 0)
 
 [node name="SlotGuide3" type="ColorRect" parent="SlotGuides" unique_id=705952222]
-offset_left = 132.0
-offset_top = 12.0
-offset_right = 168.0
-offset_bottom = 48.0
+offset_left = 5.0
+offset_top = 3.0
+offset_right = 41.0
+offset_bottom = 39.0
 mouse_filter = 2
 color = Color(1, 1, 1, 0)
 
@@ -59,10 +59,10 @@ position = Vector2(98, -8)
 position = Vector2(58, 38)
 
 [node name="Slot3" type="Marker2D" parent="SlotMarkers" unique_id=765269957]
-position = Vector2(150, 30)
+position = Vector2(23, 17)
 
 [node name="SpawnMarker" type="Marker2D" parent="." unique_id=858606807]
-position = Vector2(226, 2)
+position = Vector2(52, -151)
 
 [node name="ExitMarker" type="Marker2D" parent="." unique_id=1289659766]
 position = Vector2(-40, 0)

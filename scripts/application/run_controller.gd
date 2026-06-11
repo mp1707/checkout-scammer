@@ -83,6 +83,8 @@ func _start_run() -> void:
 	if hud_root != null:
 		hud_root.hide_dialog()
 		hud_root.close_coupon_popup()
+	if checkout_table != null:
+		checkout_table.clear_scanned_product_amount()
 
 	_start_customer()
 
@@ -101,6 +103,8 @@ func _start_customer() -> void:
 	_visible_object_queue_system.start_customer(customer, registry.game_balance.visible_object_slots, customer_coupon)
 	run_state.current_customer = customer
 
+	if checkout_table != null:
+		checkout_table.clear_scanned_product_amount()
 	_update_product_area_view()
 	_update_customer_hand()
 	_update_hud_state()
@@ -209,9 +213,8 @@ func _on_product_scan_contact_started(actor: Node2D, contact_position: Vector2) 
 		result,
 		_coupon_system.get_honest_customer_coupons(run_state.current_customer)
 	)
-	if actor.has_method("update_open_amount_label"):
-		actor.call("update_open_amount_label")
 	if checkout_table != null:
+		checkout_table.show_scanned_product_amount(product_instance.open_amount_cents)
 		checkout_table.play_successful_scan_feedback(actor, product_instance.scan_count, contact_position)
 	_update_customer_hand()
 	if run_state.current_customer.current_suspicion_percent > suspicion_before_scan and checkout_table != null:
@@ -226,6 +229,8 @@ func _on_actor_bag_drop_requested(actor: Node2D) -> void:
 	var product_instance: ProductInstance = _get_product_instance(actor)
 	if product_instance != null:
 		_economy_system.payout_product(run_state, product_instance)
+		if checkout_table != null:
+			checkout_table.clear_scanned_product_amount()
 		_visible_object_queue_system.mark_product_processed(run_state.current_customer, product_instance)
 		_finish_actor(actor, true)
 		_after_customer_object_processed()
@@ -244,6 +249,8 @@ func _on_actor_trash_drop_requested(actor: Node2D) -> void:
 	var product_instance: ProductInstance = _get_product_instance(actor)
 	if product_instance != null:
 		_economy_system.trash_product(run_state, product_instance)
+		if checkout_table != null:
+			checkout_table.clear_scanned_product_amount()
 		_visible_object_queue_system.mark_product_processed(run_state.current_customer, product_instance)
 		_finish_actor(actor, false)
 		_after_customer_object_processed()
@@ -262,6 +269,13 @@ func _on_actor_taken_from_product_area(actor: Node2D) -> void:
 		return
 	if run_state == null or run_state.current_customer == null:
 		return
+
+	var product_instance: ProductInstance = _get_product_instance(actor)
+	if checkout_table != null:
+		if product_instance != null and product_instance.open_amount_cents > 0:
+			checkout_table.show_scanned_product_amount(product_instance.open_amount_cents)
+		else:
+			checkout_table.clear_scanned_product_amount()
 
 	var actor_id: String = _get_actor_id(actor)
 	if actor_id.is_empty() or _taken_actor_ids.has(actor_id):
@@ -351,6 +365,8 @@ func _process_coupon_honestly(actor: Node2D, coupon_instance: CouponInstance) ->
 
 func _handle_caught_scan(actor: Node2D, product_instance: ProductInstance) -> void:
 	_economy_system.trash_product(run_state, product_instance)
+	if checkout_table != null:
+		checkout_table.clear_scanned_product_amount()
 	_visible_object_queue_system.mark_product_processed(run_state.current_customer, product_instance)
 	_finish_actor(actor, false)
 	_update_product_area_view()
@@ -377,6 +393,7 @@ func _queue_customer_done_dialog() -> void:
 
 	_is_advancing_customer = true
 	if checkout_table != null:
+		checkout_table.clear_scanned_product_amount()
 		checkout_table.clear_visible_objects()
 
 	await get_tree().create_timer(CUSTOMER_DONE_DELAY_SECONDS).timeout

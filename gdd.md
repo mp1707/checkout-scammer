@@ -10,7 +10,7 @@
 - Ein Produkt über den Kassenscanner ziehen
 - Das satisfying „Beep“-Geräusch hören
 - Coin-Animation beim Ablegen in die Tüte sehen
-- Den aktuellen Verkaufsbetrag direkt am gehaltenen Produkt sehen
+- Den aktuellen Verkaufsbetrag im Kassendisplay sehen
 - Geld beim finalen Verkauf direkt hochzählen sehen
 - Der Scanner-Moment ist der wichtigste Kern des Spiels
 
@@ -84,8 +84,8 @@
 - Über dem Scanner befindet sich die Tüte.
 - Gescannte Produkte werden in die Tüte gelegt, um den Verkauf final abzuschließen.
 - Ein Scan bucht noch kein Geld in den Total-Wert.
-- Solange der Spieler ein gescanntes Produkt hält, schwebt der aktuelle Verkaufsbetrag am Cursor leicht über dem Produkt.
-- Der aktuelle Verkaufsbetrag nutzt ein weißes 9-Slice-Panel als Hintergrund, damit er auf allen Produkt- und Tischfarben lesbar bleibt.
+- Nach einem erfolgreichen Scan zeigt das Display der Kasse den offenen Verkaufsbetrag des aktuell gescannten Produktes.
+- Der aktuelle Verkaufsbetrag nutzt grüne, displaytypische Schrift direkt im Kassendisplay.
 - Beim Ablegen in der Tüte wird dieser aktuelle Verkaufsbetrag zum Total-Wert hinzugefügt.
 - Danach verschwindet das Produkt in der Tüte.
 - Ein in die Tüte gelegtes Produkt gilt als verkauft und kann nicht mehr aufgehoben oder erneut gescannt werden.
@@ -217,7 +217,7 @@
 - Die Textbox muss mit Enter weggeklickt werden.
 - Die Wirkung:
   - Das aktuelle Produkt verschwindet visuell.
-  - Der offene Verkaufsbetrag am Cursor wird gelöscht.
+  - Der offene Verkaufsbetrag im Kassendisplay wird gelöscht.
   - Es wird kein Geld vom Total-Wert abgezogen.
   - Dadurch verliert der Spieler nur den noch nicht gebuchten Wert dieses Produkts.
 - Danach geht der Kunde weiter normal.
@@ -340,7 +340,7 @@ Out of scope für den Prototyp:
 - Der Spieler zieht das Produkt von rechts nach links über den vertikalen Scannerstrahl.
 - Scan löst aus:
   - Beep
-  - Verkaufsbetrag am Cursor erhöht sich
+  - Verkaufsbetrag im Kassendisplay erhöht sich
   - Scanner-Feedback
 - Danach kann der Spieler das Produkt nochmal scannen oder in die Tüte legen.
 - Beim Ablegen in die Tüte wird der offene Verkaufsbetrag zum Total-Wert gebucht.
@@ -371,7 +371,7 @@ Out of scope für den Prototyp:
   - das Produkt nur auf dem Scanner liegt
   - das Produkt nicht aktiv gezogen wird
 - Dadurch wird der Scan-Moment klarer und absichtlicher.
-- Der erste erfolgreiche Scan eines Produkts erzeugt den offenen Verkaufsbetrag am Cursor.
+- Der erste erfolgreiche Scan eines Produkts zeigt den offenen Verkaufsbetrag im Kassendisplay.
 - Jeder weitere erfolgreiche Scan desselben gehaltenen Produkts erhöht diesen offenen Verkaufsbetrag erneut um den Produktwert.
 - Bei Mehrfachscans wird vor dem erfolgreichen Hinzufügen ein Caught-Roll gegen die aktuelle Suspicion ausgeführt.
 
@@ -399,7 +399,7 @@ Out of scope für den Prototyp:
 
 - Angenehmer Beep-SFX
 - Pitch-Eskalation bei Double-, Triple- und Multi-Scans
-- Offener Verkaufsbetrag schwebt gut lesbar über dem gehaltenen Produkt
+- Offener Verkaufsbetrag sitzt gut lesbar im Kassendisplay
 - Geld zählt links in der Menüleiste animiert hoch, wenn das Produkt in die Tüte gelegt wird
 - Kurzer Screen Shake bei Double Scans
 - Visuelles Feedback am Scanner
@@ -439,7 +439,7 @@ Für den ersten spielbaren Prototyp ist wichtig:
 - Tüte über dem Scanner
 - Müll-Loch rechts unten
 - Kundenhand rechts oben mit drei Suspicion-Sprites
-- Offener Verkaufsbetrag am Cursor
+- Offener Verkaufsbetrag im Kassendisplay
 - Coin-Animation beim Ablegen in die Tüte
 - Geld zählt beim Ablegen in der Tüte direkt hoch
 - Double-Scan erhöht Suspicion

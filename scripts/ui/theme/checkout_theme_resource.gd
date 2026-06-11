@@ -28,6 +28,7 @@ const PANEL_CONTENT_MARGIN: int = 2
 @export var text_color: Color = Color(0.101961, 0.098039, 0.196078, 1.0)
 @export var text_disabled_color: Color = Color(0.054902, 0.027451, 0.105882, 1.0)
 @export var money_color: Color = Color(0.117647, 0.435294, 0.313725, 1.0)
+@export var register_display_text_color: Color = Color(0.388235, 0.780392, 0.301961, 1.0)
 @export var danger_color: Color = Color(0.768627, 0.141176, 0.188235, 1.0)
 @export var overlay_dim_color: Color = Color(0.054902, 0.027451, 0.105882, 0.58)
 @export var shadow_color: Color = Color(0.054902, 0.027451, 0.105882, 0.42)

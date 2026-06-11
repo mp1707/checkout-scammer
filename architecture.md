@@ -8,7 +8,7 @@ Diese Datei ist die verbindliche technische Grundlage fuer Checkout Scammer. Aen
 
 - Godot 4.6, 2D Pixel-Art, interne Authoring-Aufloesung `640x360`.
 - Ein 1-Screen-Spiel mit klaren, editorseitig bearbeitbaren Bereichen: linke Statusleiste, Kassentisch, rechte Upgrade-Leiste.
-- Der Scanner-Moment ist der wichtigste Kern: Drag von rechts nach links, Beep, Geldfeedback am Cursor, Scannerflash, Produktfeedback.
+- Der Scanner-Moment ist der wichtigste Kern: Drag von rechts nach links, Beep, Geldfeedback im Kassendisplay, Scannerflash, Produktfeedback.
 - Gameplay-Regeln bleiben testbar und UI-unabhaengig.
 - Szenen bleiben Authoring-Flaechen. Layouts, Slots, Drop-Zonen, Hitboxen, Marker, AnimationPlayer und UI-Struktur muessen im Godot-Editor sichtbar und bearbeitbar bleiben.
 - Code erzeugt keine kompletten Gameplay- oder UI-Baeume von Grund auf. Code steuert vorhandene Szenen, befuellt vorbereitete Container und instanziiert nur fertige `PackedScene`s.
@@ -66,8 +66,9 @@ Wichtige Szenen:
 
 - `CheckoutTable`: mittlerer Kassentisch als Root der spielbaren Flaeche.
 - `ProductScatterView`: verstreute sichtbare Objekt-Slots rechts neben dem Scanner, Spawn-von-rechts-Animationen, Slot-Marker.
-- `ProductActor`: Drag, Rotation, Scannerkontakt, Schatten, Cursorbetrag-Anzeige.
+- `ProductActor`: Drag, Rotation, Scannerkontakt, Schatten und Produktfeedback.
 - `ScannerStation`: Scannerstrahl, Hitbox/Area2D, Flash/SFX-Anker. Der Scannerkoerper ist im Tisch-Sprite enthalten.
+- `RegisterDisplay`: editorseitig platzierbares Kassendisplay im Tisch, zeigt den offenen Betrag des aktuell gescannten Produktes.
 - `BagZone`: Drop-Zone fuer finalen Verkauf.
 - `TrashZone`: Drop-Zone fuer Produkt-/Coupon-Entsorgung.
 - `CustomerHandView`: Hand-Sprite fuer Suspicion-Stufen gruen, gelb und rot.
@@ -101,7 +102,8 @@ Verbindlich sichtbar in Szenen:
 - Slot-Marker und Spawn-/Exit-Marker fuer die verstreute Produktflaeche rechts neben dem Scanner.
 - Scanner-Shape, Scannerstrahl, Scanner-Hitbox und Feedback-Anker.
 - Bag- und Trash-Drop-Zonen inklusive Collision-/Area-Nodes.
-- ProductActor-Root, Sprite-Anker, Schatten-Anker, Betrag-Label-Anker und Drag-Feedback-Anker.
+- ProductActor-Root, Sprite-Anker, Schatten-Anker und Drag-Feedback-Anker.
+- Kassendisplay-Root und Betrag-Label fuer die offene Summe des aktuell gescannten Produktes.
 - Kundenhand-Anker, Hand-Sprite und AnimationPlayer.
 - HUD-Panels, Dialoge, Popups, Buttons und Tooltip-Anker.
 - AnimationPlayer, Marker2D, Area2D, CollisionShape2D und VFX-Anker fuer alle wiederkehrenden Interaktionen.
@@ -152,7 +154,7 @@ Keine UI-Komponente bucht Geld, scannt Produkte, veraendert Suspicion oder aktiv
 3. `ScanSystem` entscheidet, ob der Scan gueltig ist. Nur rechts nach links zaehlt.
 4. Bei Mehrfachscan fragt `ScanSystem` bzw. `SuspicionSystem` den Caught-Roll ab.
 5. `EconomySystem` berechnet den offenen Betrag.
-6. `RunController` aktualisiert Runtime-State und sendet Feedback-Events an Presentation: Beep, Scannerflash, Betrag am Cursor, Kundenhand-State.
+6. `RunController` aktualisiert Runtime-State und sendet Feedback-Events an Presentation: Beep, Scannerflash, Betrag im Kassendisplay, Kundenhand-State.
 
 ### Verkauf
 

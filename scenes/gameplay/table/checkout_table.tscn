@@ -3,11 +3,13 @@
 [ext_resource type="Script" uid="uid://43dsrku7gbmo" path="res://scripts/gameplay/components/checkout_table.gd" id="1_checkout_table"]
 [ext_resource type="PackedScene" uid="uid://bmhawbmbff00f" path="res://scenes/gameplay/scanner/scanner_station.tscn" id="2_scanner"]
 [ext_resource type="PackedScene" uid="uid://ccyjowplbywsf" path="res://scenes/gameplay/product_area/product_scatter_view.tscn" id="3_product_scatter"]
-[ext_resource type="PackedScene" path="res://scenes/gameplay/bag/bag_zone.tscn" id="4_bag"]
+[ext_resource type="PackedScene" uid="uid://lwh375jkwy3g" path="res://scenes/gameplay/bag/bag_zone.tscn" id="4_bag"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/trash/trash_zone.tscn" id="5_trash"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/customer/customer_hand_view.tscn" id="6_hand"]
+[ext_resource type="FontFile" uid="uid://ilorfjrobin5" path="res://assets/fonts/PixelOperator8.ttf" id="7_33trb"]
 [ext_resource type="PackedScene" path="res://scenes/vfx/coin_burst_vfx.tscn" id="7_coin_burst"]
 [ext_resource type="Texture2D" uid="uid://c4i8322s07aui" path="res://assets/textures/environment/table.png" id="8_table"]
+[ext_resource type="Script" uid="uid://cqe1rqlfh7jru" path="res://scripts/gameplay/components/register_display.gd" id="9_register_display"]
 
 [node name="CheckoutTable" type="Control" unique_id=845555887]
 layout_mode = 3
@@ -18,6 +20,7 @@ mouse_filter = 2
 script = ExtResource("1_checkout_table")
 product_scatter_view = NodePath("ProductScatterView")
 scanner_station = NodePath("ScannerStation")
+register_display = NodePath("RegisterDisplay")
 bag_zone = NodePath("BagZone")
 trash_zone = NodePath("TrashZone")
 customer_hand_view = NodePath("CustomerHandView")
@@ -35,8 +38,35 @@ position = Vector2(206, 241)
 [node name="ScannerStation" parent="." unique_id=678997339 instance=ExtResource("2_scanner")]
 position = Vector2(334, 161)
 
+[node name="RegisterDisplay" type="Control" parent="." unique_id=1105894270 node_paths=PackedStringArray("amount_label")]
+z_index = -40
+anchors_preset = 0
+offset_left = 166.0
+offset_top = 92.0
+offset_right = 224.0
+offset_bottom = 108.0
+mouse_filter = 2
+script = ExtResource("9_register_display")
+amount_label = NodePath("AmountLabel")
+
+[node name="AmountLabel" type="Label" parent="RegisterDisplay" unique_id=547353034]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 1.0
+offset_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.388235, 0.780392, 0.301961, 1)
+theme_override_fonts/font = ExtResource("7_33trb")
+theme_override_font_sizes/font_size = 6
+text = "$1.23"
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="ProductScatterView" parent="." unique_id=364460971 instance=ExtResource("3_product_scatter")]
-position = Vector2(360, 190)
+position = Vector2(401, 153)
 
 [node name="TrashZone" parent="." unique_id=345382906 instance=ExtResource("5_trash")]
 position = Vector2(486, 289)

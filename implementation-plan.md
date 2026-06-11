@@ -289,7 +289,7 @@ Empfohlener Session-Scope: ein bis zwei Codex-Sessions.
 
 - [x] Produkt kann von der Produktflaeche aufgenommen werden.
 - [x] Rechts-nach-links-Scan ueber Scanner loest `ScanSystem` aus.
-- [x] Erster Scan erhoeht offenen Betrag am Cursor.
+- [x] Erster Scan erhoeht offenen Betrag im Kassendisplay.
 - [x] Weitere Scans desselben gehaltenen Produkts fuehren Caught-Roll aus.
 - [x] Bei Erfolg erhoeht sich offener Betrag weiter.
 - [x] Bei Caught erscheint Dialog:
