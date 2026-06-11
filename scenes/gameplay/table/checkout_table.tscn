@@ -36,7 +36,7 @@ texture = ExtResource("8_table")
 position = Vector2(206, 241)
 
 [node name="ScannerStation" parent="." unique_id=678997339 instance=ExtResource("2_scanner")]
-position = Vector2(334, 161)
+position = Vector2(338, 243)
 
 [node name="RegisterDisplay" type="Control" parent="." unique_id=1105894270 node_paths=PackedStringArray("amount_label")]
 z_index = -40
