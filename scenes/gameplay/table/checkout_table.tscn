@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://btxe7l0q104i8"]
 
 [ext_resource type="Script" uid="uid://43dsrku7gbmo" path="res://scripts/gameplay/components/checkout_table.gd" id="1_checkout_table"]
-[ext_resource type="PackedScene" path="res://scenes/gameplay/scanner/scanner_station.tscn" id="2_scanner"]
-[ext_resource type="PackedScene" path="res://scenes/gameplay/product_area/product_scatter_view.tscn" id="3_product_scatter"]
+[ext_resource type="PackedScene" uid="uid://bmhawbmbff00f" path="res://scenes/gameplay/scanner/scanner_station.tscn" id="2_scanner"]
+[ext_resource type="PackedScene" uid="uid://ccyjowplbywsf" path="res://scenes/gameplay/product_area/product_scatter_view.tscn" id="3_product_scatter"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/bag/bag_zone.tscn" id="4_bag"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/trash/trash_zone.tscn" id="5_trash"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/customer/customer_hand_view.tscn" id="6_hand"]
@@ -30,19 +30,19 @@ position = Vector2(320, 180)
 texture = ExtResource("8_table")
 
 [node name="BagZone" parent="." unique_id=1494708852 instance=ExtResource("4_bag")]
-position = Vector2(201, 183)
+position = Vector2(199, 226)
 
 [node name="ScannerStation" parent="." unique_id=678997339 instance=ExtResource("2_scanner")]
-position = Vector2(320, 186)
+position = Vector2(317, 167)
 
 [node name="ProductScatterView" parent="." unique_id=364460971 instance=ExtResource("3_product_scatter")]
 position = Vector2(360, 190)
 
 [node name="TrashZone" parent="." unique_id=345382906 instance=ExtResource("5_trash")]
-position = Vector2(492, 306)
+position = Vector2(486, 289)
 
 [node name="CustomerHandView" parent="." unique_id=1485899984 instance=ExtResource("6_hand")]
-position = Vector2(201, 47)
+position = Vector2(284, 47)
 
 [node name="VfxAnchor" type="Marker2D" parent="." unique_id=89939026]
 position = Vector2(320, 146)
