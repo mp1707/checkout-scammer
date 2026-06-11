@@ -63,30 +63,23 @@
 - Obst ist nicht scannerverkaufbar. Wird Obst über den Scanner gezogen, wird kein Betrag hinzugefügt und kein Suspicion-Roll ausgelöst.
 - Dadurch fühlt sich der Scan wie eine bewusste Kassierbewegung an.
 
-### Waage und PLU
+### Waage
 
 - Obst muss über die Waage verkauft werden.
-- Die Waage steht im Tischbereich rechts neben dem PLU-Buch und oberhalb des Scanners.
+- Die Waage steht im Tischbereich oberhalb des Scanners.
 - Die Waage ist eine eigene Drop-Zone und akzeptiert immer nur ein wiegbares Produkt gleichzeitig.
 - Wenn Obst auf die Waage gelegt wird, spielt die Waage die Press-Animation aus `waage_sheet.png`.
 - Solange Obst auf der Waage liegt, bleibt die Waage visuell belastet.
-- Während Obst auf der Waage liegt, erscheint ein kleines PLU-Eingabefeld und bleibt fokussiert.
-- Das Eingabefeld erlaubt maximal 4 Ziffern.
-- Enter bestätigt den PLU-Code.
-- Ein falscher Code bucht nichts und gibt kurzes negatives Feedback.
-- Ein richtiger Code berechnet den Betrag aus Gewicht, Kilopreis, Coupons und Stickern und addiert ihn zum offenen Verkaufsbetrag im Kassendisplay.
-- Obst kann mehrfach per richtigem PLU-Code abgerechnet werden.
-- Die erste korrekte PLU-Abrechnung ist sicher.
-- Ab der zweiten korrekten PLU-Abrechnung desselben Obstes läuft derselbe Suspicion-/Caught-Pfad wie bei Mehrfachscans.
+- Das Ablegen auf der Waage berechnet direkt den Betrag aus Gewicht, Kilopreis, Coupons und Stickern.
+- Der berechnete Betrag erscheint im Kassendisplay und wird zum offenen Verkaufsbetrag des Obstes addiert.
+- Obst kann mehrfach gewogen werden.
+- Zum mehrfachen Buchen kann Obst mit der Maus von der Waage hochgehoben und erneut abgelegt werden.
+- Während das Obst hochgehoben wird, verschwindet der Betrag aus dem Kassendisplay; der offene Betrag bleibt am Obst gespeichert.
+- Wird dasselbe Obst später erneut gewogen, erhöht sich sein aktueller offener Verkaufsbetrag erneut.
+- Wird ein Sticker auf Obst geklebt, das gerade auf der Waage liegt, aktualisiert sich der offene Verkaufsbetrag im Kassendisplay sofort.
+- Die erste Wiegung ist sicher.
+- Ab der zweiten Wiegung desselben Obstes läuft derselbe Suspicion-/Caught-Pfad wie bei Mehrfachscans.
 - Bei Caught verschwindet das Obst, der offene Betrag wird gelöscht und kein Geld wird gebucht.
-
-### PLU-Buch
-
-- Links neben der Waage liegt ein PLU-Buch.
-- Normalzustand nutzt `book.png`, Hover nutzt `book_highlighted.png`.
-- Klick öffnet ein kleines Popup mit allen Obst-PLU-Codes.
-- Das Popup blockiert das PLU-Eingabefeld nicht.
-- Das Popup schließt per Close-Button, Escape oder Enter, sofern keine aktive PLU-Eingabe Enter zuerst verarbeitet.
 
 ### Produktfläche
 
@@ -109,15 +102,15 @@
 
 - Über dem Scanner befindet sich die Tüte.
 - Gescannte Produkte werden in die Tüte gelegt, um den Verkauf final abzuschließen.
-- Gewogenes Obst wird nach korrekter PLU-Abrechnung manuell von der Waage genommen und in die Tüte gelegt.
+- Gewogenes Obst wird nach dem Wiegen manuell von der Waage genommen und in die Tüte gelegt.
 - Obst ohne offenen Verkaufsbetrag wird in der Tüte abgelehnt und nicht verarbeitet.
 - Ein Scan bucht noch kein Geld in den Total-Wert.
-- Nach einem erfolgreichen Scan zeigt das Display der Kasse den offenen Verkaufsbetrag des aktuell gescannten Produktes.
+- Nach einem erfolgreichen Scan oder einer erfolgreichen Wiegung zeigt das Display der Kasse den offenen Verkaufsbetrag des aktuell gebuchten Produktes.
 - Der aktuelle Verkaufsbetrag nutzt grüne, displaytypische Schrift direkt im Kassendisplay.
 - Beim Ablegen in der Tüte wird dieser aktuelle Verkaufsbetrag zum Total-Wert hinzugefügt.
 - Danach verschwindet das Produkt in der Tüte.
 - Ein in die Tüte gelegtes Produkt gilt als verkauft und kann nicht mehr aufgehoben oder erneut gescannt werden.
-- Mehrfachscans passieren nur, solange der Spieler dasselbe Produkt weiter hält.
+- Mehrfachscans bei Festpreis-Produkten passieren nur, solange der Spieler dasselbe Produkt weiter hält.
 
 ### Müll-Loch
 
@@ -185,7 +178,7 @@
   - Produkte pro Kunde
   - sichtbare Objekt-Slots
   - Produktpreise
-  - Kilopreise und PLU-Codes für Obst
+  - Kilopreise für Obst
   - Obst-Gewichtsranges, Rundung, Verteilung und Sprite-Skalierung
   - Produktgewichte für die Kundengenerierung
   - Coupon-Kosten
@@ -198,9 +191,9 @@
 ### Aktuelle Produkt-Werte
 
 - Startsortiment:
-  - Apfel: PLU `1001`, `150-500g`, aktuell `3,00$ / kg`
-  - Orange: PLU `1002`, `150-500g`, aktuell `3,20$ / kg`
-  - Banane: PLU `1003`, `120-500g`, aktuell `2,60$ / kg`
+  - Apfel: `150-500g`, aktuell `3,00$ / kg`
+  - Orange: `150-500g`, aktuell `3,20$ / kg`
+  - Banane: `120-500g`, aktuell `2,60$ / kg`
   - Kaugummi: `0,95$`
   - Bonbonrolle: `0,80$`
   - Taschentuecher: `1,40$`
@@ -226,15 +219,15 @@
   - in den Müll geworfen werden, falls das Produkt oder Objekt dafür gedacht ist
 - Obst kann:
   - auf die Waage gelegt werden
-  - per PLU-Code abgerechnet werden
-  - mehrfach per PLU-Code abgerechnet werden
+  - beim Ablegen auf der Waage abgerechnet werden
+  - mehrfach gewogen werden
   - nach offener Abrechnung in die Tüte gelegt werden
   - in den Müll geworfen werden
 - Obst bekommt beim Erstellen der Produktinstanz ein deterministisches zufälliges Gewicht.
 - Leichte und realistische Gewichte sind häufig, sehr schwere Früchte selten.
 - Die Gewichtsrundung liegt aktuell bei `10g`.
 - Die Obst-Spritegröße wird anhand des jeweiligen Gewichts von ca. `1.0x` bis maximal `2.0x` skaliert.
-- Jeder erfolgreiche Scan oder jede erfolgreiche PLU-Abrechnung erhöht den offenen Verkaufsbetrag des aktuell gehaltenen Produkts.
+- Jeder erfolgreiche Scan oder jede erfolgreiche Wiegung erhöht den offenen Verkaufsbetrag des betroffenen Produkts.
 - Der offene Verkaufsbetrag wird erst beim Ablegen in der Tüte zum Total-Wert gebucht.
 
 ## Suspicion-System
@@ -242,8 +235,8 @@
 - Jeder Kunde hat ein internes Suspicion-Meter.
 - Das Suspicion-Meter ist die Wahrscheinlichkeit, beim Betrügen erwischt zu werden.
 - Es startet pro Kunde bei 10%.
-- Ein Caught-Roll passiert bei jedem Produkt-Scan ab dem zweiten Scan desselben Produkts und bei jeder PLU-Abrechnung ab der zweiten Abrechnung desselben Obstes.
-- Der erste Scan oder die erste korrekte PLU-Abrechnung eines Produkts ist immer sicher.
+- Ein Caught-Roll passiert bei jedem Produkt-Scan ab dem zweiten Scan desselben Produkts und bei jeder Wiegung ab der zweiten Wiegung desselben Obstes.
+- Der erste Scan oder die erste Wiegung eines Produkts ist immer sicher.
 - Coupon-Scam löst keinen Caught-Roll aus.
 - Wenn ein Mehrfachscan nicht erwischt wird, steigt die Suspicion danach an.
 - Nach einem erfolgreichen Double Scan steigt sie auf 50%.
@@ -314,7 +307,7 @@
 - Der Coupon wird immer als erstes sichtbares Objekt auf die Produktfläche gelegt.
 - Er belegt einen sichtbaren Objekt-Slot, reduziert aber nicht die interne Produktanzahl des Kunden.
 - Der Spieler kann den Coupon ehrlich scannen.
-- Dann wird der Rabatt für alle danach gescannten passenden Produkte dieses Kunden angewendet.
+- Dann wird der Rabatt für alle danach gescannten oder gewogenen passenden Produkte dieses Kunden angewendet.
 - Der Spieler kann den Coupon aber auch in das Müll-Loch werfen.
 - Dadurch erhält der Spieler den Vorteil des Coupons:
   - Kunden kaufen wertvollere Produkte
@@ -351,8 +344,9 @@
 - Nach dem Aufkleben ist der Sticker verbraucht und kann nicht entfernt werden.
 - Der Sticker ist sichtbar auf dem Obst und bewegt sich mit dem Produkt.
 - Tooltip: `Verdreifacht den Preis von Obst`
-- Der Bio-Sticker multipliziert zukünftige Obst-Abrechnungen mit `x3`.
-- Bereits offene Beträge werden durch einen später aufgeklebten Sticker nicht rückwirkend geändert.
+- Der Bio-Sticker multipliziert Obst-Abrechnungen mit `x3`.
+- Liegt das beklebte Obst beim Aufkleben auf der Waage, wird der offene Betrag auf der Kasse sofort mit dem Stickerwert aktualisiert.
+- Bei Obst außerhalb der Waage wirkt der Sticker auf spätere Wiegungen.
 - Verbrauchte Sticker bleiben bis zum Tagesende verbraucht.
 
 ## Win / Lose
@@ -408,15 +402,15 @@ Out of scope für den Prototyp:
   - Beep
   - Verkaufsbetrag im Kassendisplay erhöht sich
   - Scanner-Feedback
-- Obst wird auf die Waage gelegt, per PLU-Code abgerechnet und danach in die Tüte gelegt.
-- Danach kann der Spieler das Festpreis-Produkt nochmal scannen oder Obst nochmal per PLU abrechnen.
+- Obst wird auf die Waage gelegt, direkt abgerechnet und danach in die Tüte gelegt.
+- Danach kann der Spieler das Festpreis-Produkt nochmal scannen oder Obst erneut wiegen.
 - Beim Ablegen in die Tüte wird der offene Verkaufsbetrag zum Total-Wert gebucht.
 - Beim Ablegen in die Tüte spielt die Coin-Animation an der Tüte.
 - Wenn eines der 4 aktiven Objekte in der Tüte, im Müll oder durch Erwischen verschwunden ist, rutscht das nächste Produkt von rechts nach.
 - Der Spieler verarbeitet alle 10 Produkte des Kunden.
 - Festpreis-Produkte können mehrfach gescannt werden.
-- Obst kann mehrfach per PLU-Code abgerechnet werden.
-- Mehrfaches Scannen oder mehrfaches korrektes PLU-Abrechnen erhöht die Suspicion.
+- Obst kann mehrfach gewogen werden.
+- Mehrfaches Scannen oder mehrfaches Wiegen erhöht die Suspicion.
 - Die Suspicion wird über den Sprite-Zustand der Kundenhand angezeigt.
 - Nach dem letzten verarbeiteten Produkt erscheint nach einer Sekunde eine Textbox:
 
@@ -509,7 +503,7 @@ Für den ersten spielbaren Prototyp ist wichtig:
 - Scanner im Tisch-Sprite, vorerst mittig, mit vertikalem Strahl
 - Scannen nur von rechts nach links
 - Obst ist wiegbar und nicht scanbar
-- Waage, PLU-Eingabe und PLU-Buch im Tischbereich
+- Waage im Tischbereich
 - Tüte über dem Scanner
 - Müll-Loch rechts unten
 - Kundenhand rechts oben mit drei Suspicion-Sprites
@@ -517,7 +511,7 @@ Für den ersten spielbaren Prototyp ist wichtig:
 - Coin-Animation beim Ablegen in die Tüte
 - Geld zählt beim Ablegen in der Tüte direkt hoch
 - Double-Scan erhöht Suspicion
-- Mehrfaches korrektes PLU-Abrechnen erhöht Suspicion wie Mehrfachscans
+- Mehrfaches Wiegen erhöht Suspicion wie Mehrfachscans
 - Sticker-Button mit `3x` Bio-Stickern pro Tag
 - Miete am Tagesende
 - Lose bei nicht bezahlbarer Miete

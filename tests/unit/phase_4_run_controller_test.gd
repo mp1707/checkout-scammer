@@ -75,6 +75,38 @@ func _run() -> void:
 	_expect_equal_int(cash_before_coupon - 200, controller.run_state.cash_cents, "Coupon intent deducts coupon cost")
 	_expect_equal_int(1, controller.run_state.pending_coupons.size(), "Coupon intent queues delayed activation")
 
+	var product_actor_scene: PackedScene = load("res://scenes/gameplay/products/product_actor.tscn") as PackedScene
+	_expect_true(product_actor_scene != null, "ProductActor scene loads for scale test")
+	if product_actor_scene == null:
+		app.queue_free()
+		_finish()
+		return
+
+	var fruit_actor: ProductActor = product_actor_scene.instantiate() as ProductActor
+	var fruit_product: ProductInstance = ProductInstance.new(controller.registry.get_product_variant("apple"), "direct_weigh_apple")
+	fruit_product.weight_grams = 200
+	fruit_actor.set_product_instance(fruit_product)
+	checkout_table.add_child(fruit_actor)
+
+	checkout_table.emit_signal("actor_scale_drop_requested", fruit_actor)
+	_expect_equal_int(60, fruit_product.open_amount_cents, "Scale drop directly adds weighed fruit amount")
+	_expect_equal_string("$0.60", _get_register_display_text(register_display), "Scale drop updates register display")
+
+	hud_root.emit_signal("sticker_drag_released", "bio_sticker", fruit_actor.global_position)
+	_expect_equal_int(180, fruit_product.open_amount_cents, "Sticker on scaled fruit refreshes open amount")
+	_expect_equal_string("$1.80", _get_register_display_text(register_display), "Sticker on scaled fruit updates register display")
+
+	checkout_table.emit_signal("actor_scale_removed", fruit_actor)
+	_expect_equal_int(180, fruit_product.open_amount_cents, "Removing weighed fruit keeps open amount")
+	_expect_equal_string("", _get_register_display_text(register_display), "Removing weighed fruit hides register display")
+
+	controller.run_state.current_customer.current_suspicion_percent = 0
+	checkout_table.emit_signal("actor_scale_drop_requested", fruit_actor)
+	_expect_equal_int(360, fruit_product.open_amount_cents, "Second scale drop adds another weighed fruit amount")
+	_expect_equal_string("$3.60", _get_register_display_text(register_display), "Second scale drop shows updated open amount")
+	fruit_actor.queue_free()
+	checkout_table.clear_scanned_product_amount()
+
 	var cash_before_upgrade: int = controller.run_state.cash_cents
 	hud_root.emit_signal("assortment_upgrade_button_pressed")
 	_expect_equal_int(cash_before_upgrade - 600, controller.run_state.cash_cents, "Upgrade intent deducts next level cost")

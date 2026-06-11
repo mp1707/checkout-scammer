@@ -66,8 +66,6 @@ func _connect_presentation() -> void:
 		_connect_signal_once(checkout_table, "actor_trash_drop_requested", _on_actor_trash_drop_requested)
 		_connect_signal_once(checkout_table, "actor_scale_drop_requested", _on_actor_scale_drop_requested)
 		_connect_signal_once(checkout_table, "actor_scale_removed", _on_actor_scale_removed)
-		_connect_signal_once(checkout_table, "plu_code_submitted", _on_plu_code_submitted)
-		_connect_signal_once(checkout_table, "plu_book_requested", _on_plu_book_requested)
 
 	if hud_root != null:
 		_connect_signal_once(hud_root, "coupon_button_pressed", _on_coupon_button_pressed)
@@ -96,8 +94,6 @@ func _start_run() -> void:
 		hud_root.close_coupon_popup()
 	if checkout_table != null:
 		checkout_table.clear_scanned_product_amount()
-		checkout_table.hide_plu_input()
-		checkout_table.close_plu_book_popup()
 
 	_start_customer()
 
@@ -119,7 +115,6 @@ func _start_customer() -> void:
 
 	if checkout_table != null:
 		checkout_table.clear_scanned_product_amount()
-		checkout_table.hide_plu_input()
 	_update_product_area_view()
 	_update_customer_hand()
 	_update_hud_state()
@@ -298,72 +293,15 @@ func _on_actor_scale_drop_requested(actor: Node2D) -> void:
 		return
 
 	_active_scale_actor = actor
-	if checkout_table != null:
-		checkout_table.show_plu_input(product_instance)
-		if product_instance.open_amount_cents > 0:
-			checkout_table.show_scanned_product_amount(product_instance.open_amount_cents)
+	_charge_weighed_product(actor, product_instance)
 
 
 func _on_actor_scale_removed(actor: Node2D) -> void:
 	if _active_scale_actor == actor:
 		_active_scale_actor = null
 
-	var product_instance: ProductInstance = _get_product_instance(actor)
 	if checkout_table != null:
-		if product_instance != null and product_instance.open_amount_cents > 0:
-			checkout_table.show_scanned_product_amount(product_instance.open_amount_cents)
-		else:
-			checkout_table.clear_scanned_product_amount()
-
-
-func _on_plu_code_submitted(plu_code: String) -> void:
-	if _should_ignore_player_input():
-		return
-	if _active_scale_actor == null or not is_instance_valid(_active_scale_actor):
-		return
-
-	var product_instance: ProductInstance = _get_product_instance(_active_scale_actor)
-	if product_instance == null or product_instance.variant == null or not product_instance.is_weighable():
-		return
-
-	if plu_code.length() != 4 or plu_code != product_instance.variant.plu_code:
-		if checkout_table != null:
-			checkout_table.play_invalid_weigh_feedback(_active_scale_actor)
-		return
-
-	var suspicion_before_charge: int = run_state.current_customer.current_suspicion_percent
-	var result: ScanResult = _scan_system.evaluate_product_charge_attempt(
-		product_instance,
-		run_state.current_customer,
-		_suspicion_system,
-		registry.suspicion_curve,
-		_scan_random
-	)
-	if result.was_caught:
-		_handle_caught_scan(_active_scale_actor, product_instance)
-		return
-	if not result.is_valid_scan:
-		if checkout_table != null:
-			checkout_table.play_invalid_weigh_feedback(_active_scale_actor)
-		return
-
-	_economy_system.apply_successful_weighing(
-		result,
-		_coupon_system.get_honest_customer_coupons(run_state.current_customer)
-	)
-	if checkout_table != null:
-		checkout_table.show_scanned_product_amount(product_instance.open_amount_cents)
-		checkout_table.play_successful_weigh_feedback(_active_scale_actor, product_instance.scan_count)
-		checkout_table.clear_plu_code_and_refocus()
-	_update_customer_hand()
-	if run_state.current_customer.current_suspicion_percent > suspicion_before_charge and checkout_table != null:
-		checkout_table.pulse_customer_hand()
-
-
-func _on_plu_book_requested() -> void:
-	if checkout_table == null or registry == null:
-		return
-	checkout_table.show_plu_book_popup(_get_weighable_product_variants())
+		checkout_table.clear_scanned_product_amount()
 
 
 func _on_actor_taken_from_product_area(actor: Node2D) -> void:
@@ -374,7 +312,7 @@ func _on_actor_taken_from_product_area(actor: Node2D) -> void:
 
 	var product_instance: ProductInstance = _get_product_instance(actor)
 	if checkout_table != null:
-		if product_instance != null and product_instance.open_amount_cents > 0:
+		if product_instance != null and product_instance.open_amount_cents > 0 and not product_instance.is_weighable():
 			checkout_table.show_scanned_product_amount(product_instance.open_amount_cents)
 		else:
 			checkout_table.clear_scanned_product_amount()
@@ -468,6 +406,8 @@ func _on_sticker_drag_released(sticker_id: String, global_drop_position: Vector2
 		return
 
 	checkout_table.refresh_product_actor(product_actor)
+	if _active_scale_actor == product_actor:
+		_refresh_active_scale_amount(product_instance)
 	if hud_root != null:
 		hud_root.refresh_sticker_popup(_sticker_system.get_inventory_entries(run_state))
 
@@ -498,7 +438,6 @@ func _handle_caught_scan(actor: Node2D, product_instance: ProductInstance) -> vo
 	if checkout_table != null:
 		checkout_table.release_scale_actor(actor)
 		checkout_table.clear_scanned_product_amount()
-		checkout_table.hide_plu_input()
 	_visible_object_queue_system.mark_product_processed(run_state.current_customer, product_instance)
 	_finish_actor(actor, false)
 	_update_product_area_view()
@@ -594,16 +533,45 @@ func _finish_actor(actor: Node2D, is_sale: bool) -> void:
 			actor.queue_free()
 
 
-func _get_weighable_product_variants() -> Array[ProductVariantResource]:
-	var products: Array[ProductVariantResource] = []
-	if registry == null:
-		return products
+func _charge_weighed_product(actor: Node2D, product_instance: ProductInstance) -> void:
+	var suspicion_before_charge: int = run_state.current_customer.current_suspicion_percent
+	var result: ScanResult = _scan_system.evaluate_product_charge_attempt(
+		product_instance,
+		run_state.current_customer,
+		_suspicion_system,
+		registry.suspicion_curve,
+		_scan_random
+	)
+	if result.was_caught:
+		_handle_caught_scan(actor, product_instance)
+		return
+	if not result.is_valid_scan:
+		if checkout_table != null:
+			checkout_table.play_invalid_weigh_feedback(actor)
+		return
 
-	for product: ProductVariantResource in registry.product_variants:
-		if product != null and product.is_weighable():
-			products.append(product)
+	_economy_system.apply_successful_weighing(
+		result,
+		_coupon_system.get_honest_customer_coupons(run_state.current_customer)
+	)
+	if checkout_table != null:
+		checkout_table.show_scanned_product_amount(product_instance.open_amount_cents)
+		checkout_table.play_successful_weigh_feedback(actor, product_instance.scan_count)
+	_update_customer_hand()
+	if run_state.current_customer.current_suspicion_percent > suspicion_before_charge and checkout_table != null:
+		checkout_table.pulse_customer_hand()
 
-	return products
+
+func _refresh_active_scale_amount(product_instance: ProductInstance) -> void:
+	if product_instance == null or not product_instance.is_weighable() or product_instance.open_amount_cents <= 0:
+		return
+
+	_economy_system.refresh_weighed_open_amount(
+		product_instance,
+		_coupon_system.get_honest_customer_coupons(run_state.current_customer)
+	)
+	if checkout_table != null:
+		checkout_table.show_scanned_product_amount(product_instance.open_amount_cents)
 
 
 func _get_available_coupon_options() -> Array[CouponResource]:

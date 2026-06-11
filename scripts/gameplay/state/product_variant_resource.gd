@@ -12,7 +12,6 @@ enum SaleMode {
 @export_enum("Fixed Price", "Weighed") var sale_mode: int = SaleMode.FIXED_PRICE
 @export var price_cents: int = 0
 @export var price_per_kg_cents: int = 0
-@export var plu_code: String = ""
 @export var min_weight_grams: int = 0
 @export var max_weight_grams: int = 0
 @export var weight_step_grams: int = 10

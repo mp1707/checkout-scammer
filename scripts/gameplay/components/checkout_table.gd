@@ -13,8 +13,6 @@ signal actor_scale_removed(actor: Node2D)
 signal actor_released_outside_drop_zones(actor: Node2D)
 signal product_actor_spawned(actor: Node2D, slot_index: int)
 signal coupon_actor_spawned(actor: Node2D, slot_index: int)
-signal plu_code_submitted(plu_code: String)
-signal plu_book_requested()
 
 @export var product_scatter_view: ProductScatterView
 @export var scanner_station: ScannerStation
@@ -22,9 +20,6 @@ signal plu_book_requested()
 @export var bag_zone: Area2D
 @export var trash_zone: Area2D
 @export var scale_station: ScaleStation
-@export var plu_input_panel: PluInputPanel
-@export var plu_book: PluBook
-@export var plu_book_popup: PluBookPopup
 @export var customer_hand_view: Node2D
 @export var vfx_container: Node2D
 @export var coin_burst_scene: PackedScene
@@ -37,24 +32,6 @@ func _ready() -> void:
 	_base_position = position
 	_resolve_child_references()
 	_connect_children()
-	close_plu_book_popup()
-
-
-func _unhandled_input(event: InputEvent) -> void:
-	var key_event: InputEventKey = event as InputEventKey
-	if key_event == null or not key_event.pressed or key_event.echo:
-		return
-	if plu_book_popup == null or not plu_book_popup.visible:
-		return
-
-	if key_event.keycode == KEY_ESCAPE:
-		close_plu_book_popup()
-		get_viewport().set_input_as_handled()
-		return
-	if key_event.keycode == KEY_ENTER or key_event.keycode == KEY_KP_ENTER:
-		if plu_input_panel == null or not plu_input_panel.is_input_active():
-			close_plu_book_popup()
-			get_viewport().set_input_as_handled()
 
 
 func display_visible_object_slots(slots: Array[VisibleObjectSlot]) -> void:
@@ -77,36 +54,9 @@ func clear_scanned_product_amount() -> void:
 		register_display.call("clear_amount")
 
 
-func show_plu_input(product_instance: ProductInstance) -> void:
-	if plu_input_panel != null:
-		plu_input_panel.show_for_product(product_instance)
-
-
-func hide_plu_input() -> void:
-	if plu_input_panel != null:
-		plu_input_panel.hide_input()
-
-
 func release_scale_actor(actor: Node2D) -> void:
 	if scale_station != null:
 		scale_station.release_actor(actor)
-
-
-func clear_plu_code_and_refocus() -> void:
-	if plu_input_panel != null:
-		plu_input_panel.clear_code_and_refocus()
-
-
-func show_plu_book_popup(products: Array[ProductVariantResource]) -> void:
-	if plu_book_popup == null:
-		return
-	plu_book_popup.visible = true
-	plu_book_popup.configure_products(products)
-
-
-func close_plu_book_popup() -> void:
-	if plu_book_popup != null:
-		plu_book_popup.visible = false
 
 
 func set_customer_hand_state(hand_stage_index: int, suspicion_percent: int) -> void:
@@ -144,8 +94,6 @@ func play_successful_weigh_feedback(actor: Node2D, charge_count: int) -> void:
 func play_invalid_weigh_feedback(actor: Node2D) -> void:
 	if scale_station != null:
 		scale_station.play_invalid_feedback()
-	if plu_input_panel != null:
-		plu_input_panel.play_invalid_feedback()
 	if actor != null and actor.has_method("play_reject_feedback"):
 		actor.call("play_reject_feedback")
 
@@ -192,9 +140,6 @@ func _connect_children() -> void:
 	_connect_signal_once(trash_zone, "actor_dropped", _on_trash_zone_actor_dropped)
 	_connect_signal_once(scale_station, "actor_dropped", _on_scale_station_actor_dropped)
 	_connect_signal_once(scale_station, "actor_removed", _on_scale_station_actor_removed)
-	_connect_signal_once(plu_input_panel, "plu_submitted", _on_plu_code_submitted)
-	_connect_signal_once(plu_book, "book_pressed", _on_plu_book_pressed)
-	_connect_signal_once(plu_book_popup, "popup_closed", _on_plu_book_popup_closed)
 
 
 func _on_product_actor_spawned(actor: Node2D, slot_index: int) -> void:
@@ -260,20 +205,7 @@ func _on_scale_station_actor_dropped(actor: Node2D) -> void:
 
 
 func _on_scale_station_actor_removed(actor: Node2D) -> void:
-	hide_plu_input()
 	actor_scale_removed.emit(actor)
-
-
-func _on_plu_code_submitted(plu_code: String) -> void:
-	plu_code_submitted.emit(plu_code)
-
-
-func _on_plu_book_pressed() -> void:
-	plu_book_requested.emit()
-
-
-func _on_plu_book_popup_closed() -> void:
-	close_plu_book_popup()
 
 
 func _connect_signal_once(source: Object, signal_name: String, callback: Callable) -> void:
@@ -362,12 +294,6 @@ func _resolve_child_references() -> void:
 		trash_zone = get_node_or_null("TrashZone") as Area2D
 	if scale_station == null:
 		scale_station = get_node_or_null("ScaleStation") as ScaleStation
-	if plu_input_panel == null:
-		plu_input_panel = get_node_or_null("PluInputPanel") as PluInputPanel
-	if plu_book == null:
-		plu_book = get_node_or_null("PluBook") as PluBook
-	if plu_book_popup == null:
-		plu_book_popup = get_node_or_null("PluBookPopup") as PluBookPopup
 	if customer_hand_view == null:
 		customer_hand_view = get_node_or_null("CustomerHandView") as Node2D
 	if vfx_container == null:

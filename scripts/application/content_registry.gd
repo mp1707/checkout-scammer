@@ -306,8 +306,6 @@ func _validate_product_variants(errors: PackedStringArray) -> void:
 
 
 func _validate_weighed_product_variant(product_variant: ProductVariantResource, errors: PackedStringArray) -> void:
-	if product_variant.plu_code.length() != 4 or not product_variant.plu_code.is_valid_int():
-		errors.append("Weighed product '%s' needs a four-digit plu_code." % product_variant.id)
 	if product_variant.price_per_kg_cents <= 0:
 		errors.append("Weighed product '%s' price_per_kg_cents must be greater than zero." % product_variant.id)
 	if product_variant.min_weight_grams <= 0:

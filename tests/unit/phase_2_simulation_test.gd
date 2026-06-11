@@ -238,7 +238,10 @@ func _test_economy_system() -> void:
 
 	var bio_sticker: StickerResource = _registry.get_sticker("bio_sticker")
 	apple.add_sticker(StickerInstance.new(bio_sticker, "apple_bio"))
-	_expect_equal_int(180, _economy_system.calculate_weighed_amount_cents(apple, honest_coupons), "EconomySystem applies sticker multipliers to future weighed charges")
+	_expect_equal_int(180, _economy_system.calculate_weighed_amount_cents(apple, honest_coupons), "EconomySystem applies sticker multipliers to weighed charges")
+	apple.scan_count = 1
+	apple.open_amount_cents = 60
+	_expect_equal_int(180, _economy_system.refresh_weighed_open_amount(apple, honest_coupons), "EconomySystem refreshes open weighed amount after sticker changes")
 
 	var fixed_product: ProductInstance = ProductInstance.new(_registry.get_product_variant("chewing_gum"), "gum_economy")
 

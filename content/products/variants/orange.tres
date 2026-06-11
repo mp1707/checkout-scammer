@@ -16,7 +16,6 @@ product_line = ExtResource("2_line")
 sale_mode = 1
 price_cents = 110
 price_per_kg_cents = 320
-plu_code = "1002"
 min_weight_grams = 150
 max_weight_grams = 500
 weight_step_grams = 10

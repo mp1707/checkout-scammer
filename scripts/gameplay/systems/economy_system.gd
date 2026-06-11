@@ -50,6 +50,15 @@ func apply_successful_weighing(result: ScanResult, honest_coupons: Array[CouponI
 	result.resulting_open_amount_cents = result.product_instance.open_amount_cents
 
 
+func refresh_weighed_open_amount(product_instance: ProductInstance, honest_coupons: Array[CouponInstance]) -> int:
+	if product_instance == null or not product_instance.is_weighable() or product_instance.scan_count <= 0:
+		return 0
+
+	var refreshed_charge_cents: int = calculate_weighed_amount_cents(product_instance, honest_coupons)
+	product_instance.open_amount_cents = refreshed_charge_cents * product_instance.scan_count
+	return product_instance.open_amount_cents
+
+
 func payout_product(run_state: RunState, product_instance: ProductInstance) -> PayoutOutcome:
 	var outcome: PayoutOutcome = PayoutOutcome.new()
 	outcome.product_instance = product_instance

@@ -46,7 +46,7 @@ Simulation trifft Regelentscheidungen und mutiert Runtime-State. Sie hat keine A
 Kernsysteme:
 
 - `VisibleObjectQueueSystem`: Kunden-Queue, vier sichtbare Objekt-Slots, Nachruecken erst nach Verarbeitung, Coupon-Objekt als optionaler erster sichtbarer Eintrag.
-- `ScanSystem`: Scan-Gueltigkeit, Scannerzone, Bewegungsrichtung, Rotation/Hit-Details, wiegbare-Produkte-Ablehnung und gemeinsamer Charge-/Caught-Pfad fuer Scan und PLU.
+- `ScanSystem`: Scan-Gueltigkeit, Scannerzone, Bewegungsrichtung, Rotation/Hit-Details, wiegbare-Produkte-Ablehnung und gemeinsamer Charge-/Caught-Pfad fuer Scan und Wiegen.
 - `EconomySystem`: Festpreiswerte, Gewichtspreise, Rabatte, Sticker-Multiplikatoren, Rundung, Payout.
 - `CouponSystem`: Aktivierung, Verzoegerung bis zum naechsten Kunden, Dauer bis Tagesende, Coupon-Scam.
 - `ComboSystem`: spaetere Multi-Scan-/Juice-/Reward-Fenster.
@@ -69,13 +69,10 @@ Wichtige Szenen:
 - `ProductScatterView`: verstreute sichtbare Objekt-Slots rechts neben dem Scanner, Spawn-von-rechts-Animationen, Slot-Marker.
 - `ProductActor`: Drag, Rotation, Scannerkontakt, Schatten und Produktfeedback.
 - `ScannerStation`: Scannerstrahl, Hitbox/Area2D, Flash/SFX-Anker. Der Scannerkoerper ist im Tisch-Sprite enthalten.
-- `RegisterDisplay`: editorseitig platzierbares Kassendisplay im Tisch, zeigt den offenen Betrag des aktuell gescannten Produktes.
+- `RegisterDisplay`: editorseitig platzierbares Kassendisplay im Tisch, zeigt den offenen Betrag des aktuell gebuchten Produktes.
 - `BagZone`: Drop-Zone fuer finalen Verkauf.
 - `TrashZone`: Drop-Zone fuer Produkt-/Coupon-Entsorgung.
 - `ScaleStation`: editorseitig platzierte Waagen-Drop-Zone fuer wiegbare Produkte, mit `waage_sheet.png`-Press-Frames.
-- `PluInputPanel`: kleines PLU-Eingabefeld, sichtbar und fokussiert solange Obst auf der Waage liegt.
-- `PluBook`: klickbares PLU-Buch mit Normal-/Hover-Texture.
-- `PluBookPopup`: kleines 9-Slice-Popup mit allen wiegbaren Produkten und PLU-Codes.
 - `CustomerHandView`: Hand-Sprite fuer Suspicion-Stufen gruen, gelb und rot.
 - `HudRoot`: linke Statusleiste, rechte Upgrade-Leiste, Dialoge, Coupon-Popup und Sticker-Popup.
 - `StickerPopup` und `StickerToken`: rechtes UI-Popup mit physischen draggable Sticker-Tokens.
@@ -90,7 +87,7 @@ Alles Konfigurierbare wird als Resource modelliert:
 
 - `GameBalanceResource`: Startgeld, Tagesmiete, Run-Laenge, Kunden pro Tag, Produkte pro Kunde, sichtbare Objekt-Slots.
 - `ProductLineResource`: Produktlinie wie Obst oder Snacks.
-- `ProductVariantResource`: einzelne Produkte mit ID, Verkaufsart, Festpreis oder Kilopreis, PLU-Code, Gewichtsspanne, Gewichtsverteilung, Sprite-Skalierung, Gewichtung, Sortiment-Level und Texture.
+- `ProductVariantResource`: einzelne Produkte mit ID, Verkaufsart, Festpreis oder Kilopreis, Gewichtsspanne, Gewichtsverteilung, Sprite-Skalierung, Gewichtung, Sortiment-Level und Texture.
 - `CouponResource`: Zielprodukt/-linie, Rabatt, Kaufpreis, Gewichtungsbonus, Dauer.
 - `StickerResource`: Sticker-ID, Tooltip, Texture, Multiplikator, Zielart und taeglicher Refill.
 - `UpgradeResource`: Sortiment-Level-Up und spaetere Upgrades.
@@ -110,10 +107,9 @@ Verbindlich sichtbar in Szenen:
 - Scanner-Shape, Scannerstrahl, Scanner-Hitbox und Feedback-Anker.
 - Bag- und Trash-Drop-Zonen inklusive Collision-/Area-Nodes.
 - Waagen-Drop-Zone, Waagen-Sprite, DropAnchor und Press-Feedback.
-- PLU-Buch, PLU-Buch-Hitbox, PLU-Eingabepanel und PLU-Buch-Popup.
 - ProductActor-Root, Sprite-Anker, Schatten-Anker und Drag-Feedback-Anker.
 - ProductActor-StickerLayer und vorbereitete Sticker-Visual-Scene.
-- Kassendisplay-Root und Betrag-Label fuer die offene Summe des aktuell gescannten Produktes.
+- Kassendisplay-Root und Betrag-Label fuer die offene Summe des aktuell gebuchten Produktes.
 - Kundenhand-Anker, Hand-Sprite und AnimationPlayer.
 - HUD-Panels, Dialoge, Coupon-/Sticker-Popups, Buttons und Tooltip-Anker.
 - AnimationPlayer, Marker2D, Area2D, CollisionShape2D und VFX-Anker fuer alle wiederkehrenden Interaktionen.
@@ -144,8 +140,6 @@ Eine Szene hat genau eine Hauptaufgabe:
 - `ProductScatterView`: zeigt Slots verstreut rechts neben dem Scanner und animiert neue Objekte von rechts herein.
 - `BagZone` und `TrashZone`: melden Drop-Intents.
 - `ScaleStation`: akzeptiert genau ein wiegbares Produkt visuell, spielt Waagenfeedback und meldet Drop-/Remove-Intents.
-- `PluInputPanel`: sammelt vierstellige PLU-Eingaben und sendet `plu_submitted`, bucht aber kein Geld.
-- `PluBook`: sendet nur den Intent, das PLU-Popup zu oeffnen.
 - `StickerPopup`: zeigt verfuegbare Sticker-Instanzen und sendet Drag-Release-Intents mit Sticker-ID und Drop-Position.
 - `HudRoot` und Panels: zeigen Run-State und senden Button-Intents.
 - `RunController`: nimmt Intents an, ruft Simulation-Systeme auf und veroeffentlicht neuen State fuer Presentation.
@@ -173,18 +167,16 @@ Keine UI-Komponente bucht Geld, scannt Produkte, veraendert Suspicion oder aktiv
 6. `EconomySystem` berechnet den offenen Festpreis-Betrag.
 7. `RunController` aktualisiert Runtime-State und sendet Feedback-Events an Presentation: Beep, Scannerflash, Betrag im Kassendisplay, Kundenhand-State.
 
-### Wiegen und PLU
+### Wiegen
 
 1. `ProductActor` wird auf `ScaleStation` gedroppt.
 2. `ScaleStation` akzeptiert nur ein wiegbares Produkt gleichzeitig und meldet den Drop an `CheckoutTable`.
-3. `RunController` setzt den aktiven Waagen-Actor und zeigt `PluInputPanel` fuer dessen `ProductInstance`.
-4. `PluInputPanel` sendet vierstellige Codes als Intent an `RunController`.
-5. `RunController` vergleicht den Code mit `ProductVariantResource.plu_code`.
-6. Bei falschem Code spielt Presentation negatives Feedback; Runtime-State bleibt unveraendert.
-7. Bei richtigem Code nutzt `RunController` `ScanSystem.evaluate_product_charge_attempt`, also denselben First-/Duplicate-/Caught-Pfad wie beim Scan.
-8. `EconomySystem` berechnet `weight_grams * price_per_kg_cents`, wendet ehrliche Coupons und aktuelle Sticker-Multiplikatoren an und addiert nur den neuen Betrag zum offenen Produktbetrag.
-9. Bereits offene Beträge werden nicht rueckwirkend geaendert, wenn spaeter ein Sticker aufgeklebt wird.
-10. Beim Entfernen des Obstes von der Waage wird die PLU-Eingabe versteckt; der offene Betrag bleibt am Produkt.
+3. `RunController` setzt den aktiven Waagen-Actor und nutzt `ScanSystem.evaluate_product_charge_attempt`, also denselben First-/Duplicate-/Caught-Pfad wie beim Scan.
+4. `EconomySystem` berechnet `weight_grams * price_per_kg_cents`, wendet ehrliche Coupons und aktuelle Sticker-Multiplikatoren an und addiert nur den neuen Betrag zum offenen Produktbetrag.
+5. `RunController` aktualisiert Runtime-State und sendet Feedback-Events an Presentation: Waagenfeedback, Betrag im Kassendisplay, Kundenhand-State.
+6. Zum Mehrfachbuchen kann der Spieler das Obst von der Waage hochheben und erneut ablegen. Jede weitere Wiegung nutzt den Duplicate-/Caught-Pfad.
+7. Beim Entfernen des Obstes von der Waage wird der Betrag im Kassendisplay ausgeblendet; der offene Betrag bleibt am Produkt.
+8. Wenn ein Sticker auf das aktuell auf der Waage liegende Obst geklebt wird, berechnet `EconomySystem` den offenen Produktbetrag mit den aktuellen Stickern neu und `RunController` aktualisiert das Kassendisplay sofort.
 
 ### Verkauf
 
@@ -214,6 +206,7 @@ Keine UI-Komponente bucht Geld, scannt Produkte, veraendert Suspicion oder aktiv
 6. `RunController` fragt `CheckoutTable.find_product_actor_at_global_position` und laesst `StickerSystem` Anwendbarkeit und Verbrauch entscheiden.
 7. Aktuell darf `bio_sticker` genau einmal pro Obst angewendet werden und nicht auf Festpreis-Produkte oder Coupons.
 8. Bei Erfolg wird ein `StickerInstance` an `ProductInstance.applied_stickers` gespeichert und `ProductActor` aktualisiert seinen `StickerLayer`.
+9. Wenn der beklebte `ProductActor` der aktive Waagen-Actor ist, laesst `RunController` den offenen Wiegebetrag ueber `EconomySystem` neu berechnen und zeigt den aktualisierten Betrag im Kassendisplay.
 
 ## 9-Slice-UI
 
@@ -278,7 +271,6 @@ Root-Assets werden nicht als dauerhafte Asset-Ablage genutzt. Dauerhafte Ziele:
 - Produkt-Spritesheet-Mapping: `assets/textures/products/products_sheet.txt`
 - Bio-Sticker-Sprite: Atlas-Region aus `assets/textures/products/products_sheet.png`
 - Waage: `assets/textures/environment/waage_sheet.png`, 3 Frames à `96x96`
-- PLU-Buch: `assets/textures/environment/book.png` und `book_highlighted.png`
 - Environment-Sprites: `assets/textures/environment`
 - Coin-/Scanner-VFX: `assets/vfx/coin`, `assets/vfx/scanner`
 
@@ -321,7 +313,6 @@ scenes/
   gameplay/
     bag/
     customer/
-    plu/
     product_area/
     products/
     scale/
@@ -375,7 +366,7 @@ Content-Validierung ist Pflicht, sobald mehrere Resource-Typen referenziert werd
 - fehlende Produkt-/Coupon-/Upgrade-Referenzen
 - fehlende Texturen
 - ungueltige Preise/Gewichtungen
-- ungueltige PLU-Codes, Gewichtsspannen, Kilopreise oder Sticker-Multiplikatoren
+- ungueltige Gewichtsspannen, Kilopreise oder Sticker-Multiplikatoren
 - Produkte ausserhalb freigeschalteter Sortiment-Level
 
 ## Technische Schuld
