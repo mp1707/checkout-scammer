@@ -1,12 +1,10 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3 uid="uid://d3jmfhyp3jonm"]
 
-[ext_resource type="Script" path="res://scripts/vfx/coin_burst_vfx.gd" id="1_coin_burst"]
-[ext_resource type="Texture2D" path="res://assets/vfx/coin/spritesheet.png" id="2_coin_sheet"]
+[ext_resource type="Script" uid="uid://bserxqrlnh55h" path="res://scripts/vfx/coin_burst_vfx.gd" id="1_coin_burst"]
 
-[node name="CoinBurstVfx" type="Node2D"]
+[node name="CoinBurstVfx" type="Node2D" unique_id=214863132]
+scale = Vector2(2, 2)
 script = ExtResource("1_coin_burst")
 sprite = NodePath("Sprite")
-spritesheet = ExtResource("2_coin_sheet")
 
-[node name="Sprite" type="Sprite2D" parent="."]
-texture_filter = 0
+[node name="Sprite" type="Sprite2D" parent="." unique_id=2107639242]

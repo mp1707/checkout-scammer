@@ -23,13 +23,15 @@ func _run() -> void:
 	var controller: RunController = app.get_node("RunController") as RunController
 	var checkout_table: CheckoutTable = app.get_node("CheckoutTable") as CheckoutTable
 	var register_display: Node = app.get_node("CheckoutTable/RegisterDisplay")
+	var scale_station: ScaleStation = app.get_node("CheckoutTable/ScaleStation") as ScaleStation
 	var hud_root: HudRoot = app.get_node("HudRoot") as HudRoot
 	_expect_true(controller != null, "RunController node is present")
 	_expect_true(controller != null and controller.run_state != null, "RunController starts a run from GameApp")
 	_expect_true(checkout_table != null, "CheckoutTable is present")
 	_expect_true(register_display != null, "RegisterDisplay is present")
+	_expect_true(scale_station != null, "ScaleStation is present")
 	_expect_true(hud_root != null, "HudRoot is present")
-	if controller == null or controller.run_state == null or checkout_table == null or register_display == null or hud_root == null:
+	if controller == null or controller.run_state == null or checkout_table == null or register_display == null or scale_station == null or hud_root == null:
 		app.queue_free()
 		_finish()
 		return
@@ -91,6 +93,8 @@ func _run() -> void:
 	checkout_table.emit_signal("actor_scale_drop_requested", fruit_actor)
 	_expect_equal_int(60, fruit_product.open_amount_cents, "Scale drop directly adds weighed fruit amount")
 	_expect_equal_string("$0.60", _get_register_display_text(register_display), "Scale drop updates register display")
+	scale_station.show_weight_grams(fruit_product.weight_grams)
+	_expect_equal_string("200g", scale_station.get_weight_display_text(), "Scale station display shows fruit weight")
 
 	hud_root.emit_signal("sticker_drag_released", "bio_sticker", fruit_actor.global_position)
 	_expect_equal_int(180, fruit_product.open_amount_cents, "Sticker on scaled fruit refreshes open amount")
@@ -99,6 +103,8 @@ func _run() -> void:
 	checkout_table.emit_signal("actor_scale_removed", fruit_actor)
 	_expect_equal_int(180, fruit_product.open_amount_cents, "Removing weighed fruit keeps open amount")
 	_expect_equal_string("", _get_register_display_text(register_display), "Removing weighed fruit hides register display")
+	scale_station.clear_weight()
+	_expect_equal_string("", scale_station.get_weight_display_text(), "Removing weighed fruit hides scale display")
 
 	controller.run_state.current_customer.current_suspicion_percent = 0
 	checkout_table.emit_signal("actor_scale_drop_requested", fruit_actor)

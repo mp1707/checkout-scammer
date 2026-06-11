@@ -2,18 +2,33 @@
 
 [ext_resource type="Script" uid="uid://hr8jsyptv8dr" path="res://scripts/gameplay/components/scale_station.gd" id="1_scale_station"]
 [ext_resource type="Texture2D" uid="uid://dhx3pw4vq5cjg" path="res://assets/textures/environment/waage_sheet.png" id="2_waage_sheet"]
+[ext_resource type="FontFile" uid="uid://ilorfjrobin5" path="res://assets/fonts/PixelOperator8.ttf" id="3_pixel_font"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_scale_drop"]
 size = Vector2(76, 54)
 
-[node name="ScaleStation" type="Area2D" unique_id=54455267 node_paths=PackedStringArray("scale_sprite", "drop_anchor")]
+[node name="ScaleStation" type="Area2D" unique_id=54455267 node_paths=PackedStringArray("scale_sprite", "drop_anchor", "weight_label")]
 script = ExtResource("1_scale_station")
 scale_sprite = NodePath("ScaleSprite")
 drop_anchor = NodePath("DropAnchor")
+weight_label = NodePath("WeightLabel")
 
 [node name="ScaleSprite" type="Sprite2D" parent="." unique_id=1193603286]
 texture = ExtResource("2_waage_sheet")
 hframes = 3
+
+[node name="WeightLabel" type="Label" parent="." unique_id=1997652582]
+z_index = 1
+offset_left = -30.0
+offset_top = 16.0
+offset_right = 30.0
+offset_bottom = 27.0
+theme_override_colors/font_color = Color(0.388235, 0.780392, 0.301961, 1)
+theme_override_fonts/font = ExtResource("3_pixel_font")
+theme_override_font_sizes/font_size = 6
+text = "320g"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1842577423]
 position = Vector2(0, -13)
