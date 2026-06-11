@@ -8,3 +8,7 @@ Productnames from left to right
 - Banana
 - Brown Snackbar
 - Purple Coupon 
+- Bio Sticker
+- Chewing Gum
+- Candy
+- Tissue
