@@ -39,7 +39,7 @@ func _run() -> void:
 	_expect_equal_int(4, controller.run_state.current_customer.visible_slots.size(), "Run displays four visible object slots")
 
 	var actor_container: Node = app.get_node("CheckoutTable/ProductScatterView/ActorContainer")
-	var product_actor: ProductActor = _get_first_product_actor(actor_container)
+	var product_actor: ProductActor = _get_first_fixed_price_product_actor(actor_container)
 	_expect_true(product_actor != null, "Product scatter view spawns product actors")
 	if product_actor == null:
 		app.queue_free()
@@ -84,13 +84,13 @@ func _run() -> void:
 	_finish()
 
 
-func _get_first_product_actor(actor_container: Node) -> ProductActor:
+func _get_first_fixed_price_product_actor(actor_container: Node) -> ProductActor:
 	if actor_container == null:
 		return null
 
 	for child: Node in actor_container.get_children():
 		var product_actor: ProductActor = child as ProductActor
-		if product_actor != null:
+		if product_actor != null and product_actor.product_instance != null and not product_actor.product_instance.is_weighable():
 			return product_actor
 
 	return null

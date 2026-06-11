@@ -5,7 +5,10 @@ const CouponSystemScript = preload("res://scripts/gameplay/systems/coupon_system
 
 const PRODUCT_ID_APPLE: String = "apple"
 const PRODUCT_ID_BANANA: String = "banana"
+const PRODUCT_ID_CANDY: String = "candy"
+const PRODUCT_ID_CHEWING_GUM: String = "chewing_gum"
 const PRODUCT_ID_ORANGE: String = "orange"
+const PRODUCT_ID_TISSUE: String = "tissue"
 
 
 func generate_customer(registry: ContentRegistry, run_state: RunState) -> CustomerState:
@@ -48,7 +51,7 @@ func generate_customer_for_context(
 		scripted_assortment_level
 	)
 	if not scripted_ids.is_empty():
-		_append_scripted_products(customer, scripted_ids, registry, product_count, day, customer_number)
+		_append_scripted_products(customer, scripted_ids, registry, product_count, run_seed, day, customer_number)
 
 	while customer.product_queue.size() < product_count:
 		var product: ProductVariantResource = _select_weighted_product(registry, assortment_level, active_coupons, random)
@@ -56,7 +59,7 @@ func generate_customer_for_context(
 			push_error("CustomerGenerator could not select a product for assortment level %d." % assortment_level)
 			return customer
 
-		customer.product_queue.append(_create_product_instance(product, day, customer_number, customer.product_queue.size()))
+		customer.product_queue.append(_create_product_instance(product, run_seed, day, customer_number, customer.product_queue.size()))
 
 	return customer
 
@@ -66,6 +69,7 @@ func _append_scripted_products(
 	scripted_ids: PackedStringArray,
 	registry: ContentRegistry,
 	product_count: int,
+	run_seed: int,
 	day: int,
 	customer_number: int
 ) -> void:
@@ -76,7 +80,7 @@ func _append_scripted_products(
 			push_error("Scripted customer references missing product '%s'." % scripted_ids[index])
 			continue
 
-		customer.product_queue.append(_create_product_instance(product, day, customer_number, index))
+		customer.product_queue.append(_create_product_instance(product, run_seed, day, customer_number, index))
 
 
 func _select_weighted_product(
@@ -122,9 +126,35 @@ func _get_effective_product_weight(product: ProductVariantResource, active_coupo
 	return effective_weight
 
 
-func _create_product_instance(product: ProductVariantResource, day: int, customer_number: int, product_index: int) -> ProductInstance:
+func _create_product_instance(
+	product: ProductVariantResource,
+	run_seed: int,
+	day: int,
+	customer_number: int,
+	product_index: int
+) -> ProductInstance:
 	var instance_id: String = "d%d_c%d_p%d_%s" % [day, customer_number, product_index + 1, product.id]
-	return ProductInstance.new(product, instance_id)
+	var product_instance: ProductInstance = ProductInstance.new(product, instance_id)
+	if product != null and product.is_weighable():
+		product_instance.weight_grams = _generate_weight_grams(product, run_seed, day, customer_number, product_index)
+	return product_instance
+
+
+func _generate_weight_grams(
+	product: ProductVariantResource,
+	run_seed: int,
+	day: int,
+	customer_number: int,
+	product_index: int
+) -> int:
+	var random: RandomNumberGenerator = RandomNumberGenerator.new()
+	random.seed = _build_weight_seed(run_seed, day, customer_number, product_index, product.id)
+
+	var normalized_roll: float = pow(random.randf(), product.weight_distribution_power)
+	var raw_weight: float = float(product.min_weight_grams) + float(product.max_weight_grams - product.min_weight_grams) * normalized_roll
+	var weight_step: int = maxi(1, product.weight_step_grams)
+	var rounded_weight: int = roundi(raw_weight / float(weight_step)) * weight_step
+	return clampi(rounded_weight, product.min_weight_grams, product.max_weight_grams)
 
 
 func _build_customer_seed(run_seed: int, day: int, customer_number: int, assortment_level: int) -> int:
@@ -132,6 +162,28 @@ func _build_customer_seed(run_seed: int, day: int, customer_number: int, assortm
 	if seed_value < 0:
 		seed_value = -seed_value
 	return seed_value
+
+
+func _build_weight_seed(run_seed: int, day: int, customer_number: int, product_index: int, product_id: String) -> int:
+	var seed_value: int = (
+		run_seed * 92837111
+		+ day * 689287499
+		+ customer_number * 283923481
+		+ (product_index + 1) * 97531
+		+ _stable_string_hash(product_id)
+	)
+	if seed_value < 0:
+		seed_value = -seed_value
+	return seed_value
+
+
+func _stable_string_hash(text: String) -> int:
+	var hash_value: int = 17
+	for index: int in range(text.length()):
+		hash_value = hash_value * 31 + text.unicode_at(index)
+	if hash_value < 0:
+		hash_value = -hash_value
+	return hash_value
 
 
 func _get_scripted_first_day_product_ids(
@@ -147,41 +199,41 @@ func _get_scripted_first_day_product_ids(
 		1:
 			return PackedStringArray([
 				PRODUCT_ID_APPLE,
+				PRODUCT_ID_CHEWING_GUM,
 				PRODUCT_ID_ORANGE,
+				PRODUCT_ID_CANDY,
 				PRODUCT_ID_BANANA,
+				PRODUCT_ID_TISSUE,
 				PRODUCT_ID_APPLE,
 				PRODUCT_ID_BANANA,
 				PRODUCT_ID_ORANGE,
-				PRODUCT_ID_APPLE,
-				PRODUCT_ID_BANANA,
-				PRODUCT_ID_APPLE,
-				PRODUCT_ID_ORANGE,
+				PRODUCT_ID_CHEWING_GUM,
 			])
 		2:
 			return PackedStringArray([
 				PRODUCT_ID_BANANA,
 				PRODUCT_ID_ORANGE,
+				PRODUCT_ID_TISSUE,
 				PRODUCT_ID_APPLE,
-				PRODUCT_ID_BANANA,
-				PRODUCT_ID_APPLE,
-				PRODUCT_ID_ORANGE,
-				PRODUCT_ID_BANANA,
+				PRODUCT_ID_CANDY,
 				PRODUCT_ID_APPLE,
 				PRODUCT_ID_ORANGE,
 				PRODUCT_ID_BANANA,
+				PRODUCT_ID_CHEWING_GUM,
+				PRODUCT_ID_TISSUE,
 			])
 		3:
 			return PackedStringArray([
 				PRODUCT_ID_APPLE,
+				PRODUCT_ID_CANDY,
 				PRODUCT_ID_ORANGE,
 				PRODUCT_ID_BANANA,
-				PRODUCT_ID_ORANGE,
+				PRODUCT_ID_CHEWING_GUM,
 				PRODUCT_ID_APPLE,
+				PRODUCT_ID_TISSUE,
 				PRODUCT_ID_BANANA,
 				PRODUCT_ID_APPLE,
 				PRODUCT_ID_ORANGE,
-				PRODUCT_ID_BANANA,
-				PRODUCT_ID_APPLE,
 			])
 		_:
 			return PackedStringArray()

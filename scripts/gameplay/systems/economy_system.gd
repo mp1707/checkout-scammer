@@ -7,10 +7,25 @@ const CouponSystemScript = preload("res://scripts/gameplay/systems/coupon_system
 func calculate_scan_amount_cents(product_instance: ProductInstance, honest_coupons: Array[CouponInstance]) -> int:
 	if product_instance == null or product_instance.variant == null:
 		return 0
+	if product_instance.variant.is_weighable():
+		return 0
 
 	var base_cents: int = product_instance.variant.price_cents
 	var discount_percent: int = get_best_discount_percent(product_instance.variant, honest_coupons)
 	return floori(float(base_cents * (100 - discount_percent)) / 100.0)
+
+
+func calculate_weighed_amount_cents(product_instance: ProductInstance, honest_coupons: Array[CouponInstance]) -> int:
+	if product_instance == null or product_instance.variant == null or not product_instance.variant.is_weighable():
+		return 0
+
+	var base_cents: int = roundi(
+		float(product_instance.weight_grams * product_instance.variant.price_per_kg_cents) / 1000.0
+	)
+	var discount_percent: int = get_best_discount_percent(product_instance.variant, honest_coupons)
+	var discounted_cents: int = floori(float(base_cents * (100 - discount_percent)) / 100.0)
+	var multiplier_percent: int = product_instance.get_price_multiplier_percent()
+	return floori(float(discounted_cents * multiplier_percent) / 100.0)
 
 
 func apply_successful_scan(result: ScanResult, honest_coupons: Array[CouponInstance]) -> void:
@@ -18,6 +33,17 @@ func apply_successful_scan(result: ScanResult, honest_coupons: Array[CouponInsta
 		return
 
 	var added_amount_cents: int = calculate_scan_amount_cents(result.product_instance, honest_coupons)
+	result.product_instance.scan_count += 1
+	result.product_instance.open_amount_cents += added_amount_cents
+	result.added_amount_cents = added_amount_cents
+	result.resulting_open_amount_cents = result.product_instance.open_amount_cents
+
+
+func apply_successful_weighing(result: ScanResult, honest_coupons: Array[CouponInstance]) -> void:
+	if result == null or not result.is_valid_scan or result.was_caught or result.product_instance == null:
+		return
+
+	var added_amount_cents: int = calculate_weighed_amount_cents(result.product_instance, honest_coupons)
 	result.product_instance.scan_count += 1
 	result.product_instance.open_amount_cents += added_amount_cents
 	result.added_amount_cents = added_amount_cents

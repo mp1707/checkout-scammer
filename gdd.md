@@ -60,7 +60,33 @@
 - Der Scannerstrahl ist vertikal und wird als separates VFX-/Feedback-Element erzeugt.
 - Der Scanner funktioniert nur, wenn ein Produkt von rechts nach links über den Scanner gezogen wird.
 - Wird ein Produkt von links nach rechts über den Scanner gezogen, passiert nichts.
+- Obst ist nicht scannerverkaufbar. Wird Obst über den Scanner gezogen, wird kein Betrag hinzugefügt und kein Suspicion-Roll ausgelöst.
 - Dadurch fühlt sich der Scan wie eine bewusste Kassierbewegung an.
+
+### Waage und PLU
+
+- Obst muss über die Waage verkauft werden.
+- Die Waage steht im Tischbereich rechts neben dem PLU-Buch und oberhalb des Scanners.
+- Die Waage ist eine eigene Drop-Zone und akzeptiert immer nur ein wiegbares Produkt gleichzeitig.
+- Wenn Obst auf die Waage gelegt wird, spielt die Waage die Press-Animation aus `waage_sheet.png`.
+- Solange Obst auf der Waage liegt, bleibt die Waage visuell belastet.
+- Während Obst auf der Waage liegt, erscheint ein kleines PLU-Eingabefeld und bleibt fokussiert.
+- Das Eingabefeld erlaubt maximal 4 Ziffern.
+- Enter bestätigt den PLU-Code.
+- Ein falscher Code bucht nichts und gibt kurzes negatives Feedback.
+- Ein richtiger Code berechnet den Betrag aus Gewicht, Kilopreis, Coupons und Stickern und addiert ihn zum offenen Verkaufsbetrag im Kassendisplay.
+- Obst kann mehrfach per richtigem PLU-Code abgerechnet werden.
+- Die erste korrekte PLU-Abrechnung ist sicher.
+- Ab der zweiten korrekten PLU-Abrechnung desselben Obstes läuft derselbe Suspicion-/Caught-Pfad wie bei Mehrfachscans.
+- Bei Caught verschwindet das Obst, der offene Betrag wird gelöscht und kein Geld wird gebucht.
+
+### PLU-Buch
+
+- Links neben der Waage liegt ein PLU-Buch.
+- Normalzustand nutzt `book.png`, Hover nutzt `book_highlighted.png`.
+- Klick öffnet ein kleines Popup mit allen Obst-PLU-Codes.
+- Das Popup blockiert das PLU-Eingabefeld nicht.
+- Das Popup schließt per Close-Button, Escape oder Enter, sofern keine aktive PLU-Eingabe Enter zuerst verarbeitet.
 
 ### Produktfläche
 
@@ -83,6 +109,8 @@
 
 - Über dem Scanner befindet sich die Tüte.
 - Gescannte Produkte werden in die Tüte gelegt, um den Verkauf final abzuschließen.
+- Gewogenes Obst wird nach korrekter PLU-Abrechnung manuell von der Waage genommen und in die Tüte gelegt.
+- Obst ohne offenen Verkaufsbetrag wird in der Tüte abgelehnt und nicht verarbeitet.
 - Ein Scan bucht noch kein Geld in den Total-Wert.
 - Nach einem erfolgreichen Scan zeigt das Display der Kasse den offenen Verkaufsbetrag des aktuell gescannten Produktes.
 - Der aktuelle Verkaufsbetrag nutzt grüne, displaytypische Schrift direkt im Kassendisplay.
@@ -118,7 +146,7 @@
 - Enthält:
   - Coupon-Button
   - Sortiment-Level-Up-Button
-  - Platz für spätere Upgrades
+  - Sticker-Button
 
 ## Game Setting
 
@@ -140,6 +168,7 @@
 - Dadurch lernt der Spieler die Scam-Mechanik.
 - Runs und zufällige Kunden werden deterministisch über einen Seed erzeugt.
 - Der gleiche Seed soll die gleiche Kunden- und Produktfolge erzeugen.
+- Der gleiche Seed soll auch die gleiche Gewichtsfolge für Obst erzeugen.
 
 ## Balancing-Defaults
 
@@ -156,21 +185,28 @@
   - Produkte pro Kunde
   - sichtbare Objekt-Slots
   - Produktpreise
+  - Kilopreise und PLU-Codes für Obst
+  - Obst-Gewichtsranges, Rundung, Verteilung und Sprite-Skalierung
   - Produktgewichte für die Kundengenerierung
   - Coupon-Kosten
   - Coupon-Rabatte
   - Coupon-Gewichtungsboni
+  - Sticker-Multiplikatoren und tägliche Sticker-Refills
   - Sortiment-Level-Up-Kosten
   - Suspicion-Stufen
 
 ### Aktuelle Produkt-Werte
 
 - Startsortiment:
-  - Apfel: `0,60$`
-  - Banane: `0,70$`
-  - Orange: `1,10$`
+  - Apfel: PLU `1001`, `150-500g`, aktuell `3,00$ / kg`
+  - Orange: PLU `1002`, `150-500g`, aktuell `3,20$ / kg`
+  - Banane: PLU `1003`, `120-500g`, aktuell `2,60$ / kg`
+  - Kaugummi: `0,95$`
+  - Bonbonrolle: `0,80$`
+  - Taschentuecher: `1,40$`
 - Sortiment-Level 2:
   - Brown Snackbar: `1,30$`
+- Alle Werte sind Balancing-Platzhalter in den Produkt-Resources.
 
 ## Kunden-Produktfluss
 
@@ -183,12 +219,22 @@
 - Dadurch bleibt das Spielfeld übersichtlich.
 - Der Spieler verarbeitet alle 10 Produkte nacheinander.
 - Die Reihenfolge innerhalb der sichtbaren Produkt-Slots ist frei wählbar.
-- Produkte können:
+- Festpreis-Produkte können:
   - gescannt werden
   - in die Tüte gelegt werden
   - mehrfach gescannt werden
   - in den Müll geworfen werden, falls das Produkt oder Objekt dafür gedacht ist
-- Jeder erfolgreiche Scan erhöht den offenen Verkaufsbetrag des aktuell gehaltenen Produkts.
+- Obst kann:
+  - auf die Waage gelegt werden
+  - per PLU-Code abgerechnet werden
+  - mehrfach per PLU-Code abgerechnet werden
+  - nach offener Abrechnung in die Tüte gelegt werden
+  - in den Müll geworfen werden
+- Obst bekommt beim Erstellen der Produktinstanz ein deterministisches zufälliges Gewicht.
+- Leichte und realistische Gewichte sind häufig, sehr schwere Früchte selten.
+- Die Gewichtsrundung liegt aktuell bei `10g`.
+- Die Obst-Spritegröße wird anhand des jeweiligen Gewichts von ca. `1.0x` bis maximal `2.0x` skaliert.
+- Jeder erfolgreiche Scan oder jede erfolgreiche PLU-Abrechnung erhöht den offenen Verkaufsbetrag des aktuell gehaltenen Produkts.
 - Der offene Verkaufsbetrag wird erst beim Ablegen in der Tüte zum Total-Wert gebucht.
 
 ## Suspicion-System
@@ -196,8 +242,8 @@
 - Jeder Kunde hat ein internes Suspicion-Meter.
 - Das Suspicion-Meter ist die Wahrscheinlichkeit, beim Betrügen erwischt zu werden.
 - Es startet pro Kunde bei 10%.
-- Ein Caught-Roll passiert bei jedem Produkt-Scan ab dem zweiten Scan desselben Produkts.
-- Der erste Scan eines Produkts ist immer sicher.
+- Ein Caught-Roll passiert bei jedem Produkt-Scan ab dem zweiten Scan desselben Produkts und bei jeder PLU-Abrechnung ab der zweiten Abrechnung desselben Obstes.
+- Der erste Scan oder die erste korrekte PLU-Abrechnung eines Produkts ist immer sicher.
 - Coupon-Scam löst keinen Caught-Roll aus.
 - Wenn ein Mehrfachscan nicht erwischt wird, steigt die Suspicion danach an.
 - Nach einem erfolgreichen Double Scan steigt sie auf 50%.
@@ -228,12 +274,14 @@
 - Kann man die Miete nicht zahlen, verliert man sofort.
 - Eine spätere Schuldenmechanik ist möglich, aber out of scope für den Prototyp.
 - Aktive Tages-Coupons laufen am Tagesende aus.
+- Bio-Sticker werden zu Beginn jedes neuen Tages wieder auf `3` aufgefüllt.
 
 ## Upgrades
 
 - In der rechten Menüleiste gibt es temporäre und permanente Upgrades:
   - Coupons
   - Sortiment-Level-Up
+  - Sticker
 
 ## Coupons
 
@@ -292,6 +340,21 @@
 - Am Anfang hat man nur Billigprodukte.
 - Durch Sortiment-Level-Ups arbeitet man sich langsam zu wertvolleren Produkten hoch.
 
+## Sticker
+
+- Der Sticker-Button im rechten Menüpanel öffnet ein kleines Popup am rechten UI-Bereich.
+- Das Popup blockiert den mittleren Spielbereich nicht.
+- Der Spieler hat pro Tag `3x Bio-Sticker`.
+- Die Sticker werden als einzelne physische Sticker im Popup angezeigt.
+- Jeder Bio-Sticker kann aus dem Popup heraus per Drag-&-Drop auf Obst gezogen werden.
+- Bio-Sticker können nicht auf Festpreis-Produkte, Coupons, Müll, Scanner, Tüte oder leere Fläche geklebt werden.
+- Nach dem Aufkleben ist der Sticker verbraucht und kann nicht entfernt werden.
+- Der Sticker ist sichtbar auf dem Obst und bewegt sich mit dem Produkt.
+- Tooltip: `Verdreifacht den Preis von Obst`
+- Der Bio-Sticker multipliziert zukünftige Obst-Abrechnungen mit `x3`.
+- Bereits offene Beträge werden durch einen später aufgeklebten Sticker nicht rückwirkend geändert.
+- Verbrauchte Sticker bleiben bis zum Tagesende verbraucht.
+
 ## Win / Lose
 
 - Win:
@@ -314,10 +377,13 @@
 
 ## Start-Sortiment
 
-- Für den aktuellen Asset-Stand gibt es im Startsortiment nur:
+- Für den aktuellen Asset-Stand gibt es im Startsortiment:
   - Apfel
   - Orange
   - Banane
+  - Kaugummi
+  - Bonbonrolle
+  - Taschentuecher
 - Das Sortiment kann vorerst genau einmal erweitert werden.
 - Die erste Erweiterung fügt hinzu:
   - Brown Snackbar
@@ -337,18 +403,20 @@ Out of scope für den Prototyp:
 - Die ersten 4 Objekte rutschen von rechts in die verstreute Produktfläche.
 - Falls für diesen Kunden ein Coupon aktiv ist, liegt er zuerst in der Produktfläche.
 - Der Spieler nimmt ein Produkt von der Produktfläche.
-- Der Spieler zieht das Produkt von rechts nach links über den vertikalen Scannerstrahl.
-- Scan löst aus:
+- Festpreis-Produkte werden von rechts nach links über den vertikalen Scannerstrahl gezogen.
+- Ein gültiger Scan löst aus:
   - Beep
   - Verkaufsbetrag im Kassendisplay erhöht sich
   - Scanner-Feedback
-- Danach kann der Spieler das Produkt nochmal scannen oder in die Tüte legen.
+- Obst wird auf die Waage gelegt, per PLU-Code abgerechnet und danach in die Tüte gelegt.
+- Danach kann der Spieler das Festpreis-Produkt nochmal scannen oder Obst nochmal per PLU abrechnen.
 - Beim Ablegen in die Tüte wird der offene Verkaufsbetrag zum Total-Wert gebucht.
 - Beim Ablegen in die Tüte spielt die Coin-Animation an der Tüte.
 - Wenn eines der 4 aktiven Objekte in der Tüte, im Müll oder durch Erwischen verschwunden ist, rutscht das nächste Produkt von rechts nach.
 - Der Spieler verarbeitet alle 10 Produkte des Kunden.
-- Produkte können mehrfach gescannt werden.
-- Mehrfaches Scannen erhöht die Suspicion.
+- Festpreis-Produkte können mehrfach gescannt werden.
+- Obst kann mehrfach per PLU-Code abgerechnet werden.
+- Mehrfaches Scannen oder mehrfaches korrektes PLU-Abrechnen erhöht die Suspicion.
 - Die Suspicion wird über den Sprite-Zustand der Kundenhand angezeigt.
 - Nach dem letzten verarbeiteten Produkt erscheint nach einer Sekunde eine Textbox:
 
@@ -370,6 +438,7 @@ Out of scope für den Prototyp:
   - das Produkt von links nach rechts gezogen wird
   - das Produkt nur auf dem Scanner liegt
   - das Produkt nicht aktiv gezogen wird
+  - das Produkt Obst bzw. ein wiegbares Produkt ist
 - Dadurch wird der Scan-Moment klarer und absichtlicher.
 - Der erste erfolgreiche Scan eines Produkts zeigt den offenen Verkaufsbetrag im Kassendisplay.
 - Jeder weitere erfolgreiche Scan desselben gehaltenen Produkts erhöht diesen offenen Verkaufsbetrag erneut um den Produktwert.
@@ -383,11 +452,14 @@ Out of scope für den Prototyp:
 - Danach kann es abgelegt werden:
   - in der Tüte
   - im Müll-Loch
+  - auf der Waage, wenn es Obst ist
   - optional zurück auf dem Tisch, falls nötig
 - Beim Ablegen in der Tüte gilt das Produkt als verkauft und verarbeitet.
+- Obst ohne offenen Verkaufsbetrag wird von der Tüte abgelehnt.
 - Der offene Verkaufsbetrag wird erst in diesem Moment zum Total-Wert gebucht.
 - Beim Ablegen im Müll-Loch verschwindet das Produkt oder der Coupon.
 - Produkte in der Tüte können nicht erneut aufgenommen werden.
+- Sticker werden aus dem Sticker-Popup gezogen und können nur auf Obst gedroppt werden.
 
 ## Juice-Fokus
 
@@ -436,6 +508,8 @@ Für den ersten spielbaren Prototyp ist wichtig:
 - 10 Produkte pro Kunde
 - Scanner im Tisch-Sprite, vorerst mittig, mit vertikalem Strahl
 - Scannen nur von rechts nach links
+- Obst ist wiegbar und nicht scanbar
+- Waage, PLU-Eingabe und PLU-Buch im Tischbereich
 - Tüte über dem Scanner
 - Müll-Loch rechts unten
 - Kundenhand rechts oben mit drei Suspicion-Sprites
@@ -443,6 +517,8 @@ Für den ersten spielbaren Prototyp ist wichtig:
 - Coin-Animation beim Ablegen in die Tüte
 - Geld zählt beim Ablegen in der Tüte direkt hoch
 - Double-Scan erhöht Suspicion
+- Mehrfaches korrektes PLU-Abrechnen erhöht Suspicion wie Mehrfachscans
+- Sticker-Button mit `3x` Bio-Stickern pro Tag
 - Miete am Tagesende
 - Lose bei nicht bezahlbarer Miete
-- Coupon- und Sortiment-Upgrade als einfache Buttons
+- Coupon-, Sticker- und Sortiment-Upgrade als einfache Buttons

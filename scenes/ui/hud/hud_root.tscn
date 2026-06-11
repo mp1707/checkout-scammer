@@ -1,10 +1,11 @@
-[gd_scene load_steps=6 format=3 uid="uid://cq5acv1k6x7ut"]
+[gd_scene load_steps=7 format=3 uid="uid://cq5acv1k6x7ut"]
 
 [ext_resource type="Script" uid="uid://y31g6ewc3swb" path="res://scripts/ui/hud/hud_root.gd" id="1_hud_root"]
 [ext_resource type="Script" path="res://scripts/ui/panels/pixel_panel_frame.gd" id="2_panel_frame"]
 [ext_resource type="Script" path="res://scripts/ui/panels/pixel_button.gd" id="3_pixel_button"]
 [ext_resource type="Script" uid="uid://mpqa4tny6r28" path="res://scripts/ui/panels/pixel_panel.gd" id="4_pixel_panel"]
 [ext_resource type="PackedScene" path="res://scenes/ui/popups/coupon_popup.tscn" id="5_coupon_popup"]
+[ext_resource type="PackedScene" path="res://scenes/ui/popups/sticker_popup.tscn" id="6_sticker_popup"]
 
 [node name="HudRoot" type="Control" unique_id=874295037]
 layout_mode = 3
@@ -19,6 +20,7 @@ dialog_message_label = NodePath("DialogLayer/DialogFrame/MainPanel/DialogContent
 dialog_continue_button = NodePath("DialogLayer/DialogFrame/MainPanel/DialogContent/ButtonRow/ContinueButton")
 popup_layer = NodePath("PopupLayer")
 coupon_popup_scene = ExtResource("5_coupon_popup")
+sticker_popup_scene = ExtResource("6_sticker_popup")
 
 [node name="DialogLayer" type="Control" parent="." unique_id=178337825]
 visible = false

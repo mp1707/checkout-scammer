@@ -13,6 +13,7 @@ var pending_assortment_activation_customer_number: int = 1
 var current_customer: CustomerState
 var active_coupons: Array[CouponInstance] = []
 var pending_coupons: Array[CouponInstance] = []
+var sticker_inventory: Array[StickerInventoryEntry] = []
 
 
 func apply_balance(balance: GameBalanceResource) -> void:

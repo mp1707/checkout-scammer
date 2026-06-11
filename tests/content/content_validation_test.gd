@@ -11,10 +11,11 @@ func _initialize() -> void:
 		quit(1)
 		return
 
-	print("Content validation passed: %d lines, %d products, %d coupons, %d upgrades." % [
+	print("Content validation passed: %d lines, %d products, %d coupons, %d stickers, %d upgrades." % [
 		registry.product_lines.size(),
 		registry.product_variants.size(),
 		registry.coupons.size(),
+		registry.stickers.size(),
 		registry.upgrades.size(),
 	])
 	quit(0)

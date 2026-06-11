@@ -8,6 +8,7 @@ const FAILURE_NOT_TOUCHING_SCANNER: String = "not_touching_scanner"
 const FAILURE_WRONG_DIRECTION: String = "wrong_direction"
 const FAILURE_NO_PRODUCT: String = "no_product"
 const FAILURE_PRODUCT_PROCESSED: String = "product_processed"
+const FAILURE_PRODUCT_WEIGHABLE: String = "product_weighable"
 const FAILURE_CAUGHT: String = "caught"
 
 
@@ -40,9 +41,34 @@ func evaluate_scan(
 	if request.movement_direction.x >= 0.0:
 		result.failure_reason = FAILURE_WRONG_DIRECTION
 		return result
+	if request.product_instance.is_weighable():
+		result.failure_reason = FAILURE_PRODUCT_WEIGHABLE
+		return result
 
-	result.is_first_scan = request.product_instance.scan_count == 0
-	result.is_duplicate_scan = request.product_instance.scan_count > 0
+	return evaluate_product_charge_attempt(request.product_instance, customer, suspicion_system, curve, random)
+
+
+func evaluate_product_charge_attempt(
+	product_instance: ProductInstance,
+	customer: CustomerState,
+	suspicion_system: SuspicionSystemScript,
+	curve: SuspicionCurveResource,
+	random: RandomNumberGenerator
+) -> ScanResult:
+	var result: ScanResult = ScanResult.new()
+	if customer != null:
+		result.suspicion_percent_after = customer.current_suspicion_percent
+
+	if product_instance == null:
+		result.failure_reason = FAILURE_NO_PRODUCT
+		return result
+
+	result.product_instance = product_instance
+	if product_instance.is_processed:
+		result.failure_reason = FAILURE_PRODUCT_PROCESSED
+		return result
+	result.is_first_scan = product_instance.scan_count == 0
+	result.is_duplicate_scan = product_instance.scan_count > 0
 
 	if result.is_duplicate_scan:
 		result.was_caught = suspicion_system.roll_for_duplicate_scan(customer, curve, random)

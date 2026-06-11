@@ -4,10 +4,12 @@ class_name RightUpgradePanel
 
 signal coupon_button_pressed()
 signal assortment_upgrade_button_pressed()
+signal sticker_button_pressed()
 
 @export var title_label: Label
 @export var coupon_button: Button
 @export var assortment_upgrade_button: Button
+@export var sticker_button: Button
 
 
 func _ready() -> void:
@@ -43,6 +45,17 @@ func set_assortment_upgrade_tooltip(button_tooltip_text: String) -> void:
 		assortment_upgrade_button.tooltip_text = button_tooltip_text
 
 
+func set_sticker_button_enabled(is_enabled: bool) -> void:
+	if sticker_button != null:
+		sticker_button.disabled = not is_enabled
+	queue_fit_to_content()
+
+
+func set_sticker_button_tooltip(button_tooltip_text: String) -> void:
+	if sticker_button != null:
+		sticker_button.tooltip_text = button_tooltip_text
+
+
 func _connect_buttons() -> void:
 	if Engine.is_editor_hint():
 		return
@@ -50,6 +63,8 @@ func _connect_buttons() -> void:
 		coupon_button.pressed.connect(_on_coupon_button_pressed)
 	if assortment_upgrade_button != null and not assortment_upgrade_button.pressed.is_connected(_on_assortment_upgrade_button_pressed):
 		assortment_upgrade_button.pressed.connect(_on_assortment_upgrade_button_pressed)
+	if sticker_button != null and not sticker_button.pressed.is_connected(_on_sticker_button_pressed):
+		sticker_button.pressed.connect(_on_sticker_button_pressed)
 
 
 func _on_coupon_button_pressed() -> void:
@@ -58,6 +73,10 @@ func _on_coupon_button_pressed() -> void:
 
 func _on_assortment_upgrade_button_pressed() -> void:
 	assortment_upgrade_button_pressed.emit()
+
+
+func _on_sticker_button_pressed() -> void:
+	sticker_button_pressed.emit()
 
 
 func _apply_label_theme(root: Node) -> void:
@@ -88,6 +107,7 @@ func _apply_button_theme() -> void:
 
 	_apply_button_font(coupon_button)
 	_apply_button_font(assortment_upgrade_button)
+	_apply_button_font(sticker_button)
 
 
 func _apply_button_font(button: Button) -> void:
@@ -110,6 +130,8 @@ func _resolve_child_references() -> void:
 		coupon_button = _get_main_panel_button("UpgradeList/CouponButton")
 	if assortment_upgrade_button == null:
 		assortment_upgrade_button = _get_main_panel_button("UpgradeList/AssortmentButton")
+	if sticker_button == null:
+		sticker_button = _get_main_panel_button("UpgradeList/StickerButton")
 
 
 func _get_main_panel_label(label_path: String) -> Label:

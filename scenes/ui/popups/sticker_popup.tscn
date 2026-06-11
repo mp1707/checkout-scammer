@@ -1,0 +1,69 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/hud/sticker_popup.gd" id="1_sticker_popup"]
+[ext_resource type="Script" path="res://scripts/ui/panels/pixel_panel.gd" id="2_pixel_panel"]
+[ext_resource type="Script" path="res://scripts/ui/panels/pixel_button.gd" id="3_pixel_button"]
+[ext_resource type="PackedScene" path="res://scenes/ui/popups/sticker_token.tscn" id="4_sticker_token"]
+
+[node name="StickerPopup" type="Control" node_paths=PackedStringArray("main_panel", "shadow_panel", "title_label", "tokens_container", "empty_label", "close_button")]
+offset_right = 102.0
+offset_bottom = 78.0
+mouse_filter = 0
+script = ExtResource("1_sticker_popup")
+main_panel = NodePath("MainPanel")
+shadow_panel = NodePath("ShadowPanel")
+panel_color = Color(0.976471, 0.901961, 0.811765, 1)
+content_margin_override = 5
+panel_width = 100
+shadow_offset = Vector2(2, 3)
+title_label = NodePath("MainPanel/VBox/TitleLabel")
+tokens_container = NodePath("MainPanel/VBox/Tokens")
+empty_label = NodePath("MainPanel/VBox/EmptyLabel")
+close_button = NodePath("MainPanel/VBox/CloseButton")
+sticker_token_scene = ExtResource("4_sticker_token")
+
+[node name="ShadowPanel" type="PanelContainer" parent="."]
+layout_mode = 0
+offset_left = 2.0
+offset_top = 3.0
+offset_right = 102.0
+offset_bottom = 78.0
+mouse_filter = 2
+script = ExtResource("2_pixel_panel")
+panel_color = Color(0.054902, 0.027451, 0.105882, 0.42)
+content_margin_override = 5
+
+[node name="MainPanel" type="PanelContainer" parent="."]
+layout_mode = 0
+offset_right = 100.0
+offset_bottom = 75.0
+script = ExtResource("2_pixel_panel")
+panel_color = Color(0.976471, 0.901961, 0.811765, 1)
+content_margin_override = 5
+
+[node name="VBox" type="VBoxContainer" parent="MainPanel"]
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="TitleLabel" type="Label" parent="MainPanel/VBox"]
+layout_mode = 2
+text = "Sticker"
+horizontal_alignment = 1
+
+[node name="Tokens" type="HBoxContainer" parent="MainPanel/VBox"]
+custom_minimum_size = Vector2(84, 26)
+layout_mode = 2
+theme_override_constants/separation = 2
+alignment = 1
+
+[node name="EmptyLabel" type="Label" parent="MainPanel/VBox"]
+visible = false
+layout_mode = 2
+text = "0"
+horizontal_alignment = 1
+
+[node name="CloseButton" type="Button" parent="MainPanel/VBox"]
+custom_minimum_size = Vector2(0, 18)
+layout_mode = 2
+text = "Close"
+script = ExtResource("3_pixel_button")

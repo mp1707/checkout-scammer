@@ -1,0 +1,25 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/gameplay/components/scale_station.gd" id="1_scale_station"]
+[ext_resource type="Texture2D" path="res://assets/textures/environment/waage_sheet.png" id="2_waage_sheet"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_scale_drop"]
+size = Vector2(76, 54)
+
+[node name="ScaleStation" type="Area2D" node_paths=PackedStringArray("scale_sprite", "drop_anchor")]
+script = ExtResource("1_scale_station")
+scale_sprite = NodePath("ScaleSprite")
+drop_anchor = NodePath("DropAnchor")
+monitoring = true
+monitorable = true
+
+[node name="ScaleSprite" type="Sprite2D" parent="."]
+texture = ExtResource("2_waage_sheet")
+hframes = 3
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 4)
+shape = SubResource("RectangleShape2D_scale_drop")
+
+[node name="DropAnchor" type="Marker2D" parent="."]
+position = Vector2(0, -8)

@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/hud/sticker_token.gd" id="1_sticker_token"]
+
+[node name="StickerToken" type="TextureRect"]
+custom_minimum_size = Vector2(26, 26)
+mouse_filter = 0
+script = ExtResource("1_sticker_token")
+stretch_mode = 5

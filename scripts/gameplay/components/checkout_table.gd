@@ -8,15 +8,23 @@ signal actor_scan_contact_ended(actor: Node2D)
 signal actor_taken_from_product_area(actor: Node2D)
 signal actor_bag_drop_requested(actor: Node2D)
 signal actor_trash_drop_requested(actor: Node2D)
+signal actor_scale_drop_requested(actor: Node2D)
+signal actor_scale_removed(actor: Node2D)
 signal actor_released_outside_drop_zones(actor: Node2D)
 signal product_actor_spawned(actor: Node2D, slot_index: int)
 signal coupon_actor_spawned(actor: Node2D, slot_index: int)
+signal plu_code_submitted(plu_code: String)
+signal plu_book_requested()
 
 @export var product_scatter_view: ProductScatterView
 @export var scanner_station: ScannerStation
 @export var register_display: Control
 @export var bag_zone: Area2D
 @export var trash_zone: Area2D
+@export var scale_station: ScaleStation
+@export var plu_input_panel: PluInputPanel
+@export var plu_book: PluBook
+@export var plu_book_popup: PluBookPopup
 @export var customer_hand_view: Node2D
 @export var vfx_container: Node2D
 @export var coin_burst_scene: PackedScene
@@ -29,6 +37,24 @@ func _ready() -> void:
 	_base_position = position
 	_resolve_child_references()
 	_connect_children()
+	close_plu_book_popup()
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	var key_event: InputEventKey = event as InputEventKey
+	if key_event == null or not key_event.pressed or key_event.echo:
+		return
+	if plu_book_popup == null or not plu_book_popup.visible:
+		return
+
+	if key_event.keycode == KEY_ESCAPE:
+		close_plu_book_popup()
+		get_viewport().set_input_as_handled()
+		return
+	if key_event.keycode == KEY_ENTER or key_event.keycode == KEY_KP_ENTER:
+		if plu_input_panel == null or not plu_input_panel.is_input_active():
+			close_plu_book_popup()
+			get_viewport().set_input_as_handled()
 
 
 func display_visible_object_slots(slots: Array[VisibleObjectSlot]) -> void:
@@ -49,6 +75,38 @@ func show_scanned_product_amount(amount_cents: int) -> void:
 func clear_scanned_product_amount() -> void:
 	if register_display != null and register_display.has_method("clear_amount"):
 		register_display.call("clear_amount")
+
+
+func show_plu_input(product_instance: ProductInstance) -> void:
+	if plu_input_panel != null:
+		plu_input_panel.show_for_product(product_instance)
+
+
+func hide_plu_input() -> void:
+	if plu_input_panel != null:
+		plu_input_panel.hide_input()
+
+
+func release_scale_actor(actor: Node2D) -> void:
+	if scale_station != null:
+		scale_station.release_actor(actor)
+
+
+func clear_plu_code_and_refocus() -> void:
+	if plu_input_panel != null:
+		plu_input_panel.clear_code_and_refocus()
+
+
+func show_plu_book_popup(products: Array[ProductVariantResource]) -> void:
+	if plu_book_popup == null:
+		return
+	plu_book_popup.visible = true
+	plu_book_popup.configure_products(products)
+
+
+func close_plu_book_popup() -> void:
+	if plu_book_popup != null:
+		plu_book_popup.visible = false
 
 
 func set_customer_hand_state(hand_stage_index: int, suspicion_percent: int) -> void:
@@ -72,6 +130,38 @@ func play_successful_scan_feedback(actor: Node2D, scan_count: int, _contact_posi
 
 	if scan_count > 1:
 		_play_table_jolt(scan_count)
+
+
+func play_successful_weigh_feedback(actor: Node2D, charge_count: int) -> void:
+	if scale_station != null:
+		scale_station.play_success_feedback()
+	if actor != null and actor.has_method("play_successful_scan_feedback"):
+		actor.call("play_successful_scan_feedback", charge_count)
+	if charge_count > 1:
+		_play_table_jolt(charge_count)
+
+
+func play_invalid_weigh_feedback(actor: Node2D) -> void:
+	if scale_station != null:
+		scale_station.play_invalid_feedback()
+	if plu_input_panel != null:
+		plu_input_panel.play_invalid_feedback()
+	if actor != null and actor.has_method("play_reject_feedback"):
+		actor.call("play_reject_feedback")
+
+
+func play_rejected_drop_feedback(actor: Node2D) -> void:
+	if actor != null and actor.has_method("play_reject_feedback"):
+		actor.call("play_reject_feedback")
+
+
+func refresh_product_actor(actor: Node2D) -> void:
+	if actor != null and actor.has_method("refresh_product_state"):
+		actor.call("refresh_product_state")
+
+
+func find_product_actor_at_global_position(global_point: Vector2) -> ProductActor:
+	return _find_product_actor_at_global_position(self, global_point)
 
 
 func play_actor_finish_feedback(actor: Node2D, is_sale: bool) -> void:
@@ -100,6 +190,11 @@ func _connect_children() -> void:
 
 	_connect_signal_once(bag_zone, "actor_dropped", _on_bag_zone_actor_dropped)
 	_connect_signal_once(trash_zone, "actor_dropped", _on_trash_zone_actor_dropped)
+	_connect_signal_once(scale_station, "actor_dropped", _on_scale_station_actor_dropped)
+	_connect_signal_once(scale_station, "actor_removed", _on_scale_station_actor_removed)
+	_connect_signal_once(plu_input_panel, "plu_submitted", _on_plu_code_submitted)
+	_connect_signal_once(plu_book, "book_pressed", _on_plu_book_pressed)
+	_connect_signal_once(plu_book_popup, "popup_closed", _on_plu_book_popup_closed)
 
 
 func _on_product_actor_spawned(actor: Node2D, slot_index: int) -> void:
@@ -115,6 +210,8 @@ func _on_coupon_actor_spawned(actor: Node2D, slot_index: int) -> void:
 
 
 func _on_actor_drag_started(actor: Node2D) -> void:
+	if scale_station != null and scale_station.has_actor(actor):
+		scale_station.release_actor(actor)
 	if product_scatter_view != null:
 		product_scatter_view.release_actor(actor)
 	actor_taken_from_product_area.emit(actor)
@@ -125,6 +222,8 @@ func _on_actor_drag_ended(actor: Node2D, _drop_position: Vector2) -> void:
 
 
 func _route_actor_drop(actor: Node2D) -> void:
+	if scale_station != null and scale_station.has_method("try_drop_actor") and scale_station.call("try_drop_actor", actor):
+		return
 	if bag_zone != null and bag_zone.has_method("try_drop_actor") and bag_zone.call("try_drop_actor", actor):
 		return
 	if trash_zone != null and trash_zone.has_method("try_drop_actor") and trash_zone.call("try_drop_actor", actor):
@@ -154,6 +253,27 @@ func _on_bag_zone_actor_dropped(actor: Node2D) -> void:
 
 func _on_trash_zone_actor_dropped(actor: Node2D) -> void:
 	actor_trash_drop_requested.emit(actor)
+
+
+func _on_scale_station_actor_dropped(actor: Node2D) -> void:
+	actor_scale_drop_requested.emit(actor)
+
+
+func _on_scale_station_actor_removed(actor: Node2D) -> void:
+	hide_plu_input()
+	actor_scale_removed.emit(actor)
+
+
+func _on_plu_code_submitted(plu_code: String) -> void:
+	plu_code_submitted.emit(plu_code)
+
+
+func _on_plu_book_pressed() -> void:
+	plu_book_requested.emit()
+
+
+func _on_plu_book_popup_closed() -> void:
+	close_plu_book_popup()
 
 
 func _connect_signal_once(source: Object, signal_name: String, callback: Callable) -> void:
@@ -199,6 +319,22 @@ func _actor_is_product(actor: Node2D) -> bool:
 	return actor.get("product_instance") is ProductInstance
 
 
+func _find_product_actor_at_global_position(root: Node, global_point: Vector2) -> ProductActor:
+	if root == null:
+		return null
+
+	var product_actor: ProductActor = root as ProductActor
+	if product_actor != null and product_actor.contains_global_point(global_point):
+		return product_actor
+
+	for child: Node in root.get_children():
+		var found_actor: ProductActor = _find_product_actor_at_global_position(child, global_point)
+		if found_actor != null:
+			return found_actor
+
+	return null
+
+
 func _play_table_jolt(scan_count: int) -> void:
 	if _shake_tween != null and _shake_tween.is_valid():
 		_shake_tween.kill()
@@ -224,6 +360,14 @@ func _resolve_child_references() -> void:
 		bag_zone = get_node_or_null("BagZone") as Area2D
 	if trash_zone == null:
 		trash_zone = get_node_or_null("TrashZone") as Area2D
+	if scale_station == null:
+		scale_station = get_node_or_null("ScaleStation") as ScaleStation
+	if plu_input_panel == null:
+		plu_input_panel = get_node_or_null("PluInputPanel") as PluInputPanel
+	if plu_book == null:
+		plu_book = get_node_or_null("PluBook") as PluBook
+	if plu_book_popup == null:
+		plu_book_popup = get_node_or_null("PluBookPopup") as PluBookPopup
 	if customer_hand_view == null:
 		customer_hand_view = get_node_or_null("CustomerHandView") as Node2D
 	if vfx_container == null:

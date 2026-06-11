@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="StickerResource" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/gameplay/state/sticker_resource.gd" id="1_sticker"]
+[ext_resource type="Texture2D" path="res://assets/textures/products/products_sheet.png" id="2_sheet"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bio_sticker"]
+atlas = ExtResource("2_sheet")
+region = Rect2(160, 0, 32, 32)
+
+[resource]
+script = ExtResource("1_sticker")
+id = "bio_sticker"
+display_name = "Bio-Sticker"
+tooltip = "Verdreifacht den Preis von Obst"
+texture = SubResource("AtlasTexture_bio_sticker")
+price_multiplier_percent = 300
+daily_refill_count = 3

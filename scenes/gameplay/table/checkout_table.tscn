@@ -10,8 +10,12 @@
 [ext_resource type="PackedScene" path="res://scenes/vfx/coin_burst_vfx.tscn" id="7_coin_burst"]
 [ext_resource type="Texture2D" uid="uid://c4i8322s07aui" path="res://assets/textures/environment/table.png" id="8_table"]
 [ext_resource type="Script" uid="uid://cqe1rqlfh7jru" path="res://scripts/gameplay/components/register_display.gd" id="9_register_display"]
+[ext_resource type="PackedScene" path="res://scenes/gameplay/scale/scale_station.tscn" id="10_scale_station"]
+[ext_resource type="PackedScene" path="res://scenes/gameplay/plu/plu_book.tscn" id="11_plu_book"]
+[ext_resource type="PackedScene" path="res://scenes/gameplay/plu/plu_input_panel.tscn" id="12_plu_input_panel"]
+[ext_resource type="PackedScene" path="res://scenes/gameplay/plu/plu_book_popup.tscn" id="13_plu_book_popup"]
 
-[node name="CheckoutTable" type="Control" unique_id=845555887]
+[node name="CheckoutTable" type="Control" unique_id=845555887 node_paths=PackedStringArray("product_scatter_view", "scanner_station", "register_display", "bag_zone", "trash_zone", "scale_station", "plu_input_panel", "plu_book", "plu_book_popup", "customer_hand_view", "vfx_container")]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 640.0
@@ -23,6 +27,10 @@ scanner_station = NodePath("ScannerStation")
 register_display = NodePath("RegisterDisplay")
 bag_zone = NodePath("BagZone")
 trash_zone = NodePath("TrashZone")
+scale_station = NodePath("ScaleStation")
+plu_input_panel = NodePath("PluInputPanel")
+plu_book = NodePath("PluBook")
+plu_book_popup = NodePath("PluBookPopup")
 customer_hand_view = NodePath("CustomerHandView")
 vfx_container = NodePath("VfxContainer")
 coin_burst_scene = ExtResource("7_coin_burst")
@@ -37,6 +45,12 @@ position = Vector2(206, 241)
 
 [node name="ScannerStation" parent="." unique_id=678997339 instance=ExtResource("2_scanner")]
 position = Vector2(338, 243)
+
+[node name="PluBook" parent="." unique_id=1505713755 instance=ExtResource("11_plu_book")]
+position = Vector2(278, 150)
+
+[node name="ScaleStation" parent="." unique_id=306612671 instance=ExtResource("10_scale_station")]
+position = Vector2(340, 147)
 
 [node name="RegisterDisplay" type="Control" parent="." unique_id=1105894270 node_paths=PackedStringArray("amount_label")]
 z_index = -40
@@ -67,6 +81,24 @@ vertical_alignment = 1
 
 [node name="ProductScatterView" parent="." unique_id=364460971 instance=ExtResource("3_product_scatter")]
 position = Vector2(401, 153)
+
+[node name="PluInputPanel" parent="." unique_id=128467133 instance=ExtResource("12_plu_input_panel")]
+visible = true
+z_index = 60
+anchors_preset = 0
+offset_left = 302.0
+offset_top = 76.0
+offset_right = 380.0
+offset_bottom = 118.0
+
+[node name="PluBookPopup" parent="." unique_id=13042683 instance=ExtResource("13_plu_book_popup")]
+z_index = 80
+custom_minimum_size = Vector2(118, 45)
+anchors_preset = 0
+offset_left = 279.0
+offset_top = 184.0
+offset_right = 397.0
+offset_bottom = 229.0
 
 [node name="TrashZone" parent="." unique_id=345382906 instance=ExtResource("5_trash")]
 position = Vector2(486, 289)

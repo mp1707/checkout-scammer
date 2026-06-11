@@ -46,15 +46,16 @@ Simulation trifft Regelentscheidungen und mutiert Runtime-State. Sie hat keine A
 Kernsysteme:
 
 - `VisibleObjectQueueSystem`: Kunden-Queue, vier sichtbare Objekt-Slots, Nachruecken erst nach Verarbeitung, Coupon-Objekt als optionaler erster sichtbarer Eintrag.
-- `ScanSystem`: Scan-Gueltigkeit, Scannerzone, Bewegungsrichtung, Rotation/Hit-Details, erster Scan vs. Mehrfachscan.
-- `EconomySystem`: Produktwerte, Rabatte, Multiplikatoren, Rundung, Payout.
+- `ScanSystem`: Scan-Gueltigkeit, Scannerzone, Bewegungsrichtung, Rotation/Hit-Details, wiegbare-Produkte-Ablehnung und gemeinsamer Charge-/Caught-Pfad fuer Scan und PLU.
+- `EconomySystem`: Festpreiswerte, Gewichtspreise, Rabatte, Sticker-Multiplikatoren, Rundung, Payout.
 - `CouponSystem`: Aktivierung, Verzoegerung bis zum naechsten Kunden, Dauer bis Tagesende, Coupon-Scam.
 - `ComboSystem`: spaetere Multi-Scan-/Juice-/Reward-Fenster.
 - `SuspicionSystem`: Caught-Rolls, Suspicion-Stufen, dreistufiger Kundenhand-Zustand.
 - `UpgradeSystem`: Sortiment-Level, Upgrade-Kosten, Wirkung ab naechstem Kunden.
-- `CustomerGenerator`: deterministische Kunden- und Produktfolgen per Seed.
+- `StickerSystem`: Tagesinventar, Refill, Verbrauch und Anwendbarkeit von Stickern auf Produkte.
+- `CustomerGenerator`: deterministische Kunden-, Produkt- und Obst-Gewichtsfolgen per Seed.
 
-Simulation arbeitet mit expliziten Datenobjekten wie `ScanRequest`, `ScanResult`, `PayoutOutcome`, `VisibleObjectSlot`, `RunState`, `CustomerState`, `ProductInstance` und `CouponInstance`.
+Simulation arbeitet mit expliziten Datenobjekten wie `ScanRequest`, `ScanResult`, `PayoutOutcome`, `VisibleObjectSlot`, `RunState`, `CustomerState`, `ProductInstance`, `CouponInstance`, `StickerResource`, `StickerInstance` und `StickerInventoryEntry`.
 
 ### Presentation
 
@@ -71,8 +72,13 @@ Wichtige Szenen:
 - `RegisterDisplay`: editorseitig platzierbares Kassendisplay im Tisch, zeigt den offenen Betrag des aktuell gescannten Produktes.
 - `BagZone`: Drop-Zone fuer finalen Verkauf.
 - `TrashZone`: Drop-Zone fuer Produkt-/Coupon-Entsorgung.
+- `ScaleStation`: editorseitig platzierte Waagen-Drop-Zone fuer wiegbare Produkte, mit `waage_sheet.png`-Press-Frames.
+- `PluInputPanel`: kleines PLU-Eingabefeld, sichtbar und fokussiert solange Obst auf der Waage liegt.
+- `PluBook`: klickbares PLU-Buch mit Normal-/Hover-Texture.
+- `PluBookPopup`: kleines 9-Slice-Popup mit allen wiegbaren Produkten und PLU-Codes.
 - `CustomerHandView`: Hand-Sprite fuer Suspicion-Stufen gruen, gelb und rot.
-- `HudRoot`: linke Statusleiste, rechte Upgrade-Leiste, Dialoge und Popups.
+- `HudRoot`: linke Statusleiste, rechte Upgrade-Leiste, Dialoge, Coupon-Popup und Sticker-Popup.
+- `StickerPopup` und `StickerToken`: rechtes UI-Popup mit physischen draggable Sticker-Tokens.
 
 Node-Pfade werden nicht quer durch die Szene gesucht. Parent/Child-Kommunikation nutzt lokale Signals, `@export`-Referenzen oder kleine Controller-APIs.
 
@@ -84,8 +90,9 @@ Alles Konfigurierbare wird als Resource modelliert:
 
 - `GameBalanceResource`: Startgeld, Tagesmiete, Run-Laenge, Kunden pro Tag, Produkte pro Kunde, sichtbare Objekt-Slots.
 - `ProductLineResource`: Produktlinie wie Obst oder Snacks.
-- `ProductVariantResource`: einzelne Produkte mit ID, Preis, Gewichtung, Sortiment-Level, Texturen.
+- `ProductVariantResource`: einzelne Produkte mit ID, Verkaufsart, Festpreis oder Kilopreis, PLU-Code, Gewichtsspanne, Gewichtsverteilung, Sprite-Skalierung, Gewichtung, Sortiment-Level und Texture.
 - `CouponResource`: Zielprodukt/-linie, Rabatt, Kaufpreis, Gewichtungsbonus, Dauer.
+- `StickerResource`: Sticker-ID, Tooltip, Texture, Multiplikator, Zielart und taeglicher Refill.
 - `UpgradeResource`: Sortiment-Level-Up und spaetere Upgrades.
 - `SuspicionCurveResource`: Startwert, Stufen und Roll-Regeln.
 - `CheckoutThemeResource`: Font, 9-Slice-Panel-Texture, Fontgroessen, Endesga-64-UI-Farben.
@@ -102,10 +109,13 @@ Verbindlich sichtbar in Szenen:
 - Slot-Marker und Spawn-/Exit-Marker fuer die verstreute Produktflaeche rechts neben dem Scanner.
 - Scanner-Shape, Scannerstrahl, Scanner-Hitbox und Feedback-Anker.
 - Bag- und Trash-Drop-Zonen inklusive Collision-/Area-Nodes.
+- Waagen-Drop-Zone, Waagen-Sprite, DropAnchor und Press-Feedback.
+- PLU-Buch, PLU-Buch-Hitbox, PLU-Eingabepanel und PLU-Buch-Popup.
 - ProductActor-Root, Sprite-Anker, Schatten-Anker und Drag-Feedback-Anker.
+- ProductActor-StickerLayer und vorbereitete Sticker-Visual-Scene.
 - Kassendisplay-Root und Betrag-Label fuer die offene Summe des aktuell gescannten Produktes.
 - Kundenhand-Anker, Hand-Sprite und AnimationPlayer.
-- HUD-Panels, Dialoge, Popups, Buttons und Tooltip-Anker.
+- HUD-Panels, Dialoge, Coupon-/Sticker-Popups, Buttons und Tooltip-Anker.
 - AnimationPlayer, Marker2D, Area2D, CollisionShape2D und VFX-Anker fuer alle wiederkehrenden Interaktionen.
 
 Code darf:
@@ -133,6 +143,10 @@ Eine Szene hat genau eine Hauptaufgabe:
 - `ScannerStation`: meldet Scannerkontakte und zeigt Scannerfeedback.
 - `ProductScatterView`: zeigt Slots verstreut rechts neben dem Scanner und animiert neue Objekte von rechts herein.
 - `BagZone` und `TrashZone`: melden Drop-Intents.
+- `ScaleStation`: akzeptiert genau ein wiegbares Produkt visuell, spielt Waagenfeedback und meldet Drop-/Remove-Intents.
+- `PluInputPanel`: sammelt vierstellige PLU-Eingaben und sendet `plu_submitted`, bucht aber kein Geld.
+- `PluBook`: sendet nur den Intent, das PLU-Popup zu oeffnen.
+- `StickerPopup`: zeigt verfuegbare Sticker-Instanzen und sendet Drag-Release-Intents mit Sticker-ID und Drop-Position.
 - `HudRoot` und Panels: zeigen Run-State und senden Button-Intents.
 - `RunController`: nimmt Intents an, ruft Simulation-Systeme auf und veroeffentlicht neuen State fuer Presentation.
 
@@ -143,27 +157,44 @@ Keine UI-Komponente bucht Geld, scannt Produkte, veraendert Suspicion oder aktiv
 ### Kundenstart
 
 1. `RunController` fordert beim `CustomerGenerator` den naechsten Kunden an.
-2. `CouponSystem` bestimmt, ob ein aktiver Coupon als erstes sichtbares Objekt auftaucht.
-3. `VisibleObjectQueueSystem` baut aus Coupon plus Produktqueue die sichtbaren `VisibleObjectSlot`s.
-4. `ProductScatterView` instanziiert vorbereitete `PackedScene`s fuer Coupon-/Produkt-Actors in vorhandene Slot-Marker.
+2. `CustomerGenerator` erzeugt fuer wiegbare Produkte deterministische Gewichte aus Run-Seed, Tag, Kunde, Produktindex und Produkt-ID.
+3. `CouponSystem` bestimmt, ob ein aktiver Coupon als erstes sichtbares Objekt auftaucht.
+4. `VisibleObjectQueueSystem` baut aus Coupon plus Produktqueue die sichtbaren `VisibleObjectSlot`s.
+5. `ProductScatterView` instanziiert vorbereitete `PackedScene`s fuer Coupon-/Produkt-Actors in vorhandene Slot-Marker.
+6. `ProductActor` skaliert Obst-Sprite, Schatten und Interaction-Shape anhand des gespeicherten Gewichts.
 
 ### Scan
 
 1. `ProductActor` wird gezogen und meldet Bewegung/Scannerkontakt.
 2. `RunController` baut einen `ScanRequest` mit Actor-ID, Bewegungsrichtung, Scannerkontakt und aktuellem Runtime-State.
 3. `ScanSystem` entscheidet, ob der Scan gueltig ist. Nur rechts nach links zaehlt.
-4. Bei Mehrfachscan fragt `ScanSystem` bzw. `SuspicionSystem` den Caught-Roll ab.
-5. `EconomySystem` berechnet den offenen Betrag.
-6. `RunController` aktualisiert Runtime-State und sendet Feedback-Events an Presentation: Beep, Scannerflash, Betrag im Kassendisplay, Kundenhand-State.
+4. Wiegbare Produkte werden im `ScanSystem` vor dem Caught-Roll abgelehnt.
+5. Bei Mehrfachscan fragt `ScanSystem` ueber den gemeinsamen Charge-Pfad den `SuspicionSystem`-Caught-Roll ab.
+6. `EconomySystem` berechnet den offenen Festpreis-Betrag.
+7. `RunController` aktualisiert Runtime-State und sendet Feedback-Events an Presentation: Beep, Scannerflash, Betrag im Kassendisplay, Kundenhand-State.
+
+### Wiegen und PLU
+
+1. `ProductActor` wird auf `ScaleStation` gedroppt.
+2. `ScaleStation` akzeptiert nur ein wiegbares Produkt gleichzeitig und meldet den Drop an `CheckoutTable`.
+3. `RunController` setzt den aktiven Waagen-Actor und zeigt `PluInputPanel` fuer dessen `ProductInstance`.
+4. `PluInputPanel` sendet vierstellige Codes als Intent an `RunController`.
+5. `RunController` vergleicht den Code mit `ProductVariantResource.plu_code`.
+6. Bei falschem Code spielt Presentation negatives Feedback; Runtime-State bleibt unveraendert.
+7. Bei richtigem Code nutzt `RunController` `ScanSystem.evaluate_product_charge_attempt`, also denselben First-/Duplicate-/Caught-Pfad wie beim Scan.
+8. `EconomySystem` berechnet `weight_grams * price_per_kg_cents`, wendet ehrliche Coupons und aktuelle Sticker-Multiplikatoren an und addiert nur den neuen Betrag zum offenen Produktbetrag.
+9. Bereits offene Beträge werden nicht rueckwirkend geaendert, wenn spaeter ein Sticker aufgeklebt wird.
+10. Beim Entfernen des Obstes von der Waage wird die PLU-Eingabe versteckt; der offene Betrag bleibt am Produkt.
 
 ### Verkauf
 
 1. `ProductActor` wird in `BagZone` gedroppt.
-2. `RunController` fragt `EconomySystem` nach `PayoutOutcome`.
-3. Offener Betrag wird dem Run-/Kunden-Total gutgeschrieben.
-4. `VisibleObjectQueueSystem` markiert das Objekt als verarbeitet und rueckt erst jetzt nach.
-5. `ProductActor` verschwindet ueber vorbereitete Animation/VFX.
-6. Coin-VFX wird an der Tüte abgespielt, weil erst dort Geld gebucht wird.
+2. `RunController` lehnt wiegbare Produkte ohne offenen Betrag ab.
+3. `RunController` fragt `EconomySystem` nach `PayoutOutcome`.
+4. Offener Betrag wird dem Run-/Kunden-Total gutgeschrieben.
+5. `VisibleObjectQueueSystem` markiert das Objekt als verarbeitet und rueckt erst jetzt nach.
+6. `ProductActor` verschwindet ueber vorbereitete Animation/VFX.
+7. Coin-VFX wird an der Tüte abgespielt, weil erst dort Geld gebucht wird.
 
 ### Trash
 
@@ -172,6 +203,17 @@ Keine UI-Komponente bucht Geld, scannt Produkte, veraendert Suspicion oder aktiv
    - Produkt: verschwindet, offener Betrag wird verworfen.
    - Coupon: Coupon-Rabatt wird fuer diesen Kunden nicht aktiviert, Produktgewichtungs-Vorteil bleibt erhalten.
 3. `VisibleObjectQueueSystem` rueckt erst jetzt nach.
+
+### Sticker
+
+1. `StickerSystem` initialisiert `RunState.sticker_inventory` aus `StickerResource.daily_refill_count`.
+2. Zu Beginn eines neuen Tages ruft `RunController` `StickerSystem.refill_daily`.
+3. Der Sticker-Button im rechten Panel oeffnet `StickerPopup` ueber `HudRoot`.
+4. `StickerPopup` instanziiert fuer jeden verfuegbaren Sticker ein vorbereitetes `StickerToken`.
+5. Beim Loslassen eines Tokens sendet UI nur Sticker-ID und globale Drop-Position.
+6. `RunController` fragt `CheckoutTable.find_product_actor_at_global_position` und laesst `StickerSystem` Anwendbarkeit und Verbrauch entscheiden.
+7. Aktuell darf `bio_sticker` genau einmal pro Obst angewendet werden und nicht auf Festpreis-Produkte oder Coupons.
+8. Bei Erfolg wird ein `StickerInstance` an `ProductInstance.applied_stickers` gespeichert und `ProductActor` aktualisiert seinen `StickerLayer`.
 
 ## 9-Slice-UI
 
@@ -234,6 +276,9 @@ Root-Assets werden nicht als dauerhafte Asset-Ablage genutzt. Dauerhafte Ziele:
 - 9-Slice-Panel: `assets/textures/ui/panels/9slice_panel_white.png`
 - Produkt-Spritesheet: `assets/textures/products/products_sheet.png`
 - Produkt-Spritesheet-Mapping: `assets/textures/products/products_sheet.txt`
+- Bio-Sticker-Sprite: Atlas-Region aus `assets/textures/products/products_sheet.png`
+- Waage: `assets/textures/environment/waage_sheet.png`, 3 Frames à `96x96`
+- PLU-Buch: `assets/textures/environment/book.png` und `book_highlighted.png`
 - Environment-Sprites: `assets/textures/environment`
 - Coin-/Scanner-VFX: `assets/vfx/coin`, `assets/vfx/scanner`
 
@@ -267,6 +312,7 @@ content/
   products/
     lines/
     variants/
+  stickers/
   ui/
   upgrades/
 docs/
@@ -275,8 +321,11 @@ scenes/
   gameplay/
     bag/
     customer/
+    plu/
     product_area/
     products/
+    scale/
+    stickers/
     scanner/
     table/
     trash/
@@ -315,9 +364,10 @@ Fruehe Tests sollen pure Gameplay-Logik abdecken:
 - `VisibleObjectQueueSystem`: Queue, sichtbare Slots, Coupon-Slot, Nachruecken erst nach Bag/Trash/Caught.
 - `ScanSystem`: Scannerkontakt, Bewegungsrichtung, Mehrfachscan, Rotation/Hit-Details.
 - `CouponSystem`: Aktivierung, Tagesdauer, Stack-/Delay-Regeln, Coupon-Scam.
-- `EconomySystem`: Basiswerte, Rabatte, Multiplikatoren, Rundung.
+- `EconomySystem`: Festpreiswerte, Gewichtspreise, Rabatte, Sticker-Multiplikatoren, Rundung.
 - `SuspicionSystem`: deterministische Rolls mit Seed, Stufen, Kundenhand-Zustand.
-- `CustomerGenerator`: gleiche Seeds erzeugen gleiche Kunden- und Produktfolgen.
+- `CustomerGenerator`: gleiche Seeds erzeugen gleiche Kunden-, Produkt- und Gewichtsfolgen.
+- `StickerSystem`: taeglicher Refill, Verbrauch, Zielvalidierung und Produkt-Multiplikatoren.
 
 Content-Validierung ist Pflicht, sobald mehrere Resource-Typen referenziert werden:
 
@@ -325,6 +375,7 @@ Content-Validierung ist Pflicht, sobald mehrere Resource-Typen referenziert werd
 - fehlende Produkt-/Coupon-/Upgrade-Referenzen
 - fehlende Texturen
 - ungueltige Preise/Gewichtungen
+- ungueltige PLU-Codes, Gewichtsspannen, Kilopreise oder Sticker-Multiplikatoren
 - Produkte ausserhalb freigeschalteter Sortiment-Level
 
 ## Technische Schuld

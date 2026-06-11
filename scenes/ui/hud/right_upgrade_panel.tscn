@@ -7,7 +7,7 @@
 [ext_resource type="FontFile" path="res://assets/fonts/PixelOperator8-Bold.ttf" id="5_bold_font"]
 [ext_resource type="FontVariation" path="res://content/ui/pixel_operator8_bold_compact.tres" id="6_compact_bold_font"]
 
-[node name="RightUpgradePanel" type="Control" unique_id=825617230 node_paths=PackedStringArray("main_panel", "shadow_panel", "title_label", "coupon_button", "assortment_upgrade_button")]
+[node name="RightUpgradePanel" type="Control" unique_id=825617230 node_paths=PackedStringArray("main_panel", "shadow_panel", "title_label", "coupon_button", "assortment_upgrade_button", "sticker_button")]
 offset_right = 102.0
 offset_bottom = 128.0
 mouse_filter = 2
@@ -21,6 +21,7 @@ shadow_offset = Vector2(2, 3)
 title_label = NodePath("MainPanel/UpgradeList/HeaderPanel/TitleLabel")
 coupon_button = NodePath("MainPanel/UpgradeList/CouponButton")
 assortment_upgrade_button = NodePath("MainPanel/UpgradeList/AssortmentButton")
+sticker_button = NodePath("MainPanel/UpgradeList/StickerButton")
 
 [node name="ShadowPanel" type="PanelContainer" parent="." unique_id=1655621175]
 layout_mode = 0
@@ -77,18 +78,10 @@ theme_override_font_sizes/font_size = 6
 text = "Lvl 2 $6.00"
 script = ExtResource("2_pixel_button")
 
-[node name="FutureUpgradeSlot" type="PanelContainer" parent="MainPanel/UpgradeList" unique_id=1072297720]
-custom_minimum_size = Vector2(0, 28)
+[node name="StickerButton" type="Button" parent="MainPanel/UpgradeList" unique_id=1072297720]
+custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
-script = ExtResource("4_pixel_panel")
-panel_color = Color(0.396078, 0.45098, 0.572549, 1)
-content_margin_override = 4
-
-[node name="Label" type="Label" parent="MainPanel/UpgradeList/FutureUpgradeSlot" unique_id=1536009743]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.054902, 0.027451, 0.105882, 1)
 theme_override_fonts/font = ExtResource("6_compact_bold_font")
 theme_override_font_sizes/font_size = 6
-text = "..."
-horizontal_alignment = 1
-vertical_alignment = 1
+text = "Sticker"
+script = ExtResource("2_pixel_button")

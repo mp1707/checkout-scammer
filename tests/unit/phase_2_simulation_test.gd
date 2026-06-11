@@ -8,6 +8,7 @@ const SuspicionSystemScript = preload("res://scripts/gameplay/systems/suspicion_
 const EconomySystemScript = preload("res://scripts/gameplay/systems/economy_system.gd")
 const CouponSystemScript = preload("res://scripts/gameplay/systems/coupon_system.gd")
 const UpgradeSystemScript = preload("res://scripts/gameplay/systems/upgrade_system.gd")
+const StickerSystemScript = preload("res://scripts/gameplay/systems/sticker_system.gd")
 
 var _failure_count: int = 0
 var _registry: ContentRegistry
@@ -18,6 +19,7 @@ var _suspicion_system: SuspicionSystemScript
 var _economy_system: EconomySystemScript
 var _coupon_system: CouponSystemScript
 var _upgrade_system: UpgradeSystemScript
+var _sticker_system: StickerSystemScript
 
 
 func _initialize() -> void:
@@ -33,6 +35,7 @@ func _initialize() -> void:
 	_economy_system = EconomySystemScript.new()
 	_coupon_system = CouponSystemScript.new()
 	_upgrade_system = UpgradeSystemScript.new()
+	_sticker_system = StickerSystemScript.new()
 
 	_test_customer_generator()
 	_test_visible_object_queue_system()
@@ -41,6 +44,7 @@ func _initialize() -> void:
 	_test_economy_system()
 	_test_coupon_system()
 	_test_upgrade_system()
+	_test_sticker_system()
 	_test_complete_customer_flow_without_scenes()
 
 	if _failure_count > 0:
@@ -80,10 +84,11 @@ func _test_customer_generator() -> void:
 	scripted_run.current_customer_number = 1
 	var scripted_customer: CustomerState = _generator.generate_customer(_registry, scripted_run)
 	_expect_string_arrays_equal(
-		PackedStringArray(["apple", "orange", "banana", "apple", "banana", "orange", "apple", "banana", "apple", "orange"]),
+		PackedStringArray(["apple", "chewing_gum", "orange", "candy", "banana", "tissue", "apple", "banana", "orange", "chewing_gum"]),
 		_product_ids(scripted_customer.product_queue),
 		"CustomerGenerator models scripted first customer"
 	)
+	_expect_true(_all_weighed_products_have_valid_weights(scripted_customer.product_queue), "CustomerGenerator assigns valid fruit weights")
 
 	var no_active_coupons_for_upgrade: Array[CouponInstance] = []
 	var upgraded_first_day_customer: CustomerState = _generator.generate_customer_for_context(
@@ -147,7 +152,7 @@ func _test_visible_object_queue_system() -> void:
 func _test_scan_system() -> void:
 	var customer: CustomerState = CustomerState.new("scan_customer")
 	_suspicion_system.setup_customer(customer, _registry.suspicion_curve)
-	var product: ProductInstance = ProductInstance.new(_registry.get_product_variant("apple"), "scan_product")
+	var product: ProductInstance = ProductInstance.new(_registry.get_product_variant("chewing_gum"), "scan_product")
 	var random: RandomNumberGenerator = RandomNumberGenerator.new()
 	random.seed = 10
 
@@ -183,6 +188,16 @@ func _test_scan_system() -> void:
 	)
 	_expect_equal_string(ScanSystemScript.FAILURE_NOT_HELD, not_held.failure_reason, "ScanSystem rejects products that are not held")
 
+	var apple: ProductInstance = ProductInstance.new(_registry.get_product_variant("apple"), "weighable_scan_product")
+	var weighed_scan: ScanResult = _scan_system.evaluate_scan(
+		_create_scan_request(apple, true, true, Vector2.LEFT),
+		customer,
+		_suspicion_system,
+		_registry.suspicion_curve,
+		random
+	)
+	_expect_equal_string(ScanSystemScript.FAILURE_PRODUCT_WEIGHABLE, weighed_scan.failure_reason, "ScanSystem rejects fruit scanner sales")
+
 
 func _test_suspicion_system() -> void:
 	var customer: CustomerState = CustomerState.new("suspicion_customer")
@@ -212,34 +227,41 @@ func _test_suspicion_system() -> void:
 func _test_economy_system() -> void:
 	var run_state: RunState = _create_run_state(1)
 	var apple: ProductInstance = ProductInstance.new(_registry.get_product_variant("apple"), "apple_economy")
+	apple.weight_grams = 200
 	var apple_coupon: CouponInstance = CouponInstance.new(_registry.get_coupon("apple_20_discount"), "apple_coupon")
 	_coupon_system.mark_coupon_honestly_activated(apple_coupon)
 	var honest_coupons: Array[CouponInstance] = [apple_coupon]
 
-	_expect_equal_int(48, _economy_system.calculate_scan_amount_cents(apple, honest_coupons), "EconomySystem applies honest coupon discount")
+	_expect_equal_int(48, _economy_system.calculate_weighed_amount_cents(apple, honest_coupons), "EconomySystem applies honest coupon discount to weighed fruit")
 	_coupon_system.mark_coupon_trashed(apple_coupon)
-	_expect_equal_int(60, _economy_system.calculate_scan_amount_cents(apple, honest_coupons), "EconomySystem ignores trashed coupon discount")
+	_expect_equal_int(60, _economy_system.calculate_weighed_amount_cents(apple, honest_coupons), "EconomySystem ignores trashed coupon discount on weighed fruit")
+
+	var bio_sticker: StickerResource = _registry.get_sticker("bio_sticker")
+	apple.add_sticker(StickerInstance.new(bio_sticker, "apple_bio"))
+	_expect_equal_int(180, _economy_system.calculate_weighed_amount_cents(apple, honest_coupons), "EconomySystem applies sticker multipliers to future weighed charges")
+
+	var fixed_product: ProductInstance = ProductInstance.new(_registry.get_product_variant("chewing_gum"), "gum_economy")
 
 	var result: ScanResult = ScanResult.new()
-	result.product_instance = apple
+	result.product_instance = fixed_product
 	result.is_valid_scan = true
 	var no_coupons: Array[CouponInstance] = []
 	_economy_system.apply_successful_scan(result, no_coupons)
-	_expect_equal_int(1, apple.scan_count, "EconomySystem increases scan count")
-	_expect_equal_int(60, apple.open_amount_cents, "EconomySystem increases open amount")
+	_expect_equal_int(1, fixed_product.scan_count, "EconomySystem increases scan count")
+	_expect_equal_int(95, fixed_product.open_amount_cents, "EconomySystem increases fixed product open amount")
 
-	var payout: PayoutOutcome = _economy_system.payout_product(run_state, apple)
-	_expect_equal_int(60, payout.payout_cents, "EconomySystem pays out open product amount")
-	_expect_equal_int(1060, run_state.cash_cents, "EconomySystem credits cash only on payout")
-	_expect_true(apple.is_processed, "EconomySystem marks paid product processed")
+	var payout: PayoutOutcome = _economy_system.payout_product(run_state, fixed_product)
+	_expect_equal_int(95, payout.payout_cents, "EconomySystem pays out open product amount")
+	_expect_equal_int(1095, run_state.cash_cents, "EconomySystem credits cash only on payout")
+	_expect_true(fixed_product.is_processed, "EconomySystem marks paid product processed")
 
 	var trash_product: ProductInstance = ProductInstance.new(_registry.get_product_variant("orange"), "trash_product")
 	trash_product.open_amount_cents = 160
 	var trash_outcome: PayoutOutcome = _economy_system.trash_product(run_state, trash_product)
 	_expect_equal_int(0, trash_outcome.payout_cents, "EconomySystem trash pays no money")
-	_expect_equal_int(1060, run_state.cash_cents, "EconomySystem trash leaves cash unchanged")
+	_expect_equal_int(1095, run_state.cash_cents, "EconomySystem trash leaves cash unchanged")
 	_expect_equal_int(0, trash_product.open_amount_cents, "EconomySystem trash clears open amount")
-	_expect_equal_string("$10.60", _economy_system.format_cents(run_state.cash_cents), "EconomySystem formats cents for display")
+	_expect_equal_string("$10.95", _economy_system.format_cents(run_state.cash_cents), "EconomySystem formats cents for display")
 
 
 func _test_coupon_system() -> void:
@@ -306,6 +328,29 @@ func _test_upgrade_system() -> void:
 	_expect_true(further_upgrade == null, "UpgradeSystem has no further assortment level without new product art")
 
 
+func _test_sticker_system() -> void:
+	var run_state: RunState = _create_run_state(6)
+	_sticker_system.setup_run_inventory(run_state, _registry.stickers)
+	_expect_equal_int(3, _sticker_system.get_sticker_count(run_state, "bio_sticker"), "StickerSystem starts day with three bio stickers")
+
+	var apple: ProductInstance = ProductInstance.new(_registry.get_product_variant("apple"), "sticker_apple")
+	var sticker_instance: StickerInstance = _sticker_system.apply_sticker(run_state, "bio_sticker", apple)
+	_expect_true(sticker_instance != null, "StickerSystem applies bio sticker to fruit")
+	_expect_equal_int(2, _sticker_system.get_sticker_count(run_state, "bio_sticker"), "StickerSystem consumes applied sticker")
+	_expect_equal_int(300, apple.get_price_multiplier_percent(), "StickerSystem stores sticker multiplier on product")
+
+	var second_same_sticker: StickerInstance = _sticker_system.apply_sticker(run_state, "bio_sticker", apple)
+	_expect_true(second_same_sticker == null, "StickerSystem rejects duplicate bio sticker on one fruit")
+	_expect_equal_int(2, _sticker_system.get_sticker_count(run_state, "bio_sticker"), "StickerSystem does not consume rejected duplicate")
+
+	var gum: ProductInstance = ProductInstance.new(_registry.get_product_variant("chewing_gum"), "sticker_gum")
+	var rejected_sticker: StickerInstance = _sticker_system.apply_sticker(run_state, "bio_sticker", gum)
+	_expect_true(rejected_sticker == null, "StickerSystem rejects bio sticker on fixed-price products")
+
+	_sticker_system.refill_daily(run_state)
+	_expect_equal_int(3, _sticker_system.get_sticker_count(run_state, "bio_sticker"), "StickerSystem refills bio stickers each day")
+
+
 func _test_complete_customer_flow_without_scenes() -> void:
 	var run_state: RunState = _create_run_state(5)
 	var customer: CustomerState = _generator.generate_customer(_registry, run_state)
@@ -327,14 +372,24 @@ func _test_complete_customer_flow_without_scenes() -> void:
 		var product: ProductInstance = taken_slot.product_instance
 		var random: RandomNumberGenerator = RandomNumberGenerator.new()
 		random.seed = 99
-		var scan_result: ScanResult = _scan_system.evaluate_scan(
-			_create_scan_request(product, true, true, Vector2.LEFT),
-			customer,
-			_suspicion_system,
-			_registry.suspicion_curve,
-			random
-		)
-		_economy_system.apply_successful_scan(scan_result, _coupon_system.get_honest_customer_coupons(customer))
+		if product.is_weighable():
+			var weigh_result: ScanResult = _scan_system.evaluate_product_charge_attempt(
+				product,
+				customer,
+				_suspicion_system,
+				_registry.suspicion_curve,
+				random
+			)
+			_economy_system.apply_successful_weighing(weigh_result, _coupon_system.get_honest_customer_coupons(customer))
+		else:
+			var scan_result: ScanResult = _scan_system.evaluate_scan(
+				_create_scan_request(product, true, true, Vector2.LEFT),
+				customer,
+				_suspicion_system,
+				_registry.suspicion_curve,
+				random
+			)
+			_economy_system.apply_successful_scan(scan_result, _coupon_system.get_honest_customer_coupons(customer))
 		_economy_system.payout_product(run_state, product)
 		_visible_object_queue_system.mark_product_processed(customer, product)
 
@@ -378,6 +433,19 @@ func _product_ids(products: Array[ProductInstance]) -> PackedStringArray:
 	for product: ProductInstance in products:
 		ids.append(product.variant.id)
 	return ids
+
+
+func _all_weighed_products_have_valid_weights(products: Array[ProductInstance]) -> bool:
+	for product: ProductInstance in products:
+		if product == null or product.variant == null or not product.variant.is_weighable():
+			continue
+		if product.weight_grams < product.variant.min_weight_grams:
+			return false
+		if product.weight_grams > product.variant.max_weight_grams:
+			return false
+		if product.weight_grams % product.variant.weight_step_grams != 0:
+			return false
+	return true
 
 
 func _count_generated_product(product_id: String, sample_count: int, active_coupons: Array[CouponInstance]) -> int:

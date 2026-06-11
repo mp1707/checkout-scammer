@@ -1,7 +1,8 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/gameplay/actors/product_actor.gd" id="1_product_actor"]
 [ext_resource type="Resource" path="res://content/ui/checkout_theme.tres" id="2_theme"]
+[ext_resource type="PackedScene" path="res://scenes/gameplay/stickers/sticker_visual.tscn" id="3_sticker_visual"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_product_pick"]
 size = Vector2(32, 32)
@@ -12,8 +13,11 @@ theme_resource = ExtResource("2_theme")
 product_sprite = NodePath("SpriteRoot/ProductSprite")
 shadow_sprite = NodePath("ShadowAnchor/ShadowSprite")
 sprite_root = NodePath("SpriteRoot")
+sticker_layer = NodePath("SpriteRoot/StickerLayer")
 interaction_area = NodePath("InteractionArea")
+collision_shape = NodePath("InteractionArea/CollisionShape2D")
 animation_player = NodePath("AnimationPlayer")
+sticker_visual_scene = ExtResource("3_sticker_visual")
 
 [node name="ShadowAnchor" type="Node2D" parent="."]
 position = Vector2(2, 3)
@@ -24,6 +28,8 @@ modulate = Color(0.054902, 0.027451, 0.105882, 0.42)
 [node name="SpriteRoot" type="Node2D" parent="."]
 
 [node name="ProductSprite" type="Sprite2D" parent="SpriteRoot"]
+
+[node name="StickerLayer" type="Node2D" parent="SpriteRoot"]
 
 [node name="InteractionArea" type="Area2D" parent="."]
 input_pickable = true

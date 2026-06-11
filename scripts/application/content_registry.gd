@@ -6,6 +6,7 @@ const SUSPICION_CURVE_PATH: String = "res://content/balance/prototype_suspicion_
 const PRODUCT_LINES_DIR: String = "res://content/products/lines"
 const PRODUCT_VARIANTS_DIR: String = "res://content/products/variants"
 const COUPONS_DIR: String = "res://content/coupons"
+const STICKERS_DIR: String = "res://content/stickers"
 const UPGRADES_DIR: String = "res://content/upgrades"
 
 var game_balance: GameBalanceResource
@@ -13,11 +14,13 @@ var suspicion_curve: SuspicionCurveResource
 var product_lines: Array[ProductLineResource] = []
 var product_variants: Array[ProductVariantResource] = []
 var coupons: Array[CouponResource] = []
+var stickers: Array[StickerResource] = []
 var upgrades: Array[UpgradeResource] = []
 
 var _product_lines_by_id: Dictionary[String, Resource] = {}
 var _product_variants_by_id: Dictionary[String, Resource] = {}
 var _coupons_by_id: Dictionary[String, Resource] = {}
+var _stickers_by_id: Dictionary[String, Resource] = {}
 var _upgrades_by_id: Dictionary[String, Resource] = {}
 
 
@@ -30,6 +33,7 @@ func load_all() -> PackedStringArray:
 	product_lines = _load_product_lines(errors)
 	product_variants = _load_product_variants(errors)
 	coupons = _load_coupons(errors)
+	stickers = _load_stickers(errors)
 	upgrades = _load_upgrades(errors)
 
 	_build_indexes(errors)
@@ -38,6 +42,7 @@ func load_all() -> PackedStringArray:
 	_validate_product_lines(errors)
 	_validate_product_variants(errors)
 	_validate_coupons(errors)
+	_validate_stickers(errors)
 	_validate_upgrades(errors)
 
 	return errors
@@ -49,10 +54,12 @@ func clear() -> void:
 	product_lines.clear()
 	product_variants.clear()
 	coupons.clear()
+	stickers.clear()
 	upgrades.clear()
 	_product_lines_by_id.clear()
 	_product_variants_by_id.clear()
 	_coupons_by_id.clear()
+	_stickers_by_id.clear()
 	_upgrades_by_id.clear()
 
 
@@ -66,6 +73,10 @@ func get_product_variant(id: String) -> ProductVariantResource:
 
 func get_coupon(id: String) -> CouponResource:
 	return _coupons_by_id.get(id) as CouponResource
+
+
+func get_sticker(id: String) -> StickerResource:
+	return _stickers_by_id.get(id) as StickerResource
 
 
 func get_upgrade(id: String) -> UpgradeResource:
@@ -135,6 +146,21 @@ func _load_coupons(errors: PackedStringArray) -> Array[CouponResource]:
 	return loaded_coupons
 
 
+func _load_stickers(errors: PackedStringArray) -> Array[StickerResource]:
+	var loaded_stickers: Array[StickerResource] = []
+	for path: String in _list_resource_paths(STICKERS_DIR, errors):
+		var resource: Resource = _load_required_resource(path, errors)
+		var sticker: StickerResource = resource as StickerResource
+		if resource != null and sticker == null:
+			errors.append("Expected StickerResource at %s." % path)
+			continue
+
+		if sticker != null:
+			loaded_stickers.append(sticker)
+
+	return loaded_stickers
+
+
 func _load_upgrades(errors: PackedStringArray) -> Array[UpgradeResource]:
 	var loaded_upgrades: Array[UpgradeResource] = []
 	for path: String in _list_resource_paths(UPGRADES_DIR, errors):
@@ -190,6 +216,9 @@ func _build_indexes(errors: PackedStringArray) -> void:
 
 	for coupon: CouponResource in coupons:
 		_add_unique_resource_id(coupon.id, "coupon", coupon.resource_path, _coupons_by_id, coupon, errors)
+
+	for sticker: StickerResource in stickers:
+		_add_unique_resource_id(sticker.id, "sticker", sticker.resource_path, _stickers_by_id, sticker, errors)
 
 	for upgrade: UpgradeResource in upgrades:
 		_add_unique_resource_id(upgrade.id, "upgrade", upgrade.resource_path, _upgrades_by_id, upgrade, errors)
@@ -264,14 +293,33 @@ func _validate_product_variants(errors: PackedStringArray) -> void:
 			errors.append("Product variant '%s' is missing product_line." % product_variant.id)
 		elif not _product_lines_by_id.has(product_variant.product_line.id):
 			errors.append("Product variant '%s' references missing product line '%s'." % [product_variant.id, product_variant.product_line.id])
-		if product_variant.price_cents <= 0:
+		if product_variant.sale_mode == ProductVariantResource.SaleMode.FIXED_PRICE and product_variant.price_cents <= 0:
 			errors.append("Product variant '%s' price_cents must be greater than zero." % product_variant.id)
+		if product_variant.sale_mode == ProductVariantResource.SaleMode.WEIGHED:
+			_validate_weighed_product_variant(product_variant, errors)
 		if product_variant.generator_weight <= 0:
 			errors.append("Product variant '%s' generator_weight must be greater than zero." % product_variant.id)
 		if product_variant.assortment_level <= 0:
 			errors.append("Product variant '%s' assortment_level must be greater than zero." % product_variant.id)
 		if product_variant.texture == null:
 			errors.append("Product variant '%s' is missing texture." % product_variant.id)
+
+
+func _validate_weighed_product_variant(product_variant: ProductVariantResource, errors: PackedStringArray) -> void:
+	if product_variant.plu_code.length() != 4 or not product_variant.plu_code.is_valid_int():
+		errors.append("Weighed product '%s' needs a four-digit plu_code." % product_variant.id)
+	if product_variant.price_per_kg_cents <= 0:
+		errors.append("Weighed product '%s' price_per_kg_cents must be greater than zero." % product_variant.id)
+	if product_variant.min_weight_grams <= 0:
+		errors.append("Weighed product '%s' min_weight_grams must be greater than zero." % product_variant.id)
+	if product_variant.max_weight_grams <= product_variant.min_weight_grams:
+		errors.append("Weighed product '%s' max_weight_grams must be greater than min_weight_grams." % product_variant.id)
+	if product_variant.weight_step_grams <= 0:
+		errors.append("Weighed product '%s' weight_step_grams must be greater than zero." % product_variant.id)
+	if product_variant.weight_distribution_power <= 0.0:
+		errors.append("Weighed product '%s' weight_distribution_power must be greater than zero." % product_variant.id)
+	if product_variant.min_visual_scale <= 0.0 or product_variant.max_visual_scale < product_variant.min_visual_scale:
+		errors.append("Weighed product '%s' visual scale range is invalid." % product_variant.id)
 
 
 func _validate_coupons(errors: PackedStringArray) -> void:
@@ -299,6 +347,18 @@ func _validate_coupons(errors: PackedStringArray) -> void:
 				errors.append("Coupon '%s' references missing product line '%s'." % [coupon.id, coupon.target_line.id])
 		else:
 			errors.append("Coupon '%s' has an unknown target_kind." % coupon.id)
+
+
+func _validate_stickers(errors: PackedStringArray) -> void:
+	for sticker: StickerResource in stickers:
+		if sticker.display_name.strip_edges().is_empty():
+			errors.append("Sticker '%s' needs a display_name." % sticker.id)
+		if sticker.texture == null:
+			errors.append("Sticker '%s' is missing texture." % sticker.id)
+		if sticker.price_multiplier_percent <= 0:
+			errors.append("Sticker '%s' price_multiplier_percent must be greater than zero." % sticker.id)
+		if sticker.daily_refill_count < 0:
+			errors.append("Sticker '%s' daily_refill_count must not be negative." % sticker.id)
 
 
 func _validate_upgrades(errors: PackedStringArray) -> void:

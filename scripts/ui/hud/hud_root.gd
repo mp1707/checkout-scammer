@@ -7,6 +7,8 @@ const RightUpgradePanelScript: GDScript = preload("res://scripts/ui/hud/right_up
 signal coupon_button_pressed()
 signal coupon_selected(coupon_id: String)
 signal assortment_upgrade_button_pressed()
+signal sticker_button_pressed()
+signal sticker_drag_released(sticker_id: String, global_drop_position: Vector2)
 signal dialog_closed()
 
 const FALLBACK_VIEWPORT_SIZE: Vector2 = Vector2(640.0, 360.0)
@@ -23,6 +25,7 @@ const DIALOG_PANEL_HORIZONTAL_PADDING: int = 24
 @export var dialog_continue_button: Button
 @export var popup_layer: Control
 @export var coupon_popup_scene: PackedScene
+@export var sticker_popup_scene: PackedScene
 @export var dialog_min_text_width: int = 120
 @export var dialog_max_text_width: int = 380
 
@@ -74,6 +77,18 @@ func set_assortment_upgrade_tooltip(button_tooltip_text: String) -> void:
 		panel.set_assortment_upgrade_tooltip(button_tooltip_text)
 
 
+func set_sticker_button_enabled(is_enabled: bool) -> void:
+	var panel: RightUpgradePanelScript = _get_right_upgrade_panel()
+	if panel != null:
+		panel.set_sticker_button_enabled(is_enabled)
+
+
+func set_sticker_button_tooltip(button_tooltip_text: String) -> void:
+	var panel: RightUpgradePanelScript = _get_right_upgrade_panel()
+	if panel != null:
+		panel.set_sticker_button_tooltip(button_tooltip_text)
+
+
 func show_dialog(message: String) -> void:
 	if dialog_layer != null:
 		dialog_layer.visible = true
@@ -110,6 +125,35 @@ func show_coupon_popup(coupons: Array[CouponResource], affordable_coupon_ids: Pa
 		_active_popup.call("configure_options", coupons, affordable_coupon_ids)
 
 
+func show_sticker_popup(entries: Array[StickerInventoryEntry]) -> void:
+	if sticker_popup_scene == null or popup_layer == null:
+		return
+
+	close_coupon_popup()
+	var popup_node: Node = sticker_popup_scene.instantiate()
+	var popup_control: Control = popup_node as Control
+	if popup_control == null:
+		popup_node.queue_free()
+		return
+
+	_active_popup = popup_control
+	popup_layer.add_child(_active_popup)
+	_active_popup.position = Vector2(532.0, 134.0)
+	_set_popup_layer_visible(true)
+
+	if _active_popup.has_signal("popup_closed"):
+		_active_popup.connect("popup_closed", Callable(self, "close_coupon_popup"))
+	if _active_popup.has_signal("sticker_drag_released"):
+		_active_popup.connect("sticker_drag_released", _on_sticker_drag_released)
+	if _active_popup.has_method("configure_inventory"):
+		_active_popup.call("configure_inventory", entries)
+
+
+func refresh_sticker_popup(entries: Array[StickerInventoryEntry]) -> void:
+	if _active_popup != null and _active_popup.has_method("configure_inventory"):
+		_active_popup.call("configure_inventory", entries)
+
+
 func close_coupon_popup() -> void:
 	if _active_popup != null:
 		_active_popup.queue_free()
@@ -136,6 +180,8 @@ func _connect_panel_signals() -> void:
 		panel.coupon_button_pressed.connect(_on_coupon_button_pressed)
 	if not panel.assortment_upgrade_button_pressed.is_connected(_on_assortment_upgrade_button_pressed):
 		panel.assortment_upgrade_button_pressed.connect(_on_assortment_upgrade_button_pressed)
+	if not panel.sticker_button_pressed.is_connected(_on_sticker_button_pressed):
+		panel.sticker_button_pressed.connect(_on_sticker_button_pressed)
 
 
 func _connect_dialog_signals() -> void:
@@ -153,9 +199,17 @@ func _on_assortment_upgrade_button_pressed() -> void:
 	assortment_upgrade_button_pressed.emit()
 
 
+func _on_sticker_button_pressed() -> void:
+	sticker_button_pressed.emit()
+
+
 func _on_coupon_selected(coupon_id: String) -> void:
 	coupon_selected.emit(coupon_id)
 	close_coupon_popup()
+
+
+func _on_sticker_drag_released(sticker_id: String, global_drop_position: Vector2) -> void:
+	sticker_drag_released.emit(sticker_id, global_drop_position)
 
 
 func _on_dialog_continue_pressed() -> void:
