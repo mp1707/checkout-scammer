@@ -132,8 +132,9 @@ func play_actor_finish_feedback(actor: Node2D, is_sale: bool) -> void:
 		return
 
 	var finish_position: Vector2 = _get_actor_finish_position(actor, is_sale)
-	if is_sale and _actor_is_product(actor):
-		_spawn_coin_burst(finish_position)
+	var product_instance: ProductInstance = _get_product_instance(actor)
+	if is_sale and product_instance != null:
+		_spawn_coin_burst(finish_position, _product_uses_bonus_coin_sound(product_instance))
 	if actor.has_method("play_finish_feedback"):
 		actor.call("play_finish_feedback", finish_position, is_sale)
 	else:
@@ -230,7 +231,7 @@ func _connect_signal_once(source: Object, signal_name: String, callback: Callabl
 		source.connect(signal_name, callback)
 
 
-func _spawn_coin_burst(burst_global_position: Vector2) -> void:
+func _spawn_coin_burst(burst_global_position: Vector2, use_bonus_sound: bool) -> void:
 	if coin_burst_scene == null:
 		return
 
@@ -244,7 +245,7 @@ func _spawn_coin_burst(burst_global_position: Vector2) -> void:
 		add_child(vfx_node)
 
 	if vfx_node.has_method("play_at"):
-		vfx_node.call("play_at", burst_global_position)
+		vfx_node.call("play_at", burst_global_position, use_bonus_sound)
 	else:
 		vfx_node.global_position = burst_global_position.round()
 
@@ -260,10 +261,15 @@ func _get_actor_finish_position(actor: Node2D, is_sale: bool) -> Vector2:
 	return global_position
 
 
-func _actor_is_product(actor: Node2D) -> bool:
+func _get_product_instance(actor: Node2D) -> ProductInstance:
 	if actor == null:
-		return false
-	return actor.get("product_instance") is ProductInstance
+		return null
+	var value: Variant = actor.get("product_instance")
+	return value as ProductInstance
+
+
+func _product_uses_bonus_coin_sound(product_instance: ProductInstance) -> bool:
+	return product_instance.scan_count > 1 or not product_instance.applied_stickers.is_empty()
 
 
 func _find_product_actor_at_global_position(root: Node, global_point: Vector2) -> ProductActor:

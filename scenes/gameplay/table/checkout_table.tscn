@@ -7,10 +7,10 @@
 [ext_resource type="PackedScene" path="res://scenes/gameplay/trash/trash_zone.tscn" id="5_trash"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/customer/customer_hand_view.tscn" id="6_hand"]
 [ext_resource type="FontFile" uid="uid://ilorfjrobin5" path="res://assets/fonts/PixelOperator8.ttf" id="7_33trb"]
-[ext_resource type="PackedScene" path="res://scenes/vfx/coin_burst_vfx.tscn" id="7_coin_burst"]
+[ext_resource type="PackedScene" uid="uid://d3jmfhyp3jonm" path="res://scenes/vfx/coin_burst_vfx.tscn" id="7_coin_burst"]
 [ext_resource type="Texture2D" uid="uid://c4i8322s07aui" path="res://assets/textures/environment/table.png" id="8_table"]
 [ext_resource type="Script" uid="uid://cqe1rqlfh7jru" path="res://scripts/gameplay/components/register_display.gd" id="9_register_display"]
-[ext_resource type="PackedScene" path="res://scenes/gameplay/scale/scale_station.tscn" id="10_scale_station"]
+[ext_resource type="PackedScene" uid="uid://bsvrb5lcllis3" path="res://scenes/gameplay/scale/scale_station.tscn" id="10_scale_station"]
 
 [node name="CheckoutTable" type="Control" unique_id=845555887 node_paths=PackedStringArray("product_scatter_view", "scanner_station", "register_display", "bag_zone", "trash_zone", "scale_station", "customer_hand_view", "vfx_container")]
 layout_mode = 3
@@ -38,7 +38,7 @@ texture = ExtResource("8_table")
 position = Vector2(202, 243)
 
 [node name="ScannerStation" parent="." unique_id=678997339 instance=ExtResource("2_scanner")]
-position = Vector2(338, 243)
+position = Vector2(334, 250)
 
 [node name="ScaleStation" parent="." unique_id=306612671 instance=ExtResource("10_scale_station")]
 position = Vector2(334, 157)

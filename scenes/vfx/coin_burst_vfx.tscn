@@ -1,21 +1,19 @@
-[gd_scene load_steps=5 format=3 uid="uid://d3jmfhyp3jonm"]
+[gd_scene load_steps=4 format=3 uid="uid://d3jmfhyp3jonm"]
 
 [ext_resource type="Script" uid="uid://bserxqrlnh55h" path="res://scripts/vfx/coin_burst_vfx.gd" id="1_coin_burst"]
-[ext_resource type="AudioStream" path="res://assets/audio/sfx/ui/coinfx1_loop.mp3" id="2_coinfx1"]
-[ext_resource type="AudioStream" path="res://assets/audio/sfx/ui/coinfx2_loop.mp3" id="3_coinfx2"]
-[ext_resource type="AudioStream" path="res://assets/audio/sfx/ui/coinfx3_loop.mp3" id="4_coinfx3"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/ui/coins/1_coins.ogg" id="2_coin1"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/ui/coins/5_coins.ogg" id="6_coin5"]
 
 [node name="CoinBurstVfx" type="Node2D" unique_id=214863132 node_paths=PackedStringArray("sprite", "coin_sound_player")]
 scale = Vector2(2, 2)
 script = ExtResource("1_coin_burst")
 sprite = NodePath("Sprite")
 coin_sound_player = NodePath("CoinSoundPlayer")
-coin_sound_1 = ExtResource("2_coinfx1")
-coin_sound_2 = ExtResource("3_coinfx2")
-coin_sound_3 = ExtResource("4_coinfx3")
+normal_coin_sound = ExtResource("2_coin1")
+bonus_coin_sound = ExtResource("6_coin5")
 
 [node name="Sprite" type="Sprite2D" parent="." unique_id=2107639242]
 
 [node name="CoinSoundPlayer" type="AudioStreamPlayer2D" parent="."]
-stream = ExtResource("2_coinfx1")
+stream = ExtResource("2_coin1")
 volume_db = -5.0
