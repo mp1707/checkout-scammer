@@ -1,10 +1,10 @@
 extends Node2D
 class_name ScannerStation
 
-signal product_contact_started(actor: Node2D, contact_position: Vector2)
-signal product_contact_ended(actor: Node2D)
-signal actor_contact_started(actor: Node2D, contact_position: Vector2)
-signal actor_contact_ended(actor: Node2D)
+signal product_contact_started(actor: ProductActor, contact_position: Vector2)
+signal product_contact_ended(actor: ProductActor)
+signal actor_contact_started(actor: TableActor, contact_position: Vector2)
+signal actor_contact_ended(actor: TableActor)
 
 @export var theme_resource: CheckoutThemeResource = preload("res://content/ui/checkout_theme.tres")
 @export var hit_area: Area2D
@@ -19,21 +19,16 @@ var _flash_tween: Tween
 
 
 func _ready() -> void:
-	_resolve_child_references()
 	_apply_theme()
 	if flash_rect != null:
 		flash_rect.visible = false
 	if hit_area == null:
+		push_error("%s is missing required scene reference 'hit_area'." % get_path())
 		return
 	if not hit_area.area_entered.is_connected(_on_hit_area_entered):
 		hit_area.area_entered.connect(_on_hit_area_entered)
 	if not hit_area.area_exited.is_connected(_on_hit_area_exited):
 		hit_area.area_exited.connect(_on_hit_area_exited)
-
-
-func set_beam_visible(should_show_beam: bool) -> void:
-	if beam != null:
-		beam.visible = should_show_beam
 
 
 func flash() -> void:
@@ -49,42 +44,44 @@ func play_success_feedback(scan_count: int) -> void:
 
 
 func _on_hit_area_entered(area: Area2D) -> void:
-	var actor: Node2D = _find_actor_from_area(area)
+	var actor: TableActor = _find_actor_from_area(area)
 	if actor == null:
 		return
 
 	var contact_position: Vector2 = area.global_position
 	actor_contact_started.emit(actor, contact_position)
 
-	if not actor.has_method("set_touching_scanner"):
+	var product_actor: ProductActor = actor as ProductActor
+	if product_actor == null:
 		return
 
-	actor.call("set_touching_scanner", true, contact_position)
-	product_contact_started.emit(actor, contact_position)
+	product_actor.set_touching_scanner(true, contact_position)
+	product_contact_started.emit(product_actor, contact_position)
 
 
 func _on_hit_area_exited(area: Area2D) -> void:
-	var actor: Node2D = _find_actor_from_area(area)
+	var actor: TableActor = _find_actor_from_area(area)
 	if actor == null:
 		return
 
 	actor_contact_ended.emit(actor)
 
-	if not actor.has_method("set_touching_scanner"):
+	var product_actor: ProductActor = actor as ProductActor
+	if product_actor == null:
 		return
 
-	actor.call("set_touching_scanner", false, Vector2.ZERO)
-	product_contact_ended.emit(actor)
+	product_actor.set_touching_scanner(false, Vector2.ZERO)
+	product_contact_ended.emit(product_actor)
 
 
-func _find_actor_from_area(area: Area2D) -> Node2D:
+func _find_actor_from_area(area: Area2D) -> TableActor:
 	if area == null:
 		return null
 
 	var node: Node = area
 	while node != null:
-		var actor: Node2D = node as Node2D
-		if actor != null and actor.has_method("get_contact_area"):
+		var actor: TableActor = node as TableActor
+		if actor != null:
 			return actor
 		node = node.get_parent()
 
@@ -161,18 +158,3 @@ func _get_scanner_flash_color() -> Color:
 	if theme_resource != null:
 		return theme_resource.scanner_flash_color
 	return Color(1.0, 0.921568, 0.341176, 0.72)
-
-
-func _resolve_child_references() -> void:
-	if hit_area == null:
-		hit_area = get_node_or_null("HitArea") as Area2D
-	if beam == null:
-		beam = get_node_or_null("Beam") as CanvasItem
-	if feedback_anchor == null:
-		feedback_anchor = get_node_or_null("FeedbackAnchor") as Marker2D
-	if flash_rect == null:
-		flash_rect = get_node_or_null("FeedbackAnchor/ScannerFlash") as CanvasItem
-	if beep_player == null:
-		beep_player = get_node_or_null("BeepPlayer") as AudioStreamPlayer2D
-	if animation_player == null:
-		animation_player = get_node_or_null("AnimationPlayer") as AnimationPlayer

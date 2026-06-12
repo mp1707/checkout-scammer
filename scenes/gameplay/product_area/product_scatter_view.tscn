@@ -4,7 +4,7 @@
 [ext_resource type="PackedScene" path="res://scenes/gameplay/products/product_actor.tscn" id="2_product_actor"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/products/coupon_actor.tscn" id="3_coupon_actor"]
 
-[node name="ProductScatterView" type="Node2D" unique_id=1156285210]
+[node name="ProductScatterView" type="Node2D" unique_id=1156285210 node_paths=PackedStringArray("actor_container", "slot_marker_root", "spawn_marker", "exit_marker")]
 script = ExtResource("1_scatter")
 actor_container = NodePath("ActorContainer")
 slot_marker_root = NodePath("SlotMarkers")

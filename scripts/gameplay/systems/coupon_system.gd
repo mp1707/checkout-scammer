@@ -22,15 +22,15 @@ func purchase_coupon(
 	if not can_purchase_coupon(run_state, coupon, registry):
 		return null
 
-	var activation_context: Vector2i = _get_next_customer_context(run_state, balance)
+	var activation: RunSchedule.Activation = RunSchedule.get_next_customer_activation(run_state, balance)
 	var coupon_instance: CouponInstance = CouponInstance.new(coupon, "coupon_%s_d%d_c%d" % [
 		coupon.id,
 		run_state.current_day,
 		run_state.current_customer_number,
 	])
-	coupon_instance.activates_on_day = activation_context.x
-	coupon_instance.activates_on_customer_number = activation_context.y
-	coupon_instance.expires_after_day = activation_context.x + coupon.duration_days - 1
+	coupon_instance.activates_on_day = activation.day
+	coupon_instance.activates_on_customer_number = activation.customer_number
+	coupon_instance.expires_after_day = activation.day + coupon.duration_days - 1
 	coupon_instance.is_active = false
 
 	run_state.cash_cents -= coupon.purchase_price_cents
@@ -46,7 +46,7 @@ func apply_pending_coupons_for_customer(run_state: RunState) -> void:
 
 	var still_pending: Array[CouponInstance] = []
 	for coupon_instance: CouponInstance in run_state.pending_coupons:
-		if _is_activation_due(
+		if RunSchedule.is_activation_due(
 			coupon_instance.activates_on_day,
 			coupon_instance.activates_on_customer_number,
 			run_state.current_day,
@@ -139,6 +139,30 @@ func coupon_is_available_for_assortment(
 	return false
 
 
+func get_available_coupons(run_state: RunState, registry: ContentRegistry) -> Array[CouponResource]:
+	var available_coupons: Array[CouponResource] = []
+	if registry == null or run_state == null:
+		return available_coupons
+
+	for coupon: CouponResource in registry.coupons:
+		if coupon_is_available_for_assortment(coupon, registry.product_variants, run_state.assortment_level):
+			available_coupons.append(coupon)
+
+	return available_coupons
+
+
+func get_affordable_coupon_ids(run_state: RunState, registry: ContentRegistry) -> PackedStringArray:
+	var affordable_coupon_ids: PackedStringArray = PackedStringArray()
+	if registry == null or run_state == null:
+		return affordable_coupon_ids
+
+	for coupon: CouponResource in get_available_coupons(run_state, registry):
+		if can_purchase_coupon(run_state, coupon, registry):
+			affordable_coupon_ids.append(coupon.id)
+
+	return affordable_coupon_ids
+
+
 static func coupon_matches_product_resource(coupon: CouponResource, product: ProductVariantResource) -> bool:
 	if coupon == null or product == null:
 		return false
@@ -154,23 +178,6 @@ static func coupon_matches_product_resource(coupon: CouponResource, product: Pro
 		)
 
 	return false
-
-
-func _get_next_customer_context(run_state: RunState, balance: GameBalanceResource) -> Vector2i:
-	if balance == null:
-		return Vector2i(run_state.current_day, run_state.current_customer_number)
-	if run_state.current_customer_number >= balance.customers_per_day:
-		return Vector2i(run_state.current_day + 1, 1)
-
-	return Vector2i(run_state.current_day, run_state.current_customer_number + 1)
-
-
-func _is_activation_due(activation_day: int, activation_customer_number: int, current_day: int, current_customer_number: int) -> bool:
-	if activation_day < current_day:
-		return true
-	if activation_day > current_day:
-		return false
-	return activation_customer_number <= current_customer_number
 
 
 func _filter_active_coupons_for_day(run_state: RunState, day: int) -> void:

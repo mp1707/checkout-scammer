@@ -14,7 +14,7 @@ signal sticker_drag_released(sticker_id: String, global_drop_position: Vector2)
 
 func _ready() -> void:
 	super()
-	_resolve_popup_references()
+	_validate_required_references()
 	_apply_label_theme(self)
 	if close_button != null and not close_button.pressed.is_connected(_on_close_button_pressed):
 		close_button.pressed.connect(_on_close_button_pressed)
@@ -95,12 +95,6 @@ func _apply_label_theme_to_label(label: Label, is_title: bool) -> void:
 	label.add_theme_color_override("font_color", theme_resource.text_color)
 
 
-func _resolve_popup_references() -> void:
-	if title_label == null:
-		title_label = get_node_or_null("MainPanel/VBox/TitleLabel") as Label
-	if tokens_container == null:
-		tokens_container = get_node_or_null("MainPanel/VBox/Tokens") as HBoxContainer
-	if empty_label == null:
-		empty_label = get_node_or_null("MainPanel/VBox/EmptyLabel") as Label
-	if close_button == null:
-		close_button = get_node_or_null("MainPanel/VBox/CloseButton") as Button
+func _validate_required_references() -> void:
+	if tokens_container == null or close_button == null or sticker_token_scene == null:
+		push_error("%s is missing required references. Assign them in the scene." % get_path())

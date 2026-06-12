@@ -1,9 +1,8 @@
 extends Node2D
 class_name ProductScatterView
 
-signal actor_spawned(actor: Node2D, slot_index: int)
-signal product_actor_spawned(actor: Node2D, slot_index: int)
-signal coupon_actor_spawned(actor: Node2D, slot_index: int)
+signal product_actor_spawned(actor: ProductActor, slot_index: int)
+signal coupon_actor_spawned(actor: CouponActor, slot_index: int)
 
 @export var actor_container: Node2D
 @export var slot_marker_root: Node2D
@@ -14,18 +13,17 @@ signal coupon_actor_spawned(actor: Node2D, slot_index: int)
 @export var spawn_tween_duration: float = 0.22
 @export var spawn_stagger_seconds: float = 0.04
 
-var _actors_by_slot: Dictionary[int, Node2D] = {}
-var _actors_by_object_key: Dictionary[String, Node2D] = {}
+var _actors_by_slot: Dictionary[int, TableActor] = {}
+var _actors_by_object_key: Dictionary[String, TableActor] = {}
 var _object_keys_by_slot: Dictionary[int, String] = {}
 var _spawn_tweens_by_object_key: Dictionary[String, Tween] = {}
 
 
 func _ready() -> void:
-	_resolve_child_references()
+	_validate_required_references()
 
 
 func display_slots(slots: Array[VisibleObjectSlot]) -> void:
-	_resolve_child_references()
 	var stale_object_keys: Dictionary[String, bool] = {}
 	for object_key: String in _actors_by_object_key.keys():
 		stale_object_keys[object_key] = true
@@ -46,7 +44,7 @@ func display_slots(slots: Array[VisibleObjectSlot]) -> void:
 		if object_key.is_empty():
 			continue
 
-		var actor: Node2D = _actors_by_object_key.get(object_key) as Node2D
+		var actor: TableActor = _actors_by_object_key.get(object_key) as TableActor
 		var is_new_actor: bool = actor == null or not is_instance_valid(actor)
 		if is_new_actor:
 			actor = _instantiate_actor_for_slot(slot)
@@ -56,7 +54,7 @@ func display_slots(slots: Array[VisibleObjectSlot]) -> void:
 			_actors_by_object_key[object_key] = actor
 			_emit_actor_spawned(actor, slot.slot_index)
 		else:
-			actor.set("slot_index", slot.slot_index)
+			actor.slot_index = slot.slot_index
 
 		stale_object_keys.erase(object_key)
 		_actors_by_slot[slot.slot_index] = actor
@@ -68,7 +66,7 @@ func display_slots(slots: Array[VisibleObjectSlot]) -> void:
 
 
 func clear_actors() -> void:
-	for actor: Node2D in _actors_by_slot.values():
+	for actor: TableActor in _actors_by_slot.values():
 		if actor != null and is_instance_valid(actor):
 			actor.queue_free()
 	_actors_by_slot.clear()
@@ -80,11 +78,11 @@ func clear_actors() -> void:
 	_spawn_tweens_by_object_key.clear()
 
 
-func release_actor(actor: Node2D) -> void:
+func release_actor(actor: TableActor) -> void:
 	if actor == null:
 		return
 
-	var slot_index: int = _get_actor_slot_index(actor)
+	var slot_index: int = actor.slot_index
 	if slot_index < 0:
 		return
 	if _actors_by_slot.get(slot_index) == actor:
@@ -96,8 +94,19 @@ func release_actor(actor: Node2D) -> void:
 			_kill_spawn_tween(object_key)
 
 
-func get_actor_for_slot(slot_index: int) -> Node2D:
-	return _actors_by_slot.get(slot_index) as Node2D
+## Finds the topmost product actor whose hitbox contains the point. Searches the
+## actor container directly so actors lying loose on the table are found too.
+func find_product_actor_at(global_point: Vector2) -> ProductActor:
+	if actor_container == null:
+		return null
+
+	var children: Array[Node] = actor_container.get_children()
+	for child_index: int in range(children.size() - 1, -1, -1):
+		var product_actor: ProductActor = children[child_index] as ProductActor
+		if product_actor != null and product_actor.contains_global_point(global_point):
+			return product_actor
+
+	return null
 
 
 func get_slot_marker(slot_index: int) -> Marker2D:
@@ -114,7 +123,18 @@ func get_slot_marker(slot_index: int) -> Marker2D:
 	return null
 
 
-func _instantiate_actor_for_slot(slot: VisibleObjectSlot) -> Node2D:
+func _validate_required_references() -> void:
+	if actor_container == null:
+		push_error("%s is missing required scene reference 'actor_container'." % get_path())
+	if slot_marker_root == null:
+		push_error("%s is missing required scene reference 'slot_marker_root'." % get_path())
+	if product_actor_scene == null:
+		push_error("%s is missing required scene reference 'product_actor_scene'." % get_path())
+	if coupon_actor_scene == null:
+		push_error("%s is missing required scene reference 'coupon_actor_scene'." % get_path())
+
+
+func _instantiate_actor_for_slot(slot: VisibleObjectSlot) -> TableActor:
 	match slot.slot_kind:
 		VisibleObjectSlot.SlotKind.PRODUCT:
 			return _instantiate_product_actor(slot)
@@ -124,39 +144,35 @@ func _instantiate_actor_for_slot(slot: VisibleObjectSlot) -> Node2D:
 			return null
 
 
-func _instantiate_product_actor(slot: VisibleObjectSlot) -> Node2D:
+func _instantiate_product_actor(slot: VisibleObjectSlot) -> ProductActor:
 	if product_actor_scene == null:
-		push_warning("ProductScatterView needs a ProductActor scene.")
 		return null
 
-	var actor: Node2D = product_actor_scene.instantiate() as Node2D
+	var actor: ProductActor = product_actor_scene.instantiate() as ProductActor
 	if actor == null:
-		push_warning("Configured product_actor_scene does not instance Node2D.")
+		push_error("Configured product_actor_scene does not instance a ProductActor.")
 		return null
 
-	actor.set("slot_index", slot.slot_index)
-	if actor.has_method("set_product_instance"):
-		actor.call("set_product_instance", slot.product_instance)
+	actor.slot_index = slot.slot_index
+	actor.set_product_instance(slot.product_instance)
 	return actor
 
 
-func _instantiate_coupon_actor(slot: VisibleObjectSlot) -> Node2D:
+func _instantiate_coupon_actor(slot: VisibleObjectSlot) -> CouponActor:
 	if coupon_actor_scene == null:
-		push_warning("ProductScatterView needs a CouponActor scene.")
 		return null
 
-	var actor: Node2D = coupon_actor_scene.instantiate() as Node2D
+	var actor: CouponActor = coupon_actor_scene.instantiate() as CouponActor
 	if actor == null:
-		push_warning("Configured coupon_actor_scene does not instance Node2D.")
+		push_error("Configured coupon_actor_scene does not instance a CouponActor.")
 		return null
 
-	actor.set("slot_index", slot.slot_index)
-	if actor.has_method("set_coupon_instance"):
-		actor.call("set_coupon_instance", slot.coupon_instance)
+	actor.slot_index = slot.slot_index
+	actor.set_coupon_instance(slot.coupon_instance)
 	return actor
 
 
-func _add_actor_to_container(actor: Node2D) -> void:
+func _add_actor_to_container(actor: TableActor) -> void:
 	if actor_container != null:
 		actor_container.add_child(actor)
 	else:
@@ -164,7 +180,7 @@ func _add_actor_to_container(actor: Node2D) -> void:
 
 
 func _move_actor_to_slot(
-	actor: Node2D,
+	actor: TableActor,
 	object_key: String,
 	slot_marker: Marker2D,
 	from_spawn: bool,
@@ -193,7 +209,7 @@ func _get_marker_position_in_actor_container(marker: Marker2D) -> Vector2:
 
 
 func _remove_actor_for_object_key(object_key: String) -> void:
-	var actor: Node2D = _actors_by_object_key.get(object_key) as Node2D
+	var actor: TableActor = _actors_by_object_key.get(object_key) as TableActor
 	_kill_spawn_tween(object_key)
 	if actor != null and is_instance_valid(actor):
 		actor.queue_free()
@@ -220,29 +236,12 @@ func _get_slot_object_key(slot: VisibleObjectSlot) -> String:
 	return ""
 
 
-func _emit_actor_spawned(actor: Node2D, slot_index: int) -> void:
-	actor_spawned.emit(actor, slot_index)
-	if actor.has_method("set_product_instance"):
-		product_actor_spawned.emit(actor, slot_index)
+func _emit_actor_spawned(actor: TableActor, slot_index: int) -> void:
+	var product_actor: ProductActor = actor as ProductActor
+	if product_actor != null:
+		product_actor_spawned.emit(product_actor, slot_index)
 		return
 
-	if actor.has_method("set_coupon_instance"):
-		coupon_actor_spawned.emit(actor, slot_index)
-
-
-func _get_actor_slot_index(actor: Node2D) -> int:
-	var slot_index_value: Variant = actor.get("slot_index")
-	if slot_index_value is int:
-		return slot_index_value
-	return -1
-
-
-func _resolve_child_references() -> void:
-	if actor_container == null:
-		actor_container = get_node_or_null("ActorContainer") as Node2D
-	if slot_marker_root == null:
-		slot_marker_root = get_node_or_null("SlotMarkers") as Node2D
-	if spawn_marker == null:
-		spawn_marker = get_node_or_null("SpawnMarker") as Marker2D
-	if exit_marker == null:
-		exit_marker = get_node_or_null("ExitMarker") as Marker2D
+	var coupon_actor: CouponActor = actor as CouponActor
+	if coupon_actor != null:
+		coupon_actor_spawned.emit(coupon_actor, slot_index)

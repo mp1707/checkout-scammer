@@ -32,10 +32,13 @@ func _make_custom_tooltip(for_text: String) -> Object:
 	if for_text.strip_edges().is_empty():
 		return null
 
-	var tooltip_node: Node = TOOLTIP_PANEL_SCENE.instantiate()
-	if tooltip_node.has_method("configure_text"):
-		tooltip_node.call("configure_text", for_text)
-	return tooltip_node
+	var tooltip_panel: TooltipPanel = TOOLTIP_PANEL_SCENE.instantiate() as TooltipPanel
+	if tooltip_panel == null:
+		push_error("Tooltip panel scene does not instance a TooltipPanel.")
+		return null
+
+	tooltip_panel.configure_text(for_text)
+	return tooltip_panel
 
 
 func _gui_input(event: InputEvent) -> void:

@@ -1,25 +1,15 @@
-extends SceneTree
-class_name Phase2SimulationTest
+extends "res://tests/checkout_test_base.gd"
+class_name SimulationSystemsTest
 
-const CustomerGeneratorScript = preload("res://scripts/gameplay/generation/customer_generator.gd")
-const VisibleObjectQueueSystemScript = preload("res://scripts/gameplay/systems/visible_object_queue_system.gd")
-const ScanSystemScript = preload("res://scripts/gameplay/systems/scan_system.gd")
-const SuspicionSystemScript = preload("res://scripts/gameplay/systems/suspicion_system.gd")
-const EconomySystemScript = preload("res://scripts/gameplay/systems/economy_system.gd")
-const CouponSystemScript = preload("res://scripts/gameplay/systems/coupon_system.gd")
-const UpgradeSystemScript = preload("res://scripts/gameplay/systems/upgrade_system.gd")
-const StickerSystemScript = preload("res://scripts/gameplay/systems/sticker_system.gd")
-
-var _failure_count: int = 0
 var _registry: ContentRegistry
-var _generator: CustomerGeneratorScript
-var _visible_object_queue_system: VisibleObjectQueueSystemScript
-var _scan_system: ScanSystemScript
-var _suspicion_system: SuspicionSystemScript
-var _economy_system: EconomySystemScript
-var _coupon_system: CouponSystemScript
-var _upgrade_system: UpgradeSystemScript
-var _sticker_system: StickerSystemScript
+var _generator: CustomerGenerator
+var _visible_object_queue_system: VisibleObjectQueueSystem
+var _scan_system: ScanSystem
+var _suspicion_system: SuspicionSystem
+var _economy_system: EconomySystem
+var _coupon_system: CouponSystem
+var _upgrade_system: UpgradeSystem
+var _sticker_system: StickerSystem
 
 
 func _initialize() -> void:
@@ -28,14 +18,14 @@ func _initialize() -> void:
 	for message: String in content_errors:
 		_fail("content validation", message)
 
-	_generator = CustomerGeneratorScript.new()
-	_visible_object_queue_system = VisibleObjectQueueSystemScript.new()
-	_scan_system = ScanSystemScript.new()
-	_suspicion_system = SuspicionSystemScript.new()
-	_economy_system = EconomySystemScript.new()
-	_coupon_system = CouponSystemScript.new()
-	_upgrade_system = UpgradeSystemScript.new()
-	_sticker_system = StickerSystemScript.new()
+	_generator = CustomerGenerator.new()
+	_visible_object_queue_system = VisibleObjectQueueSystem.new()
+	_scan_system = ScanSystem.new()
+	_suspicion_system = SuspicionSystem.new()
+	_economy_system = EconomySystem.new()
+	_coupon_system = CouponSystem.new()
+	_upgrade_system = UpgradeSystem.new()
+	_sticker_system = StickerSystem.new()
 
 	_test_customer_generator()
 	_test_visible_object_queue_system()
@@ -47,13 +37,7 @@ func _initialize() -> void:
 	_test_sticker_system()
 	_test_complete_customer_flow_without_scenes()
 
-	if _failure_count > 0:
-		push_error("Phase 2 simulation tests failed: %d failure(s)." % _failure_count)
-		quit(1)
-		return
-
-	print("Phase 2 simulation tests passed.")
-	quit(0)
+	_finish_suite("Simulation system tests")
 
 
 func _test_customer_generator() -> void:
@@ -98,8 +82,7 @@ func _test_customer_generator() -> void:
 		2,
 		2,
 		no_active_coupons_for_upgrade,
-		_registry.game_balance.products_per_customer,
-		_registry.game_balance.starting_assortment_level
+		_registry.game_balance.products_per_customer
 	)
 	_expect_true(
 		_has_product_at_assortment_level(upgraded_first_day_customer, 2),
@@ -168,7 +151,7 @@ func _test_scan_system() -> void:
 		_registry.suspicion_curve,
 		random
 	)
-	_expect_equal_string(ScanSystemScript.FAILURE_WRONG_DIRECTION, wrong_direction.failure_reason, "ScanSystem rejects left-to-right movement")
+	_expect_equal_int(ScanResult.FailureReason.WRONG_DIRECTION, wrong_direction.failure_reason, "ScanSystem rejects left-to-right movement")
 
 	var not_touching: ScanResult = _scan_system.evaluate_scan(
 		_create_scan_request(product, true, false, Vector2.LEFT),
@@ -177,7 +160,7 @@ func _test_scan_system() -> void:
 		_registry.suspicion_curve,
 		random
 	)
-	_expect_equal_string(ScanSystemScript.FAILURE_NOT_TOUCHING_SCANNER, not_touching.failure_reason, "ScanSystem rejects missing scanner contact")
+	_expect_equal_int(ScanResult.FailureReason.NOT_TOUCHING_SCANNER, not_touching.failure_reason, "ScanSystem rejects missing scanner contact")
 
 	var not_held: ScanResult = _scan_system.evaluate_scan(
 		_create_scan_request(product, false, true, Vector2.LEFT),
@@ -186,7 +169,7 @@ func _test_scan_system() -> void:
 		_registry.suspicion_curve,
 		random
 	)
-	_expect_equal_string(ScanSystemScript.FAILURE_NOT_HELD, not_held.failure_reason, "ScanSystem rejects products that are not held")
+	_expect_equal_int(ScanResult.FailureReason.NOT_HELD, not_held.failure_reason, "ScanSystem rejects products that are not held")
 
 	var apple: ProductInstance = ProductInstance.new(_registry.get_product_variant("apple"), "weighable_scan_product")
 	var weighed_scan: ScanResult = _scan_system.evaluate_scan(
@@ -196,7 +179,7 @@ func _test_scan_system() -> void:
 		_registry.suspicion_curve,
 		random
 	)
-	_expect_equal_string(ScanSystemScript.FAILURE_PRODUCT_WEIGHABLE, weighed_scan.failure_reason, "ScanSystem rejects fruit scanner sales")
+	_expect_equal_int(ScanResult.FailureReason.PRODUCT_WEIGHABLE, weighed_scan.failure_reason, "ScanSystem rejects fruit scanner sales")
 
 
 func _test_suspicion_system() -> void:
@@ -476,38 +459,3 @@ func _has_product_at_assortment_level(customer: CustomerState, assortment_level:
 			return true
 	return false
 
-
-func _expect_true(value: bool, label: String) -> void:
-	if not value:
-		_fail(label, "Expected true.")
-
-
-func _expect_false(value: bool, label: String) -> void:
-	if value:
-		_fail(label, "Expected false.")
-
-
-func _expect_equal_int(expected: int, actual: int, label: String) -> void:
-	if expected != actual:
-		_fail(label, "Expected %d, got %d." % [expected, actual])
-
-
-func _expect_equal_string(expected: String, actual: String, label: String) -> void:
-	if expected != actual:
-		_fail(label, "Expected '%s', got '%s'." % [expected, actual])
-
-
-func _expect_string_arrays_equal(expected: PackedStringArray, actual: PackedStringArray, label: String) -> void:
-	if expected.size() != actual.size():
-		_fail(label, "Expected %s, got %s." % [str(expected), str(actual)])
-		return
-
-	for index: int in range(expected.size()):
-		if expected[index] != actual[index]:
-			_fail(label, "Expected %s, got %s." % [str(expected), str(actual)])
-			return
-
-
-func _fail(label: String, message: String) -> void:
-	_failure_count += 1
-	push_error("%s: %s" % [label, message])

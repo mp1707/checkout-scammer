@@ -6,7 +6,7 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_scanner_hit"]
 size = Vector2(18, 29)
 
-[node name="ScannerStation" type="Node2D" unique_id=1456192738]
+[node name="ScannerStation" type="Node2D" unique_id=1456192738 node_paths=PackedStringArray("hit_area", "beam", "feedback_anchor", "flash_rect", "beep_player", "animation_player")]
 script = ExtResource("1_scanner_station")
 hit_area = NodePath("HitArea")
 beam = NodePath("Beam")

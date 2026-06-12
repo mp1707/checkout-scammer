@@ -9,8 +9,8 @@ class_name OneShotAnimatedVfx
 
 
 func _ready() -> void:
-	_resolve_child_references()
 	if animated_sprite == null:
+		push_error("%s is missing required scene reference 'animated_sprite'." % get_path())
 		return
 
 	if not animated_sprite.animation_finished.is_connected(_on_animation_finished):
@@ -51,8 +51,3 @@ func _on_animation_finished() -> void:
 		queue_free()
 	else:
 		stop_and_hide()
-
-
-func _resolve_child_references() -> void:
-	if animated_sprite == null:
-		animated_sprite = get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D

@@ -1,6 +1,6 @@
 # Checkout Scammer - Architektur
 
-Stand: 2026-06-11
+Stand: 2026-06-12
 
 Diese Datei ist die verbindliche technische Grundlage fuer Checkout Scammer. Aenderungen an dieser Architektur brauchen vorherige Ruecksprache mit Marco, wenn sie Ownership, Datenfluss, Szenenstruktur, Autoloads, UI-Architektur oder zentrale Gameplay-Systeme betreffen.
 
@@ -28,12 +28,19 @@ Verantwortung:
 - Simulation-Systeme koordinieren.
 - UI-Intents entgegennehmen und daraus Simulation-Commands ausloesen.
 
-Geplante Haupttypen:
+Haupttypen:
 
-- `GameApp`: Einstiegspunkt der Spielszene.
-- `RunController`: verbindet Run-State, Systeme und Presentation.
-- `ContentRegistry`: zentraler Zugriff auf Produkt-, Coupon-, Upgrade-, Balance- und UI-Resources.
+- `GameApp`: Einstiegspunkt der Spielszene; laedt und validiert Content.
+- `RunController`: duenne Verdrahtungsschicht. Verbindet Presentation-Signale mit den Handlern, haelt selbst keine Spiellogik.
+- `RunContext`: gemeinsamer Zustand einer Session (Registry, RunState, Systeme, Presentation-Referenzen) fuer alle Handler.
+- `RunFlowController`: Run-/Tages-/Kunden-Lifecycle, Win/Lose und Dialog-Zustandsmaschine.
+- `CheckoutInteractionHandler`: uebersetzt Tisch-Intents (Scan, Wiegen, Bag, Trash, Sticker) in Simulation-Aufrufe und Feedback.
+- `ShopHandler`: Coupon-Kauf, Sortiment-Upgrade, Sticker-Popup.
+- `HudStateUpdater`: synchronisiert Run-State in das HUD (Summary, Buttons, Tooltips).
+- `ContentRegistry`: zentraler Zugriff auf Produkt-, Coupon-, Upgrade-, Balance-, Scripted-Customer- und UI-Resources.
 - `SaveService`: spaeterer Speicher-/Ladepunkt, ohne Gameplay-Regeln.
+
+Wenn der Datenfluss unten von "RunController" spricht, ist die Application-Schicht insgesamt gemeint; die konkrete Arbeit passiert in Flow-, Interaction- und Shop-Handler.
 
 Autoloads bleiben klein. Der einzige direkt gesetzte Autoload in der Projektbasis ist `PixelDisplayService`, weil er die in `project-settings.md` definierten Window-/Scale-Regeln bei jedem Szenenstart erzwingt.
 
@@ -53,7 +60,8 @@ Kernsysteme:
 - `SuspicionSystem`: Caught-Rolls, Suspicion-Stufen, dreistufiger Kundenhand-Zustand.
 - `UpgradeSystem`: Sortiment-Level, Upgrade-Kosten, Wirkung ab naechstem Kunden.
 - `StickerSystem`: Tagesinventar, Refill, Verbrauch und Anwendbarkeit von Stickern auf Produkte.
-- `CustomerGenerator`: deterministische Kunden-, Produkt- und Obst-Gewichtsfolgen per Seed.
+- `CustomerGenerator`: deterministische Kunden-, Produkt- und Obst-Gewichtsfolgen per Seed. Geskriptete Kunden kommen aus `ScriptedCustomerResource`-Content, nicht aus Code.
+- `RunSchedule`: gemeinsame Kalender-Helfer ("wirkt ab dem naechsten Kunden") fuer Coupons und Upgrades.
 
 Simulation arbeitet mit expliziten Datenobjekten wie `ScanRequest`, `ScanResult`, `PayoutOutcome`, `VisibleObjectSlot`, `RunState`, `CustomerState`, `ProductInstance`, `CouponInstance`, `StickerResource`, `StickerInstance` und `StickerInventoryEntry`.
 
@@ -65,6 +73,7 @@ Presentation zeigt Zustand, sammelt Input und sendet Intents. Sie mutiert keinen
 
 Wichtige Szenen:
 
+- `TableActor` (Basisklasse): gemeinsame Drag-/Slot-/Finish-API fuer Produkt- und Coupon-Actors.
 - `CheckoutTable`: mittlerer Kassentisch als Root der spielbaren Flaeche.
 - `ProductScatterView`: verstreute sichtbare Objekt-Slots rechts neben dem Scanner, Spawn-von-rechts-Animationen, Slot-Marker.
 - `ProductActor`: Drag, Rotation, Scannerkontakt, Schatten und Produktfeedback.
@@ -92,6 +101,7 @@ Alles Konfigurierbare wird als Resource modelliert:
 - `StickerResource`: Sticker-ID, Tooltip, Texture, Multiplikator, Zielart und taeglicher Refill.
 - `UpgradeResource`: Sortiment-Level-Up und spaetere Upgrades.
 - `SuspicionCurveResource`: Startwert, Stufen und Roll-Regeln.
+- `ScriptedCustomerResource`: feste Produktreihenfolge fuer bestimmte Kunden (z. B. Tag 1), inklusive Sortiment-Bedingung.
 - `CheckoutThemeResource`: Font, 9-Slice-Panel-Texture, Fontgroessen, Endesga-64-UI-Farben.
 
 Definition-Resources sind immutable Runtime-Definitionen. Veraenderbarer Zustand liegt in Runtime-Instanzen.
@@ -246,6 +256,7 @@ Regeln:
 
 Die verbindlichen Werte stehen in `project-settings.md` und sind in `project.godot` gesetzt.
 
+- Renderer: `gl_compatibility` (reines 2D-Spiel; geringerer Overhead und breitere Hardware-/Export-Unterstuetzung als Forward+)
 - Viewport: `640x360`
 - Run-Fenster: `1280x720`
 - Stretch Mode: `canvas_items`

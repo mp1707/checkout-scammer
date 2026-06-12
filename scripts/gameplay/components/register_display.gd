@@ -14,7 +14,8 @@ class_name RegisterDisplay
 
 
 func _ready() -> void:
-	_resolve_child_references()
+	if amount_label == null:
+		push_error("%s is missing required scene reference 'amount_label'." % get_path())
 	_apply_label_theme()
 	if not Engine.is_editor_hint():
 		clear_amount()
@@ -69,7 +70,3 @@ func _format_cents(cents: int) -> String:
 	var dollars: int = floori(float(absolute_cents) / 100.0)
 	return "%s$%d.%02d" % [sign_prefix, dollars, absolute_cents % 100]
 
-
-func _resolve_child_references() -> void:
-	if amount_label == null:
-		amount_label = get_node_or_null("AmountLabel") as Label

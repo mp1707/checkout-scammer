@@ -14,7 +14,7 @@ signal sticker_button_pressed()
 
 func _ready() -> void:
 	super()
-	_resolve_child_references()
+	_validate_required_references()
 	_apply_label_theme(self)
 	_apply_button_theme()
 	_connect_buttons()
@@ -123,24 +123,6 @@ func _apply_button_font(button: Button) -> void:
 	button.add_theme_font_size_override("font_size", theme_resource.font_size_detail)
 
 
-func _resolve_child_references() -> void:
-	if title_label == null:
-		title_label = _get_main_panel_label("UpgradeList/HeaderPanel/TitleLabel")
-	if coupon_button == null:
-		coupon_button = _get_main_panel_button("UpgradeList/CouponButton")
-	if assortment_upgrade_button == null:
-		assortment_upgrade_button = _get_main_panel_button("UpgradeList/AssortmentButton")
-	if sticker_button == null:
-		sticker_button = _get_main_panel_button("UpgradeList/StickerButton")
-
-
-func _get_main_panel_label(label_path: String) -> Label:
-	if main_panel == null:
-		return null
-	return main_panel.get_node_or_null(NodePath(label_path)) as Label
-
-
-func _get_main_panel_button(button_path: String) -> Button:
-	if main_panel == null:
-		return null
-	return main_panel.get_node_or_null(NodePath(button_path)) as Button
+func _validate_required_references() -> void:
+	if coupon_button == null or assortment_upgrade_button == null or sticker_button == null:
+		push_error("%s is missing required button references. Assign them in the scene." % get_path())

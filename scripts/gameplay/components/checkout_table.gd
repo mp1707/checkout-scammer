@@ -1,26 +1,21 @@
 extends Control
 class_name CheckoutTable
 
-signal product_scan_contact_started(actor: Node2D, contact_position: Vector2)
-signal product_scan_contact_ended(actor: Node2D)
-signal actor_scan_contact_started(actor: Node2D, contact_position: Vector2)
-signal actor_scan_contact_ended(actor: Node2D)
-signal actor_taken_from_product_area(actor: Node2D)
-signal actor_bag_drop_requested(actor: Node2D)
-signal actor_trash_drop_requested(actor: Node2D)
-signal actor_scale_drop_requested(actor: Node2D)
-signal actor_scale_removed(actor: Node2D)
-signal actor_released_outside_drop_zones(actor: Node2D)
-signal product_actor_spawned(actor: Node2D, slot_index: int)
-signal coupon_actor_spawned(actor: Node2D, slot_index: int)
+signal product_scan_contact_started(actor: ProductActor, contact_position: Vector2)
+signal actor_scan_contact_started(actor: TableActor, contact_position: Vector2)
+signal actor_taken_from_product_area(actor: TableActor)
+signal actor_bag_drop_requested(actor: TableActor)
+signal actor_trash_drop_requested(actor: TableActor)
+signal actor_scale_drop_requested(actor: ProductActor)
+signal actor_scale_removed(actor: ProductActor)
 
 @export var product_scatter_view: ProductScatterView
 @export var scanner_station: ScannerStation
-@export var register_display: Control
-@export var bag_zone: Area2D
-@export var trash_zone: Area2D
+@export var register_display: RegisterDisplay
+@export var bag_zone: BagZone
+@export var trash_zone: TrashZone
 @export var scale_station: ScaleStation
-@export var customer_hand_view: Node2D
+@export var customer_hand_view: CustomerHandView
 @export var vfx_container: Node2D
 @export var coin_burst_scene: PackedScene
 
@@ -30,262 +25,214 @@ var _base_position: Vector2
 
 func _ready() -> void:
 	_base_position = position
-	_resolve_child_references()
+	_validate_required_references()
 	_connect_children()
 
 
 func display_visible_object_slots(slots: Array[VisibleObjectSlot]) -> void:
-	if product_scatter_view != null:
-		product_scatter_view.call("display_slots", slots)
+	product_scatter_view.display_slots(slots)
 
 
 func clear_visible_objects() -> void:
-	if product_scatter_view != null:
-		product_scatter_view.call("clear_actors")
+	product_scatter_view.clear_actors()
 
 
 func show_scanned_product_amount(amount_cents: int) -> void:
-	if register_display != null and register_display.has_method("show_amount_cents"):
-		register_display.call("show_amount_cents", amount_cents)
+	register_display.show_amount_cents(amount_cents)
 
 
 func clear_scanned_product_amount() -> void:
-	if register_display != null and register_display.has_method("clear_amount"):
-		register_display.call("clear_amount")
+	register_display.clear_amount()
 
 
-func release_scale_actor(actor: Node2D) -> void:
-	if scale_station != null:
-		scale_station.release_actor(actor)
+func release_scale_actor(actor: TableActor) -> void:
+	scale_station.release_actor(actor)
 
 
 func set_customer_hand_state(hand_stage_index: int, suspicion_percent: int) -> void:
-	if customer_hand_view == null:
-		return
-	if customer_hand_view.has_method("set_suspicion_state"):
-		customer_hand_view.call("set_suspicion_state", hand_stage_index, suspicion_percent)
+	customer_hand_view.set_suspicion_state(hand_stage_index, suspicion_percent)
 
 
 func pulse_customer_hand() -> void:
-	if customer_hand_view != null and customer_hand_view.has_method("pulse_customer_hand"):
-		customer_hand_view.call("pulse_customer_hand")
-
-
-func play_customer_alert_sound() -> void:
-	if customer_hand_view != null and customer_hand_view.has_method("play_alert_sound"):
-		customer_hand_view.call("play_alert_sound")
+	customer_hand_view.pulse_customer_hand()
 
 
 func play_customer_caught_sound() -> void:
-	if customer_hand_view != null and customer_hand_view.has_method("play_caught_sound"):
-		customer_hand_view.call("play_caught_sound")
+	customer_hand_view.play_caught_sound()
 
 
-func play_successful_scan_feedback(actor: Node2D, scan_count: int, _contact_position: Vector2) -> void:
-	if scanner_station != null and scanner_station.has_method("play_success_feedback"):
-		scanner_station.call("play_success_feedback", scan_count)
-
-	if actor != null and actor.has_method("play_successful_scan_feedback"):
-		actor.call("play_successful_scan_feedback", scan_count)
-
+func play_successful_scan_feedback(actor: ProductActor, scan_count: int) -> void:
+	scanner_station.play_success_feedback(scan_count)
+	if actor != null:
+		actor.play_successful_scan_feedback(scan_count)
 	if scan_count > 1:
 		_play_table_jolt(scan_count)
 
 
-func play_successful_weigh_feedback(actor: Node2D, charge_count: int) -> void:
-	if scale_station != null:
-		scale_station.play_success_feedback()
-	if actor != null and actor.has_method("play_successful_scan_feedback"):
-		actor.call("play_successful_scan_feedback", charge_count)
+func play_successful_weigh_feedback(actor: ProductActor, charge_count: int) -> void:
+	scale_station.play_success_feedback()
+	if actor != null:
+		actor.play_successful_scan_feedback(charge_count)
 	if charge_count > 1:
 		_play_table_jolt(charge_count)
 
 
-func play_invalid_weigh_feedback(actor: Node2D) -> void:
-	if scale_station != null:
-		scale_station.play_invalid_feedback()
-	if actor != null and actor.has_method("play_reject_feedback"):
-		actor.call("play_reject_feedback")
+func play_invalid_weigh_feedback(actor: ProductActor) -> void:
+	scale_station.play_invalid_feedback()
+	if actor != null:
+		actor.play_reject_feedback()
 
 
-func play_rejected_drop_feedback(actor: Node2D) -> void:
-	if actor != null and actor.has_method("play_reject_feedback"):
-		actor.call("play_reject_feedback")
+func play_rejected_drop_feedback(actor: ProductActor) -> void:
+	if actor != null:
+		actor.play_reject_feedback()
 
 
-func refresh_product_actor(actor: Node2D) -> void:
-	if actor != null and actor.has_method("refresh_product_state"):
-		actor.call("refresh_product_state")
+func refresh_product_actor(actor: ProductActor) -> void:
+	if actor != null:
+		actor.refresh_product_state()
 
 
-func play_sticker_apply_feedback(actor: Node2D) -> void:
-	if actor != null and actor.has_method("play_sticker_apply_feedback"):
-		actor.call("play_sticker_apply_feedback")
+func play_sticker_apply_feedback(actor: ProductActor) -> void:
+	if actor != null:
+		actor.play_sticker_apply_feedback()
 
 
 func find_product_actor_at_global_position(global_point: Vector2) -> ProductActor:
-	return _find_product_actor_at_global_position(self, global_point)
+	var scale_actor: ProductActor = scale_station.get_current_actor()
+	if scale_actor != null and scale_actor.contains_global_point(global_point):
+		return scale_actor
+	return product_scatter_view.find_product_actor_at(global_point)
 
 
-func play_actor_finish_feedback(actor: Node2D, is_sale: bool) -> void:
+func play_actor_finish_feedback(actor: TableActor, is_sale: bool) -> void:
 	if actor == null or not is_instance_valid(actor):
 		return
 
 	var finish_position: Vector2 = _get_actor_finish_position(actor, is_sale)
-	var product_instance: ProductInstance = _get_product_instance(actor)
-	if is_sale and product_instance != null:
-		_spawn_coin_burst(finish_position, _product_uses_bonus_coin_sound(product_instance))
-	if actor.has_method("play_finish_feedback"):
-		actor.call("play_finish_feedback", finish_position, is_sale)
-	else:
-		actor.queue_free()
+	var product_actor: ProductActor = actor as ProductActor
+	if is_sale and product_actor != null and product_actor.product_instance != null:
+		_spawn_coin_burst(finish_position, _product_uses_bonus_coin_sound(product_actor.product_instance))
+	actor.play_finish_feedback(finish_position, is_sale)
+
+
+func _validate_required_references() -> void:
+	if product_scatter_view == null:
+		push_error("%s is missing required scene reference 'product_scatter_view'." % get_path())
+	if scanner_station == null:
+		push_error("%s is missing required scene reference 'scanner_station'." % get_path())
+	if register_display == null:
+		push_error("%s is missing required scene reference 'register_display'." % get_path())
+	if bag_zone == null:
+		push_error("%s is missing required scene reference 'bag_zone'." % get_path())
+	if trash_zone == null:
+		push_error("%s is missing required scene reference 'trash_zone'." % get_path())
+	if scale_station == null:
+		push_error("%s is missing required scene reference 'scale_station'." % get_path())
+	if customer_hand_view == null:
+		push_error("%s is missing required scene reference 'customer_hand_view'." % get_path())
+	if coin_burst_scene == null:
+		push_error("%s is missing required scene reference 'coin_burst_scene'." % get_path())
 
 
 func _connect_children() -> void:
 	if scanner_station != null:
-		_connect_signal_once(scanner_station, "actor_contact_started", _on_actor_scan_contact_started)
-		_connect_signal_once(scanner_station, "actor_contact_ended", _on_actor_scan_contact_ended)
-		_connect_signal_once(scanner_station, "product_contact_started", _on_product_scan_contact_started)
-		_connect_signal_once(scanner_station, "product_contact_ended", _on_product_scan_contact_ended)
-
+		scanner_station.actor_contact_started.connect(_on_actor_scan_contact_started)
+		scanner_station.product_contact_started.connect(_on_product_scan_contact_started)
 	if product_scatter_view != null:
-		_connect_signal_once(product_scatter_view, "product_actor_spawned", _on_product_actor_spawned)
-		_connect_signal_once(product_scatter_view, "coupon_actor_spawned", _on_coupon_actor_spawned)
-
-	_connect_signal_once(bag_zone, "actor_dropped", _on_bag_zone_actor_dropped)
-	_connect_signal_once(trash_zone, "actor_dropped", _on_trash_zone_actor_dropped)
-	_connect_signal_once(scale_station, "actor_dropped", _on_scale_station_actor_dropped)
-	_connect_signal_once(scale_station, "actor_removed", _on_scale_station_actor_removed)
-
-
-func _on_product_actor_spawned(actor: Node2D, slot_index: int) -> void:
-	product_actor_spawned.emit(actor, slot_index)
-	_connect_signal_once(actor, "drag_started", _on_actor_drag_started)
-	_connect_signal_once(actor, "drag_ended", _on_actor_drag_ended)
+		product_scatter_view.product_actor_spawned.connect(_on_product_actor_spawned)
+		product_scatter_view.coupon_actor_spawned.connect(_on_coupon_actor_spawned)
+	if bag_zone != null:
+		bag_zone.actor_dropped.connect(_on_bag_zone_actor_dropped)
+	if trash_zone != null:
+		trash_zone.actor_dropped.connect(_on_trash_zone_actor_dropped)
+	if scale_station != null:
+		scale_station.actor_dropped.connect(_on_scale_station_actor_dropped)
+		scale_station.actor_removed.connect(_on_scale_station_actor_removed)
 
 
-func _on_coupon_actor_spawned(actor: Node2D, slot_index: int) -> void:
-	coupon_actor_spawned.emit(actor, slot_index)
-	_connect_signal_once(actor, "drag_started", _on_actor_drag_started)
-	_connect_signal_once(actor, "drag_ended", _on_actor_drag_ended)
+func _on_product_actor_spawned(actor: ProductActor, _slot_index: int) -> void:
+	_connect_actor_drag_signals(actor)
 
 
-func _on_actor_drag_started(actor: Node2D) -> void:
-	if scale_station != null and scale_station.has_actor(actor):
+func _on_coupon_actor_spawned(actor: CouponActor, _slot_index: int) -> void:
+	_connect_actor_drag_signals(actor)
+
+
+func _connect_actor_drag_signals(actor: TableActor) -> void:
+	actor.drag_started.connect(_on_actor_drag_started)
+	actor.drag_ended.connect(_on_actor_drag_ended)
+
+
+func _on_actor_drag_started(actor: TableActor) -> void:
+	if scale_station.has_actor(actor):
 		scale_station.release_actor(actor)
-	if product_scatter_view != null:
-		product_scatter_view.release_actor(actor)
+	product_scatter_view.release_actor(actor)
 	actor_taken_from_product_area.emit(actor)
 
 
-func _on_actor_drag_ended(actor: Node2D, _drop_position: Vector2) -> void:
+func _on_actor_drag_ended(actor: TableActor, _drop_position: Vector2) -> void:
 	_route_actor_drop(actor)
 
 
-func _route_actor_drop(actor: Node2D) -> void:
-	if scale_station != null and scale_station.has_method("try_drop_actor") and scale_station.call("try_drop_actor", actor):
+func _route_actor_drop(actor: TableActor) -> void:
+	if scale_station.try_drop_actor(actor):
 		return
-	if bag_zone != null and bag_zone.has_method("try_drop_actor") and bag_zone.call("try_drop_actor", actor):
+	if bag_zone.try_drop_actor(actor):
 		return
-	if trash_zone != null and trash_zone.has_method("try_drop_actor") and trash_zone.call("try_drop_actor", actor):
+	if trash_zone.try_drop_actor(actor):
 		return
-	actor_released_outside_drop_zones.emit(actor)
 
 
-func _on_product_scan_contact_started(actor: Node2D, contact_position: Vector2) -> void:
+func _on_product_scan_contact_started(actor: ProductActor, contact_position: Vector2) -> void:
 	product_scan_contact_started.emit(actor, contact_position)
 
 
-func _on_product_scan_contact_ended(actor: Node2D) -> void:
-	product_scan_contact_ended.emit(actor)
-
-
-func _on_actor_scan_contact_started(actor: Node2D, contact_position: Vector2) -> void:
+func _on_actor_scan_contact_started(actor: TableActor, contact_position: Vector2) -> void:
 	actor_scan_contact_started.emit(actor, contact_position)
 
 
-func _on_actor_scan_contact_ended(actor: Node2D) -> void:
-	actor_scan_contact_ended.emit(actor)
-
-
-func _on_bag_zone_actor_dropped(actor: Node2D) -> void:
+func _on_bag_zone_actor_dropped(actor: TableActor) -> void:
 	actor_bag_drop_requested.emit(actor)
 
 
-func _on_trash_zone_actor_dropped(actor: Node2D) -> void:
+func _on_trash_zone_actor_dropped(actor: TableActor) -> void:
 	actor_trash_drop_requested.emit(actor)
 
 
-func _on_scale_station_actor_dropped(actor: Node2D) -> void:
+func _on_scale_station_actor_dropped(actor: ProductActor) -> void:
 	actor_scale_drop_requested.emit(actor)
 
 
-func _on_scale_station_actor_removed(actor: Node2D) -> void:
+func _on_scale_station_actor_removed(actor: ProductActor) -> void:
 	actor_scale_removed.emit(actor)
-
-
-func _connect_signal_once(source: Object, signal_name: String, callback: Callable) -> void:
-	if source == null or not source.has_signal(signal_name):
-		return
-	if not source.is_connected(signal_name, callback):
-		source.connect(signal_name, callback)
 
 
 func _spawn_coin_burst(burst_global_position: Vector2, use_bonus_sound: bool) -> void:
 	if coin_burst_scene == null:
 		return
 
-	var vfx_node: Node2D = coin_burst_scene.instantiate() as Node2D
-	if vfx_node == null:
+	var vfx: CoinBurstVfx = coin_burst_scene.instantiate() as CoinBurstVfx
+	if vfx == null:
+		push_error("Configured coin_burst_scene does not instance a CoinBurstVfx.")
 		return
 
 	if vfx_container != null:
-		vfx_container.add_child(vfx_node)
+		vfx_container.add_child(vfx)
 	else:
-		add_child(vfx_node)
-
-	if vfx_node.has_method("play_at"):
-		vfx_node.call("play_at", burst_global_position, use_bonus_sound)
-	else:
-		vfx_node.global_position = burst_global_position.round()
+		add_child(vfx)
+	vfx.play_at(burst_global_position, use_bonus_sound)
 
 
-func _get_actor_finish_position(actor: Node2D, is_sale: bool) -> Vector2:
+func _get_actor_finish_position(actor: TableActor, is_sale: bool) -> Vector2:
 	var zone: Area2D = bag_zone if is_sale else trash_zone
-	if zone != null and zone.has_method("get_drop_position"):
-		var drop_position: Variant = zone.call("get_drop_position")
-		if drop_position is Vector2:
-			return drop_position
-	if actor != null:
+	if zone == null:
 		return actor.global_position
-	return global_position
-
-
-func _get_product_instance(actor: Node2D) -> ProductInstance:
-	if actor == null:
-		return null
-	var value: Variant = actor.get("product_instance")
-	return value as ProductInstance
+	return bag_zone.get_drop_position() if is_sale else trash_zone.get_drop_position()
 
 
 func _product_uses_bonus_coin_sound(product_instance: ProductInstance) -> bool:
 	return product_instance.scan_count > 1 or not product_instance.applied_stickers.is_empty()
-
-
-func _find_product_actor_at_global_position(root: Node, global_point: Vector2) -> ProductActor:
-	if root == null:
-		return null
-
-	var product_actor: ProductActor = root as ProductActor
-	if product_actor != null and product_actor.contains_global_point(global_point):
-		return product_actor
-
-	for child: Node in root.get_children():
-		var found_actor: ProductActor = _find_product_actor_at_global_position(child, global_point)
-		if found_actor != null:
-			return found_actor
-
-	return null
 
 
 func _play_table_jolt(scan_count: int) -> void:
@@ -300,22 +247,3 @@ func _play_table_jolt(scan_count: int) -> void:
 	_shake_tween.tween_property(self, "position", _base_position, 0.045) \
 		.set_trans(Tween.TRANS_QUAD) \
 		.set_ease(Tween.EASE_OUT)
-
-
-func _resolve_child_references() -> void:
-	if product_scatter_view == null:
-		product_scatter_view = get_node_or_null("ProductScatterView") as ProductScatterView
-	if scanner_station == null:
-		scanner_station = get_node_or_null("ScannerStation") as ScannerStation
-	if register_display == null:
-		register_display = get_node_or_null("RegisterDisplay") as Control
-	if bag_zone == null:
-		bag_zone = get_node_or_null("BagZone") as Area2D
-	if trash_zone == null:
-		trash_zone = get_node_or_null("TrashZone") as Area2D
-	if scale_station == null:
-		scale_station = get_node_or_null("ScaleStation") as ScaleStation
-	if customer_hand_view == null:
-		customer_hand_view = get_node_or_null("CustomerHandView") as Node2D
-	if vfx_container == null:
-		vfx_container = get_node_or_null("VfxContainer") as Node2D

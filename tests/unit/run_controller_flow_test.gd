@@ -1,7 +1,5 @@
-extends SceneTree
-class_name Phase4RunControllerTest
-
-var _failure_count: int = 0
+extends "res://tests/checkout_test_base.gd"
+class_name RunControllerFlowTest
 
 
 func _initialize() -> void:
@@ -22,7 +20,7 @@ func _run() -> void:
 
 	var controller: RunController = app.get_node("RunController") as RunController
 	var checkout_table: CheckoutTable = app.get_node("CheckoutTable") as CheckoutTable
-	var register_display: Node = app.get_node("CheckoutTable/RegisterDisplay")
+	var register_display: RegisterDisplay = app.get_node("CheckoutTable/RegisterDisplay") as RegisterDisplay
 	var scale_station: ScaleStation = app.get_node("CheckoutTable/ScaleStation") as ScaleStation
 	var hud_root: HudRoot = app.get_node("HudRoot") as HudRoot
 	_expect_true(controller != null, "RunController node is present")
@@ -135,51 +133,10 @@ func _get_first_fixed_price_product_actor(actor_container: Node) -> ProductActor
 
 
 func _finish() -> void:
-	if _failure_count > 0:
-		push_error("Phase 4 run controller tests failed: %d failure(s)." % _failure_count)
-		quit(1)
-		return
-
-	print("Phase 4 run controller tests passed.")
-	quit(0)
+	_finish_suite("Run controller flow tests")
 
 
-func _expect_true(value: bool, label: String) -> void:
-	if not value:
-		_fail(label, "Expected true.")
-
-
-func _expect_equal_int(expected: int, actual: int, label: String) -> void:
-	if expected != actual:
-		_fail(label, "Expected %d, got %d." % [expected, actual])
-
-
-func _expect_equal_string(expected: String, actual: String, label: String) -> void:
-	if expected != actual:
-		_fail(label, "Expected '%s', got '%s'." % [expected, actual])
-
-
-func _get_register_display_text(register_display: Node) -> String:
-	if register_display == null or not register_display.has_method("get_display_text"):
+func _get_register_display_text(register_display: RegisterDisplay) -> String:
+	if register_display == null:
 		return ""
-
-	var display_text: Variant = register_display.call("get_display_text")
-	if display_text is String:
-		return display_text
-	return ""
-
-
-func _format_cents(cents: int) -> String:
-	var sign_prefix: String = ""
-	var absolute_cents: int = cents
-	if cents < 0:
-		sign_prefix = "-"
-		absolute_cents = -cents
-
-	var dollars: int = floori(float(absolute_cents) / 100.0)
-	return "%s$%d.%02d" % [sign_prefix, dollars, absolute_cents % 100]
-
-
-func _fail(label: String, message: String) -> void:
-	_failure_count += 1
-	push_error("%s: %s" % [label, message])
+	return register_display.get_display_text()

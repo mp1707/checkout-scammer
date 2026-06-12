@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  tests:
+    name: Headless tests (Godot 4.6)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Godot
+        run: |
+          GODOT_VERSION=4.6.3
+          curl -sSL -o godot.zip "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          unzip -q godot.zip
+          sudo mv "Godot_v${GODOT_VERSION}-stable_linux.x86_64" /usr/local/bin/godot
+
+      - name: Run test suites
+        run: GODOT=godot tools/run_tests.sh
+
+  lint:
+    name: GDScript lint & format
+    runs-on: ubuntu-latest
+    # Advisory until the team has run gdformat once locally and committed the result;
+    # then remove this line so formatting drift fails the build.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install gdtoolkit
+        run: pip install "gdtoolkit==4.*"
+
+      - name: gdlint
+        run: gdlint scripts tests
+
+      - name: gdformat check
+        run: gdformat --check scripts tests

@@ -8,6 +8,7 @@ const PRODUCT_VARIANTS_DIR: String = "res://content/products/variants"
 const COUPONS_DIR: String = "res://content/coupons"
 const STICKERS_DIR: String = "res://content/stickers"
 const UPGRADES_DIR: String = "res://content/upgrades"
+const SCRIPTED_CUSTOMERS_DIR: String = "res://content/customers"
 
 var game_balance: GameBalanceResource
 var suspicion_curve: SuspicionCurveResource
@@ -16,12 +17,14 @@ var product_variants: Array[ProductVariantResource] = []
 var coupons: Array[CouponResource] = []
 var stickers: Array[StickerResource] = []
 var upgrades: Array[UpgradeResource] = []
+var scripted_customers: Array[ScriptedCustomerResource] = []
 
 var _product_lines_by_id: Dictionary[String, Resource] = {}
 var _product_variants_by_id: Dictionary[String, Resource] = {}
 var _coupons_by_id: Dictionary[String, Resource] = {}
 var _stickers_by_id: Dictionary[String, Resource] = {}
 var _upgrades_by_id: Dictionary[String, Resource] = {}
+var _scripted_customers_by_calendar_key: Dictionary[String, Resource] = {}
 
 
 func load_all() -> PackedStringArray:
@@ -35,6 +38,7 @@ func load_all() -> PackedStringArray:
 	coupons = _load_coupons(errors)
 	stickers = _load_stickers(errors)
 	upgrades = _load_upgrades(errors)
+	scripted_customers = _load_scripted_customers(errors)
 
 	_build_indexes(errors)
 	_validate_balance(errors)
@@ -44,6 +48,7 @@ func load_all() -> PackedStringArray:
 	_validate_coupons(errors)
 	_validate_stickers(errors)
 	_validate_upgrades(errors)
+	_validate_scripted_customers(errors)
 
 	return errors
 
@@ -56,11 +61,13 @@ func clear() -> void:
 	coupons.clear()
 	stickers.clear()
 	upgrades.clear()
+	scripted_customers.clear()
 	_product_lines_by_id.clear()
 	_product_variants_by_id.clear()
 	_coupons_by_id.clear()
 	_stickers_by_id.clear()
 	_upgrades_by_id.clear()
+	_scripted_customers_by_calendar_key.clear()
 
 
 func get_product_line(id: String) -> ProductLineResource:
@@ -81,6 +88,10 @@ func get_sticker(id: String) -> StickerResource:
 
 func get_upgrade(id: String) -> UpgradeResource:
 	return _upgrades_by_id.get(id) as UpgradeResource
+
+
+func get_scripted_customer(day: int, customer_number: int) -> ScriptedCustomerResource:
+	return _scripted_customers_by_calendar_key.get(_scripted_customer_key(day, customer_number)) as ScriptedCustomerResource
 
 
 func _load_game_balance(errors: PackedStringArray) -> GameBalanceResource:
@@ -176,6 +187,21 @@ func _load_upgrades(errors: PackedStringArray) -> Array[UpgradeResource]:
 	return loaded_upgrades
 
 
+func _load_scripted_customers(errors: PackedStringArray) -> Array[ScriptedCustomerResource]:
+	var loaded_scripted_customers: Array[ScriptedCustomerResource] = []
+	for path: String in _list_resource_paths(SCRIPTED_CUSTOMERS_DIR, errors):
+		var resource: Resource = _load_required_resource(path, errors)
+		var scripted_customer: ScriptedCustomerResource = resource as ScriptedCustomerResource
+		if resource != null and scripted_customer == null:
+			errors.append("Expected ScriptedCustomerResource at %s." % path)
+			continue
+
+		if scripted_customer != null:
+			loaded_scripted_customers.append(scripted_customer)
+
+	return loaded_scripted_customers
+
+
 func _load_required_resource(path: String, errors: PackedStringArray) -> Resource:
 	if not ResourceLoader.exists(path):
 		errors.append("Content resource missing: %s." % path)
@@ -222,6 +248,13 @@ func _build_indexes(errors: PackedStringArray) -> void:
 
 	for upgrade: UpgradeResource in upgrades:
 		_add_unique_resource_id(upgrade.id, "upgrade", upgrade.resource_path, _upgrades_by_id, upgrade, errors)
+
+	for scripted_customer: ScriptedCustomerResource in scripted_customers:
+		var calendar_key: String = _scripted_customer_key(scripted_customer.day, scripted_customer.customer_number)
+		if _scripted_customers_by_calendar_key.has(calendar_key):
+			errors.append("Duplicate scripted customer for day %d customer %d in %s." % [scripted_customer.day, scripted_customer.customer_number, scripted_customer.resource_path])
+			continue
+		_scripted_customers_by_calendar_key[calendar_key] = scripted_customer
 
 
 func _add_unique_resource_id(
@@ -377,3 +410,27 @@ func _validate_upgrades(errors: PackedStringArray) -> void:
 				errors.append("Upgrade '%s' references missing product '%s'." % [upgrade.id, product_variant.id])
 			elif product_variant.assortment_level != upgrade.target_assortment_level:
 				errors.append("Upgrade '%s' unlocks product '%s' at assortment level %d but targets level %d." % [upgrade.id, product_variant.id, product_variant.assortment_level, upgrade.target_assortment_level])
+
+
+func _validate_scripted_customers(errors: PackedStringArray) -> void:
+	for scripted_customer: ScriptedCustomerResource in scripted_customers:
+		if scripted_customer.id.strip_edges().is_empty():
+			errors.append("Scripted customer in %s needs an id." % scripted_customer.resource_path)
+		if scripted_customer.day < 1:
+			errors.append("Scripted customer '%s' day must be at least one." % scripted_customer.id)
+		if scripted_customer.customer_number < 1:
+			errors.append("Scripted customer '%s' customer_number must be at least one." % scripted_customer.id)
+		if scripted_customer.required_assortment_level < 1:
+			errors.append("Scripted customer '%s' required_assortment_level must be at least one." % scripted_customer.id)
+		if scripted_customer.products.is_empty():
+			errors.append("Scripted customer '%s' needs at least one product." % scripted_customer.id)
+
+		for product_variant: ProductVariantResource in scripted_customer.products:
+			if product_variant == null:
+				errors.append("Scripted customer '%s' contains an empty product reference." % scripted_customer.id)
+			elif not _product_variants_by_id.has(product_variant.id):
+				errors.append("Scripted customer '%s' references missing product '%s'." % [scripted_customer.id, product_variant.id])
+
+
+func _scripted_customer_key(day: int, customer_number: int) -> String:
+	return "d%d_c%d" % [day, customer_number]

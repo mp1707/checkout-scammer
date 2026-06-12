@@ -20,6 +20,12 @@ und die Aufgabe muss vor der Umsetzung geklaert oder angepasst werden.
 
 ## Aktueller Projektstand
 
+Hinweis 2026-06-12: Grosses Qualitaets-Refactoring umgesetzt (siehe `improvements.md`):
+RunController in Flow-/Interaction-/Shop-Handler zerlegt, `TableActor`-Basisklasse,
+Reflection/Fallback-Ketten entfernt, geskriptete Kunden als `ScriptedCustomerResource`,
+Tests umbenannt (`tests/unit/simulation_systems_test.gd`, `tests/unit/run_controller_flow_test.gd`),
+README/CI/Test-Runner ergaenzt, Renderer auf `gl_compatibility`.
+
 - [x] Godot-Projektbasis vorhanden.
 - [x] `PixelDisplayService` als kleiner Autoload vorhanden.
 - [x] `CheckoutThemeResource` und `content/ui/checkout_theme.tres` vorhanden.

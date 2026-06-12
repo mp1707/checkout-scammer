@@ -16,8 +16,8 @@ var _play_tween: Tween
 
 
 func _ready() -> void:
-	_resolve_child_references()
 	if sprite == null:
+		push_error("%s is missing required scene reference 'sprite'." % get_path())
 		return
 
 	sprite.texture = spritesheet
@@ -43,7 +43,7 @@ func play_at(start_global_position: Vector2, use_bonus_sound: bool = false) -> v
 	var animation_duration_seconds: float = frame_duration_seconds * float(frame_count)
 	_play_tween = create_tween()
 	_play_tween.tween_method(
-		Callable(self, "_set_frame_index"),
+		_set_frame_index,
 		0.0,
 		float(maxi(frame_count - 1, 0)),
 		animation_duration_seconds
@@ -92,10 +92,3 @@ func _stop_coin_sound() -> void:
 func _hide_sprite() -> void:
 	if sprite != null:
 		sprite.visible = false
-
-
-func _resolve_child_references() -> void:
-	if sprite == null:
-		sprite = get_node_or_null("Sprite") as Sprite2D
-	if coin_sound_player == null:
-		coin_sound_player = get_node_or_null("CoinSoundPlayer") as AudioStreamPlayer2D

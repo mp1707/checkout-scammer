@@ -1,0 +1,7 @@
+# gdlint (gdtoolkit) configuration.
+# Line length matches the project's editor wrap; private-method ordering is
+# intentionally free because scripts group public API first, helpers second.
+max-line-length: 120
+disable:
+  - max-public-methods
+  - class-definitions-order

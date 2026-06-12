@@ -1,17 +1,20 @@
 extends Area2D
 class_name TrashZone
 
-signal actor_dropped(actor: Node2D)
+signal actor_dropped(actor: TableActor)
 
 @export var drop_anchor: Marker2D
 @export var swoosh_player: AudioStreamPlayer2D
 
 
 func _ready() -> void:
-	_resolve_child_references()
+	if drop_anchor == null:
+		push_error("%s is missing required scene reference 'drop_anchor'." % get_path())
+	if swoosh_player == null:
+		push_error("%s is missing required scene reference 'swoosh_player'." % get_path())
 
 
-func try_drop_actor(actor: Node2D) -> bool:
+func try_drop_actor(actor: TableActor) -> bool:
 	if not can_accept_actor(actor):
 		return false
 
@@ -20,8 +23,11 @@ func try_drop_actor(actor: Node2D) -> bool:
 	return true
 
 
-func can_accept_actor(actor: Node2D) -> bool:
-	var contact_area: Area2D = _get_actor_contact_area(actor)
+func can_accept_actor(actor: TableActor) -> bool:
+	if actor == null:
+		return false
+
+	var contact_area: Area2D = actor.get_contact_area()
 	return contact_area != null and get_overlapping_areas().has(contact_area)
 
 
@@ -31,22 +37,9 @@ func get_drop_position() -> Vector2:
 	return global_position
 
 
-func _get_actor_contact_area(actor: Node2D) -> Area2D:
-	if actor == null or not actor.has_method("get_contact_area"):
-		return null
-	return actor.call("get_contact_area") as Area2D
-
-
 func _play_swoosh_sound() -> void:
 	if swoosh_player == null:
 		return
 
 	swoosh_player.stop()
 	swoosh_player.play()
-
-
-func _resolve_child_references() -> void:
-	if drop_anchor == null:
-		drop_anchor = get_node_or_null("DropAnchor") as Marker2D
-	if swoosh_player == null:
-		swoosh_player = get_node_or_null("SwooshPlayer") as AudioStreamPlayer2D

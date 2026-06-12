@@ -1,16 +1,14 @@
 extends Node2D
 class_name CustomerHandView
 
-const OneShotAnimatedVfxScript = preload("res://scripts/vfx/one_shot_animated_vfx.gd")
-
 @export var theme_resource: CheckoutThemeResource = preload("res://content/ui/checkout_theme.tres")
 @export var hand_sprite: Sprite2D
 @export var green_texture: Texture2D = preload("res://assets/textures/environment/hand_green.png")
 @export var yellow_texture: Texture2D = preload("res://assets/textures/environment/hand_yellow.png")
 @export var red_texture: Texture2D = preload("res://assets/textures/environment/hand_red.png")
 @export var animation_player: AnimationPlayer
-@export var yellow_alert_vfx: OneShotAnimatedVfxScript
-@export var red_alert_vfx: OneShotAnimatedVfxScript
+@export var yellow_alert_vfx: OneShotAnimatedVfx
+@export var red_alert_vfx: OneShotAnimatedVfx
 @export var alert_sound_player: AudioStreamPlayer2D
 @export var caught_sound_player: AudioStreamPlayer2D
 
@@ -22,7 +20,8 @@ var _current_hand_stage_index: int = -1
 
 func _ready() -> void:
 	_base_position = position
-	_resolve_child_references()
+	if hand_sprite == null:
+		push_error("%s is missing required scene reference 'hand_sprite'." % get_path())
 	set_suspicion_state(0, 10)
 
 
@@ -123,17 +122,3 @@ func _play_audio_player(player: AudioStreamPlayer2D) -> void:
 	player.stop()
 	player.play()
 
-
-func _resolve_child_references() -> void:
-	if hand_sprite == null:
-		hand_sprite = get_node_or_null("HandSprite") as Sprite2D
-	if animation_player == null:
-		animation_player = get_node_or_null("AnimationPlayer") as AnimationPlayer
-	if yellow_alert_vfx == null:
-		yellow_alert_vfx = get_node_or_null("YellowAlertVfx") as OneShotAnimatedVfxScript
-	if red_alert_vfx == null:
-		red_alert_vfx = get_node_or_null("RedAlertVfx") as OneShotAnimatedVfxScript
-	if alert_sound_player == null:
-		alert_sound_player = get_node_or_null("AlertSoundPlayer") as AudioStreamPlayer2D
-	if caught_sound_player == null:
-		caught_sound_player = get_node_or_null("CaughtSoundPlayer") as AudioStreamPlayer2D

@@ -1,13 +1,20 @@
 extends Control
 class_name GameApp
 
-@export var run_controller: Node
+@export var run_controller: RunController
 @export var content_error_label: Label
 
 var registry: ContentRegistry
 
 
 func _ready() -> void:
+	if run_controller == null:
+		push_error("%s is missing required scene reference 'run_controller'." % get_path())
+		return
+	if content_error_label == null:
+		push_error("%s is missing required scene reference 'content_error_label'." % get_path())
+		return
+
 	_load_content()
 
 
@@ -18,36 +25,13 @@ func _load_content() -> void:
 		_show_content_errors(errors)
 		return
 
-	var error_label: Label = _get_content_error_label()
-	if error_label != null:
-		error_label.visible = false
-	var controller: RunController = _get_run_controller()
-	if controller != null:
-		controller.configure(registry)
+	content_error_label.visible = false
+	run_controller.configure(registry)
 
 
 func _show_content_errors(errors: PackedStringArray) -> void:
-	var error_label: Label = _get_content_error_label()
-	if error_label == null:
-		for error: String in errors:
-			push_error(error)
-		return
+	for error: String in errors:
+		push_error(error)
 
-	error_label.visible = true
-	error_label.text = "\n".join(errors)
-
-
-func _get_run_controller() -> RunController:
-	var controller: RunController = run_controller as RunController
-	if controller != null:
-		return controller
-
-	return get_node_or_null("RunController") as RunController
-
-
-func _get_content_error_label() -> Label:
-	var label: Label = content_error_label as Label
-	if label != null:
-		return label
-
-	return get_node_or_null("ContentErrorLabel") as Label
+	content_error_label.visible = true
+	content_error_label.text = "\n".join(errors)

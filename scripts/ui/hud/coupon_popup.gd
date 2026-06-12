@@ -14,16 +14,10 @@ signal coupon_selected(coupon_id: String)
 
 func _ready() -> void:
 	super()
-	_resolve_child_references()
+	_validate_required_references()
 	_apply_popup_label_theme()
 	if close_button != null and not close_button.pressed.is_connected(_on_close_button_pressed):
 		close_button.pressed.connect(_on_close_button_pressed)
-
-
-func set_placeholder_text(message: String) -> void:
-	if body_label != null:
-		body_label.text = message
-	queue_fit_to_content()
 
 
 func configure_options(coupons: Array[CouponResource], affordable_coupon_ids: PackedStringArray) -> void:
@@ -93,12 +87,6 @@ func _format_cents(cents: int) -> String:
 	return "$%d.%02d" % [dollars, cents % 100]
 
 
-func _resolve_child_references() -> void:
-	if title_label == null:
-		title_label = get_node_or_null("MainPanel/VBox/TitleLabel") as Label
-	if body_label == null:
-		body_label = get_node_or_null("MainPanel/VBox/BodyLabel") as Label
-	if options_container == null:
-		options_container = get_node_or_null("MainPanel/VBox/OptionsAnchor") as VBoxContainer
-	if close_button == null:
-		close_button = get_node_or_null("MainPanel/VBox/CloseButton") as Button
+func _validate_required_references() -> void:
+	if options_container == null or close_button == null or coupon_option_button_scene == null:
+		push_error("%s is missing required references. Assign them in the scene." % get_path())

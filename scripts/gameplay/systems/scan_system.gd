@@ -1,21 +1,11 @@
 extends RefCounted
 class_name ScanSystem
 
-const SuspicionSystemScript = preload("res://scripts/gameplay/systems/suspicion_system.gd")
-
-const FAILURE_NOT_HELD: String = "not_held"
-const FAILURE_NOT_TOUCHING_SCANNER: String = "not_touching_scanner"
-const FAILURE_WRONG_DIRECTION: String = "wrong_direction"
-const FAILURE_NO_PRODUCT: String = "no_product"
-const FAILURE_PRODUCT_PROCESSED: String = "product_processed"
-const FAILURE_PRODUCT_WEIGHABLE: String = "product_weighable"
-const FAILURE_CAUGHT: String = "caught"
-
 
 func evaluate_scan(
 	request: ScanRequest,
 	customer: CustomerState,
-	suspicion_system: SuspicionSystemScript,
+	suspicion_system: SuspicionSystem,
 	curve: SuspicionCurveResource,
 	random: RandomNumberGenerator
 ) -> ScanResult:
@@ -24,25 +14,25 @@ func evaluate_scan(
 		result.suspicion_percent_after = customer.current_suspicion_percent
 
 	if request == null or request.product_instance == null:
-		result.failure_reason = FAILURE_NO_PRODUCT
+		result.failure_reason = ScanResult.FailureReason.NO_PRODUCT
 		return result
 
 	result.product_instance = request.product_instance
 
 	if request.product_instance.is_processed:
-		result.failure_reason = FAILURE_PRODUCT_PROCESSED
+		result.failure_reason = ScanResult.FailureReason.PRODUCT_PROCESSED
 		return result
 	if not request.is_held:
-		result.failure_reason = FAILURE_NOT_HELD
+		result.failure_reason = ScanResult.FailureReason.NOT_HELD
 		return result
 	if not request.is_touching_scanner:
-		result.failure_reason = FAILURE_NOT_TOUCHING_SCANNER
+		result.failure_reason = ScanResult.FailureReason.NOT_TOUCHING_SCANNER
 		return result
 	if request.movement_direction.x >= 0.0:
-		result.failure_reason = FAILURE_WRONG_DIRECTION
+		result.failure_reason = ScanResult.FailureReason.WRONG_DIRECTION
 		return result
 	if request.product_instance.is_weighable():
-		result.failure_reason = FAILURE_PRODUCT_WEIGHABLE
+		result.failure_reason = ScanResult.FailureReason.PRODUCT_WEIGHABLE
 		return result
 
 	return evaluate_product_charge_attempt(request.product_instance, customer, suspicion_system, curve, random)
@@ -51,7 +41,7 @@ func evaluate_scan(
 func evaluate_product_charge_attempt(
 	product_instance: ProductInstance,
 	customer: CustomerState,
-	suspicion_system: SuspicionSystemScript,
+	suspicion_system: SuspicionSystem,
 	curve: SuspicionCurveResource,
 	random: RandomNumberGenerator
 ) -> ScanResult:
@@ -60,12 +50,12 @@ func evaluate_product_charge_attempt(
 		result.suspicion_percent_after = customer.current_suspicion_percent
 
 	if product_instance == null:
-		result.failure_reason = FAILURE_NO_PRODUCT
+		result.failure_reason = ScanResult.FailureReason.NO_PRODUCT
 		return result
 
 	result.product_instance = product_instance
 	if product_instance.is_processed:
-		result.failure_reason = FAILURE_PRODUCT_PROCESSED
+		result.failure_reason = ScanResult.FailureReason.PRODUCT_PROCESSED
 		return result
 	result.is_first_scan = product_instance.scan_count == 0
 	result.is_duplicate_scan = product_instance.scan_count > 0
@@ -74,7 +64,7 @@ func evaluate_product_charge_attempt(
 		result.was_caught = suspicion_system.roll_for_duplicate_scan(customer, curve, random)
 		result.suspicion_percent_after = customer.current_suspicion_percent
 		if result.was_caught:
-			result.failure_reason = FAILURE_CAUGHT
+			result.failure_reason = ScanResult.FailureReason.CAUGHT
 			return result
 
 	result.is_valid_scan = true

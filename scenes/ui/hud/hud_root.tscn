@@ -7,7 +7,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/popups/coupon_popup.tscn" id="5_coupon_popup"]
 [ext_resource type="PackedScene" path="res://scenes/ui/popups/sticker_popup.tscn" id="6_sticker_popup"]
 
-[node name="HudRoot" type="Control" unique_id=874295037]
+[node name="HudRoot" type="Control" unique_id=874295037 node_paths=PackedStringArray("dialog_layer", "dialog_panel_frame", "dialog_message_label", "dialog_continue_button", "popup_layer")]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 640.0

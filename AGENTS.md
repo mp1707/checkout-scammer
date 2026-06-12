@@ -28,11 +28,13 @@ Arbeitsregeln fuer Codex und andere Agenten in diesem Godot-Projekt.
   - Rueckgabewerte typisieren.
   - Signal-Parameter typisieren.
 - Wiederverwendbare Typen mit `class_name` versehen.
+- Keine Reflection zwischen eigenen Klassen: kein `has_method()`, kein `obj.call("...")`, kein `obj.get("property")`, kein `connect("signal_name", ...)` per String und kein `Callable(self, "method")`. Stattdessen direkte typisierte Aufrufe, `as`-Casts auf `class_name`-Typen und `signal_name.connect(method)`.
+- Geschlossene Wertemengen als `enum` modellieren, nicht als String-Konstanten (Beispiel: `ScanResult.FailureReason`).
 - Keine untypisierten Dictionary-Strukturen als Ersatz fuer echte `Resource`-, State- oder `RefCounted`-Datenobjekte verwenden.
 - Keine globalen String-IDs frei im Code verstreuen. Stabile IDs gehoeren in Resources, Konstanten oder Validierung.
 - Runtime-Daten und Resource-Definitionen sauber trennen.
 - Explizite, kleine Datenklassen bevorzugen, z. B. `ScanRequest`, `ScanResult`, `PayoutOutcome`, `CouponInstance`, `RunState`.
-- Nullbarkeit bewusst behandeln. Keine stillen Fallbacks, die Content-Fehler verdecken.
+- Nullbarkeit bewusst behandeln. Keine stillen Fallbacks, die Content- oder Szenen-Fehler verdecken.
 
 ## Scenes und Nodes
 
@@ -44,14 +46,19 @@ Arbeitsregeln fuer Codex und andere Agenten in diesem Godot-Projekt.
   - Simulation entscheidet Regeln.
   - Application verbindet Scenes, Save/Load und Game-Lifecycle.
 - Keine Gameplay-State-Mutation direkt aus UI-Code.
+- `@export`-Referenzen sind die einzige Quelle fuer Node-Verdrahtung. Keine `get_node_or_null("...")`-Fallback-Ketten im Code — sie duplizieren die Szenenstruktur und verdecken kaputtes Wiring.
+- Fehlende Pflicht-Referenzen in `_ready()` laut melden (`push_error` mit Node-Pfad und Property-Name). Danach duerfen Hot-Paths die Referenzen voraussetzen. Nur optionale Polish-Referenzen (Audio, VFX, Labels) duerfen still degradieren.
+- Beim direkten Editieren von `.tscn`-Dateien: Node-Referenz-Exports brauchen den `node_paths=PackedStringArray(...)`-Eintrag im Node-Header, sonst loest Godot die NodePaths nicht auf.
 - Keine fragilen Node-Pfade wie `get_node("../../Foo")`, wenn Signal, `@export`, eindeutige Parent-API oder Controller sauberer ist.
 - Visuals, Interaktion, Hitboxen/Drop-Zonen und Regelentscheidungen getrennt halten.
 - Kurzlebige Gameplay-Zonen oder Effekte sind eigene Szenen/Components, nicht versteckte Nebenlogik in Movement- oder UI-Nodes.
 - Fuer dieses Projekt konkret:
-  - `ProductActor` sammelt Drag/Rotation/Input und zeigt Zustand.
+  - `TableActor` ist die gemeinsame Basis fuer draggable Tisch-Objekte; `ProductActor`/`CouponActor` ergaenzen nur ihre Spezifika.
   - `ScanSystem` entscheidet, ob ein Scan gueltig ist.
   - `EconomySystem`, `CouponSystem` und `ComboSystem` veraendern Gameplay-Ergebnisse.
+  - `RunController` ist reine Verdrahtung; Spiellogik lebt in `RunFlowController`, `CheckoutInteractionHandler` und `ShopHandler` (siehe `architecture.md`).
   - UI-Komponenten senden Intents und reagieren auf State, mutieren aber nicht eigenmaechtig den Run.
+- Player-sichtbare Texte sind Englisch und liegen zentral in `scripts/ui/ui_texts.gd`, nicht verstreut in Controllern.
 
 ## Daten und Resources
 
@@ -69,6 +76,7 @@ Alles Konfigurierbare als Resource modellieren, z. B.:
 
 Regeln:
 
+- Auch geskriptete Ablaeufe sind Content: feste Kundenfolgen gehoeren in `ScriptedCustomerResource`-Dateien unter `content/customers/`, nicht als ID-Listen in den Generator.
 - Definition-Resources wie `ProductLineResource`, `ProductVariantResource`, `CouponResource` oder `UpgradeResource` zur Laufzeit nicht als mutable Runtime-State missbrauchen.
 - Runtime-Zustand liegt in Instanzen wie `RunState`, `CouponInstance`, `VisibleObjectSlot`, `ScanRequest`, `ScanResult`, `PayoutOutcome` oder spaeter Item-/Equipment-Instanzen.
 - Neue Produkte, Coupons, Upgrades oder Balancing-Aenderungen sollen moeglichst ohne Code-Aenderung funktionieren.
@@ -116,6 +124,9 @@ Auch wenn das Spiel klein startet, soll die Architektur spaeter wachsen koennen.
 
 ## Tests und Validierung
 
+- Tests laufen headless ueber `tools/run_tests.sh` (siehe README). Nach jeder Code-Aenderung ausfuehren; CI muss gruen bleiben.
+- Test-Suiten nach Verhalten benennen (`simulation_systems_test.gd`), nicht nach Implementierungsphasen.
+- Neue Suiten erben von `tests/checkout_test_base.gd` (gemeinsame Assertions, Suite-Abschluss).
 - Pure Gameplay-Logik bevorzugt testbar ohne UI halten.
 - Besonders frueh testen:
   - `VisibleObjectQueueSystem`: Queue, sichtbare Slots, Nachruecken.

@@ -10,7 +10,7 @@ region = Rect2(128, 0, 32, 32)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_coupon_pick"]
 size = Vector2(32, 32)
 
-[node name="CouponActor" type="Node2D"]
+[node name="CouponActor" type="Node2D" node_paths=PackedStringArray("coupon_sprite", "interaction_area")]
 script = ExtResource("1_coupon_actor")
 coupon_sprite = NodePath("CouponSprite")
 interaction_area = NodePath("InteractionArea")

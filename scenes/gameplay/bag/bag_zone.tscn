@@ -5,7 +5,7 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_bag_zone"]
 size = Vector2(70, 58)
 
-[node name="BagZone" type="Area2D" unique_id=1128207494]
+[node name="BagZone" type="Area2D" unique_id=1128207494 node_paths=PackedStringArray("drop_anchor")]
 script = ExtResource("1_bag_zone")
 drop_anchor = NodePath("DropAnchor")
 

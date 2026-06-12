@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ScriptedCustomerResource" load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/gameplay/state/scripted_customer_resource.gd" id="1_scripted_customer"]
+[ext_resource type="ProductVariantResource" path="res://content/products/variants/banana.tres" id="2_banana"]
+[ext_resource type="ProductVariantResource" path="res://content/products/variants/orange.tres" id="3_orange"]
+[ext_resource type="ProductVariantResource" path="res://content/products/variants/tissue.tres" id="4_tissue"]
+[ext_resource type="ProductVariantResource" path="res://content/products/variants/apple.tres" id="5_apple"]
+[ext_resource type="ProductVariantResource" path="res://content/products/variants/candy.tres" id="6_candy"]
+[ext_resource type="ProductVariantResource" path="res://content/products/variants/chewing_gum.tres" id="7_chewing_gum"]
+
+[resource]
+script = ExtResource("1_scripted_customer")
+id = "day_1_customer_2"
+day = 1
+customer_number = 2
+required_assortment_level = 1
+products = Array[ProductVariantResource]([ExtResource("2_banana"), ExtResource("3_orange"), ExtResource("4_tissue"), ExtResource("5_apple"), ExtResource("6_candy"), ExtResource("5_apple"), ExtResource("3_orange"), ExtResource("2_banana"), ExtResource("7_chewing_gum"), ExtResource("4_tissue")])

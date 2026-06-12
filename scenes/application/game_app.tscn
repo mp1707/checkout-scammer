@@ -7,7 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://4uyrabfcoewe" path="res://scenes/ui/hud/left_status_panel.tscn" id="5_left_status_panel"]
 [ext_resource type="PackedScene" uid="uid://kfkdw8d7b8ya" path="res://scenes/ui/hud/right_upgrade_panel.tscn" id="6_right_upgrade_panel"]
 
-[node name="GameApp" type="Control" unique_id=449391400]
+[node name="GameApp" type="Control" unique_id=449391400 node_paths=PackedStringArray("run_controller", "content_error_label")]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 640.0
@@ -30,13 +30,15 @@ offset_left = 538.0
 offset_top = 4.0
 offset_right = 640.0
 
-[node name="HudRoot" parent="." unique_id=376225137 instance=ExtResource("4_hud_root")]
+[node name="HudRoot" parent="." unique_id=376225137 instance=ExtResource("4_hud_root") node_paths=PackedStringArray("left_status_panel", "right_upgrade_panel")]
 layout_mode = 0
 left_status_panel = NodePath("../LeftStatusPanel")
 right_upgrade_panel = NodePath("../RightUpgradePanel")
 
-[node name="RunController" type="Node" parent="." unique_id=2112833296]
+[node name="RunController" type="Node" parent="." unique_id=2112833296 node_paths=PackedStringArray("checkout_table", "hud_root")]
 script = ExtResource("2_run_controller")
+checkout_table = NodePath("../CheckoutTable")
+hud_root = NodePath("../HudRoot")
 
 [node name="ContentErrorLabel" type="Label" parent="." unique_id=1258349028]
 visible = false

@@ -41,14 +41,16 @@ var _is_fit_queued: bool = false
 
 
 func _ready() -> void:
-	_resolve_frame_references()
+	if main_panel == null:
+		push_error("%s is missing required scene reference 'main_panel'." % get_path())
+	if shadow_panel == null:
+		push_error("%s is missing required scene reference 'shadow_panel'." % get_path())
 	_connect_main_panel_minimum_size_changed()
 	apply_frame_theme()
 	queue_fit_to_content()
 
 
 func apply_frame_theme() -> void:
-	_resolve_frame_references()
 	if main_panel != null:
 		main_panel.theme_resource = theme_resource
 		main_panel.panel_color = _get_panel_color()
@@ -78,7 +80,6 @@ func queue_fit_to_content() -> void:
 
 func fit_frame_to_content() -> void:
 	_is_fit_queued = false
-	_resolve_frame_references()
 	if main_panel == null:
 		return
 
@@ -119,12 +120,6 @@ func _connect_main_panel_minimum_size_changed() -> void:
 func _on_main_panel_minimum_size_changed() -> void:
 	queue_fit_to_content()
 
-
-func _resolve_frame_references() -> void:
-	if main_panel == null:
-		main_panel = get_node_or_null("MainPanel") as PixelPanel
-	if shadow_panel == null:
-		shadow_panel = get_node_or_null("ShadowPanel") as PixelPanel
 
 
 func _get_panel_color() -> Color:

@@ -1,8 +1,6 @@
 extends RefCounted
 class_name EconomySystem
 
-const CouponSystemScript = preload("res://scripts/gameplay/systems/coupon_system.gd")
-
 
 func calculate_scan_amount_cents(product_instance: ProductInstance, honest_coupons: Array[CouponInstance]) -> int:
 	if product_instance == null or product_instance.variant == null:
@@ -96,7 +94,7 @@ func get_best_discount_percent(product: ProductVariantResource, honest_coupons: 
 			continue
 		if not coupon_instance.was_activated_honestly:
 			continue
-		if CouponSystemScript.coupon_matches_product_resource(coupon_instance.coupon, product):
+		if CouponSystem.coupon_matches_product_resource(coupon_instance.coupon, product):
 			best_discount_percent = maxi(best_discount_percent, coupon_instance.coupon.discount_percent)
 
 	return best_discount_percent

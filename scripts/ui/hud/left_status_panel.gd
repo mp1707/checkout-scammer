@@ -14,7 +14,7 @@ var _cash_tween: Tween
 
 func _ready() -> void:
 	super()
-	_resolve_child_references()
+	_validate_required_references()
 	_apply_label_theme(self)
 	_apply_status_value_colors()
 	queue_fit_to_content()
@@ -89,7 +89,7 @@ func _animate_cash_value(target_cents: int) -> void:
 	var duration_seconds: float = clampf(0.12 + float(distance_cents) / 2500.0, 0.16, 0.45)
 	_cash_tween = create_tween()
 	_cash_tween.tween_method(
-		Callable(self, "_set_displayed_cash_cents_from_float"),
+		_set_displayed_cash_cents_from_float,
 		float(_displayed_cash_cents),
 		float(target_cents),
 		duration_seconds
@@ -117,20 +117,6 @@ func _format_cents(cents: int) -> String:
 	return "%s$%d.%02d" % [sign_prefix, dollars, absolute_cents % 100]
 
 
-func _resolve_child_references() -> void:
-	if title_label == null:
-		title_label = _get_main_panel_label("StatusList/HeaderPanel/TitleLabel")
-	if day_value_label == null:
-		day_value_label = _get_main_panel_label("StatusList/TopStatsRow/DayStat/DayValuePanel/DayValue")
-	if customer_value_label == null:
-		customer_value_label = _get_main_panel_label("StatusList/TopStatsRow/CustomerStat/CustomerValuePanel/CustomerValue")
-	if rent_value_label == null:
-		rent_value_label = _get_main_panel_label("StatusList/RentGroup/RentValuePanel/RentValue")
-	if cash_value_label == null:
-		cash_value_label = _get_main_panel_label("StatusList/CashGroup/CashValuePanel/CashValue")
-
-
-func _get_main_panel_label(label_path: String) -> Label:
-	if main_panel == null:
-		return null
-	return main_panel.get_node_or_null(NodePath(label_path)) as Label
+func _validate_required_references() -> void:
+	if day_value_label == null or customer_value_label == null or rent_value_label == null or cash_value_label == null:
+		push_error("%s is missing required label references. Assign them in the scene." % get_path())
