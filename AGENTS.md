@@ -6,7 +6,10 @@ Arbeitsregeln fuer Codex und andere Agenten in diesem Godot-Projekt.
 
 - Vor groesseren Aenderungen immer `architecture.md` und bei Gameplay-Fragen `gdd.md` lesen.
 - Die Architektur in `architecture.md` ist verbindlich.
+- Anpassungen muessen immer entsprechend `architecture.md` umgesetzt werden; bestehende Ownership-, Datenfluss-, Szenen- und UI-Architektur sind aktiv einzuhalten.
 - Abweichungen von `architecture.md` duerfen nur nach vorheriger Rueckfrage an Marco eingebaut werden.
+- Wenn die Architektur angepasst werden muss, muss diese Aenderung sauber wartbar, skalierbar und konsistent mit den Projektprinzipien umgesetzt und in `architecture.md` dokumentiert werden.
+- Bei jeder Aenderung pruefen, ob `architecture.md` oder `gdd.md` aktualisiert werden muessen, damit technische und spielerische Dokumentation stets aktuell bleiben.
 - Wenn eine kurzfristige Vereinfachung noetig ist, muss sie klar als technische Schuld markiert werden, inklusive Grund und spaeterem Ersatzpfad.
 - Jede Empfehlung, jedes Snippet und jede Implementierung soll saubere, skalierbare Godot-Entscheidungen priorisieren.
 
