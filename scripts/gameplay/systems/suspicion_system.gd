@@ -1,6 +1,9 @@
 extends RefCounted
 class_name SuspicionSystem
 
+const GREEN_HAND_MAX_SUSPICION_PERCENT: int = 30
+const YELLOW_HAND_MAX_SUSPICION_PERCENT: int = 60
+
 
 func setup_customer(customer: CustomerState, run_state: RunState = null) -> void:
 	if customer == null or customer.customer_type == null:
@@ -32,11 +35,10 @@ func roll_for_duplicate_scan_with_value(
 		return false
 
 	var was_caught: bool = roll_percent <= customer.current_suspicion_percent
-	if not was_caught:
-		customer.current_suspicion_percent = get_next_suspicion_percent(
-			customer.current_suspicion_percent,
-			customer.customer_type
-		)
+	customer.current_suspicion_percent = get_next_suspicion_percent(
+		customer.current_suspicion_percent,
+		customer.customer_type
+	)
 
 	return was_caught
 
@@ -52,15 +54,10 @@ func get_next_suspicion_percent(current_percent: int, customer_type: CustomerTyp
 	return customer_type.suspicion_stage_percentages[customer_type.suspicion_stage_percentages.size() - 1]
 
 
-func get_customer_hand_stage_index(current_percent: int, customer_type: CustomerTypeResource) -> int:
-	if customer_type == null or customer_type.suspicion_stage_percentages.is_empty():
+func get_customer_hand_stage_index(current_percent: int, _customer_type: CustomerTypeResource) -> int:
+	if current_percent <= GREEN_HAND_MAX_SUSPICION_PERCENT:
 		return 0
-
-	if customer_type.suspicion_stage_percentages.size() < 3:
-		return 0
-	if current_percent < customer_type.suspicion_stage_percentages[1]:
-		return 0
-	if current_percent < customer_type.suspicion_stage_percentages[2]:
+	if current_percent <= YELLOW_HAND_MAX_SUSPICION_PERCENT:
 		return 1
 	return 2
 

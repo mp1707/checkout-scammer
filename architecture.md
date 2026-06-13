@@ -57,7 +57,7 @@ Kernsysteme:
 - `EconomySystem`: Festpreiswerte, Gewichtspreise, Rabatte, Sticker-Multiplikatoren, Rundung, Payout.
 - `CouponSystem`: Aktivierung, Verzoegerung bis zum naechsten Kunden, Dauer bis Tagesende, Coupon-Scam.
 - `ComboSystem`: spaetere Multi-Scan-/Juice-/Reward-Fenster.
-- `SuspicionSystem`: Caught-Rolls, kundentyp-spezifische Suspicion-Stufen, dreistufiger Customer-Signal-Zustand und Start-Suspicion-Boni.
+- `SuspicionSystem`: Caught-Rolls, kundentyp-spezifische Suspicion-Stufen, global einheitlicher dreistufiger Customer-Signal-Zustand (`<=30%` gruen, `<=60%` gelb, darueber rot) und Start-Suspicion-Boni.
 - `UpgradeSystem`: Sortiment-Level, Upgrade-Kosten, Wirkung ab naechstem Kunden.
 - `StickerSystem`: Tagesinventar, Refill, Verbrauch und Anwendbarkeit von Stickern auf Produkte.
 - `CustomerGenerator`: deterministische Kundentyp-, Produkt- und Obst-Gewichtsfolgen per Seed. Normale neue Runs erzeugen einen frischen Seed; positive `GameBalanceResource.default_run_seed`-Werte erzwingen reproduzierbare Debug-Runs. Der erste Kunde eines Runs ist immer Jimmy; danach werden Kundentypen zufaellig aus `CustomerTypeResource`-Content gezogen, ohne denselben Typ direkt zu wiederholen.
@@ -82,7 +82,7 @@ Wichtige Szenen:
 - `BagZone`: Drop-Zone fuer finalen Verkauf.
 - `TrashZone`: Drop-Zone fuer Produkt-/Coupon-Entsorgung.
 - `ScaleStation`: editorseitig platzierte Waagen-Drop-Zone fuer wiegbare Produkte, mit `waage_sheet.png`-Press-Frames.
-- `CustomerHandView`: typisierte Customer-Signal-View. Sie zeigt fuer den aktiven Kundentyp die drei Suspicion-Texturen gruen, gelb und rot und stellt den Mouseover-Tooltip bereit.
+- `CustomerHandView`: typisierte Customer-Signal-View. Sie zeigt fuer den aktiven Kundentyp die drei Suspicion-Texturen gruen, gelb und rot nach den globalen Signal-Schwellen und stellt den Mouseover-Tooltip bereit.
 - `HudRoot`: linke Statusleiste, rechte Upgrade-Leiste, Dialoge, Coupon-Popup und Sticker-Popup.
 - `StickerPopup` und `StickerToken`: rechtes UI-Popup mit physischen draggable Sticker-Tokens.
 
@@ -100,7 +100,7 @@ Alles Konfigurierbare wird als Resource modelliert:
 - `CouponResource`: Zielprodukt/-linie, Rabatt, Kaufpreis, Gewichtungsbonus, Dauer.
 - `StickerResource`: Sticker-ID, Tooltip, Texture, Multiplikator, Zielart und taeglicher Refill.
 - `UpgradeResource`: Sortiment-Level-Up und spaetere Upgrades.
-- `CustomerTypeResource`: Kundentyp-ID, Anzeigename, Tooltip, Caught-/Abschiedsdialog, Preisperzentil-Bereich, Suspicion-Stufen, Caught-Strafe und drei Stage-Texturen fuer gruen/gelb/rot.
+- `CustomerTypeResource`: Kundentyp-ID, Anzeigename, Tooltip, Caught-/Abschiedsdialog, Preisperzentil-Bereich, Suspicion-Stufen, Caught-Strafe und drei Stage-Texturen fuer den globalen gruen/gelb/roten Signalzustand.
 - `SuspicionCurveResource`: optionaler Migrations-/Fallback-Default. Die verbindlichen Suspicion-Werte liegen in `CustomerTypeResource`.
 - `CheckoutThemeResource`: Font, 9-Slice-Panel-Texture, Fontgroessen, Endesga-64-UI-Farben.
 
@@ -122,6 +122,8 @@ Pflichtfelder:
 - `caught_penalty_kind` als `enum`, nicht als String
 - optionale Strafwerte wie `cash_penalty_product_value_multiplier_percent` oder `next_customer_suspicion_bonus_percent`
 - `green_texture`, `yellow_texture`, `red_texture`
+
+Die `suspicion_stage_percentages` steuern Startwert, Caught-Roll-Wahrscheinlichkeit und Progressionsspruenge. Die sichtbare Customer-Signal-Farbe ist fuer alle Kundentypen global vereinheitlicht: bis inklusive `30%` gruen, bis inklusive `60%` gelb, darueber rot.
 
 Produkt-Preiswerte fuer Perzentile:
 
@@ -180,7 +182,7 @@ Eine Szene hat genau eine Hauptaufgabe:
 - `ProductScatterView`: zeigt Slots verstreut rechts neben dem Scanner und animiert neue Objekte von rechts herein.
 - `BagZone` und `TrashZone`: melden Drop-Intents.
 - `ScaleStation`: akzeptiert genau ein wiegbares Produkt visuell, spielt Waagenfeedback und meldet Drop-/Remove-Intents.
-- `CustomerHandView`: zeigt den aktiven Kundentyp, wechselt dessen gruen/gelb/rot-Textur nach Suspicion-Stufe, spielt Alert-/Caught-Feedback und liefert den Kundentyp-Tooltip.
+- `CustomerHandView`: zeigt den aktiven Kundentyp, wechselt dessen gruen/gelb/rot-Textur nach den globalen Suspicion-Signal-Schwellen, spielt Alert-/Caught-Feedback und liefert den Kundentyp-Tooltip.
 - `StickerPopup`: zeigt verfuegbare Sticker-Instanzen und sendet Drag-Release-Intents mit Sticker-ID und Drop-Position.
 - `HudRoot` und Panels: zeigen Run-State und senden Button-Intents.
 - `RunController`: nimmt Intents an, ruft Simulation-Systeme auf und veroeffentlicht neuen State fuer Presentation.
@@ -199,7 +201,7 @@ Keine UI-Komponente bucht Geld, scannt Produkte, veraendert Suspicion oder aktiv
 6. `CouponSystem` bestimmt, ob ein aktiver Coupon als erstes sichtbares Objekt auftaucht.
 7. `VisibleObjectQueueSystem` baut aus Coupon plus Produktqueue die sichtbaren `VisibleObjectSlot`s.
 8. `ProductScatterView` instanziiert vorbereitete `PackedScene`s fuer Coupon-/Produkt-Actors in vorhandene Slot-Marker.
-9. `CustomerHandView` zeigt die gruen/gelb/rot-Texturen und den Tooltip des aktiven Kundentyps.
+9. `CustomerHandView` zeigt die gruen/gelb/rot-Texturen nach den globalen Signal-Schwellen und den Tooltip des aktiven Kundentyps.
 10. `ProductActor` skaliert Obst-Sprite, Schatten und Interaction-Shape anhand des gespeicherten Gewichts.
 
 ### Scan
@@ -209,8 +211,9 @@ Keine UI-Komponente bucht Geld, scannt Produkte, veraendert Suspicion oder aktiv
 3. `ScanSystem` entscheidet, ob der Scan gueltig ist. Nur rechts nach links zaehlt.
 4. Wiegbare Produkte werden im `ScanSystem` vor dem Caught-Roll abgelehnt.
 5. Bei Mehrfachscan fragt `ScanSystem` ueber den gemeinsamen Charge-Pfad den `SuspicionSystem`-Caught-Roll gegen die Suspicion-Kurve des aktiven Kundentyps ab.
-6. `EconomySystem` berechnet den offenen Festpreis-Betrag.
-7. `RunController` aktualisiert Runtime-State und sendet Feedback-Events an Presentation: Beep, Scannerflash, Betrag im Kassendisplay, Customer-Signal-State.
+6. Der Mehrfachscan-Versuch erhoeht die Suspicion nach dem Caught-Roll auch dann auf die naechste Kundentyp-Stufe, wenn der Spieler erwischt wurde.
+7. `EconomySystem` berechnet den offenen Festpreis-Betrag.
+8. `RunController` aktualisiert Runtime-State und sendet Feedback-Events an Presentation: Beep, Scannerflash, Betrag im Kassendisplay, Customer-Signal-State.
 
 ### Wiegen
 
@@ -219,7 +222,7 @@ Keine UI-Komponente bucht Geld, scannt Produkte, veraendert Suspicion oder aktiv
 3. `RunController` setzt den aktiven Waagen-Actor und nutzt `ScanSystem.evaluate_product_charge_attempt`, also denselben First-/Duplicate-/Caught-Pfad wie beim Scan.
 4. `EconomySystem` berechnet `weight_grams * price_per_kg_cents`, wendet ehrliche Coupons und aktuelle Sticker-Multiplikatoren an und addiert nur den neuen Betrag zum offenen Produktbetrag.
 5. `RunController` aktualisiert Runtime-State und sendet Feedback-Events an Presentation: Waagenfeedback, Betrag im Kassendisplay, Customer-Signal-State.
-6. Zum Mehrfachbuchen kann der Spieler das Obst von der Waage hochheben und erneut ablegen. Jede weitere Wiegung nutzt den Duplicate-/Caught-Pfad.
+6. Zum Mehrfachbuchen kann der Spieler das Obst von der Waage hochheben und erneut ablegen. Jede weitere Wiegung nutzt den Duplicate-/Caught-Pfad und erhoeht die Suspicion nach dem Caught-Roll auch bei Caught.
 7. Beim Entfernen des Obstes von der Waage wird der Betrag im Kassendisplay ausgeblendet; der offene Betrag bleibt am Produkt.
 8. Wenn ein Sticker auf das aktuell auf der Waage liegende Obst geklebt wird, berechnet `EconomySystem` den offenen Produktbetrag mit den aktuellen Stickern neu und `RunController` aktualisiert das Kassendisplay sofort.
 
@@ -425,7 +428,7 @@ Fruehe Tests sollen pure Gameplay-Logik abdecken:
 - `ScanSystem`: Scannerkontakt, Bewegungsrichtung, Mehrfachscan, Rotation/Hit-Details.
 - `CouponSystem`: Aktivierung, Tagesdauer, Stack-/Delay-Regeln, Coupon-Scam.
 - `EconomySystem`: Festpreiswerte, Gewichtspreise, Rabatte, Sticker-Multiplikatoren, Rundung.
-- `SuspicionSystem`: deterministische Rolls mit Seed, kundentyp-spezifische Stufen, Customer-Signal-Zustand und Start-Suspicion-Boni.
+- `SuspicionSystem`: deterministische Rolls mit Seed, kundentyp-spezifische Stufen, global einheitlicher Customer-Signal-Zustand und Start-Suspicion-Boni.
 - `CustomerGenerator`: gleiche Seeds erzeugen gleiche Kundentyp-, Produkt- und Gewichtsfolgen; normale neue Runs bekommen frische Seeds; Run-Kunde 1 ist Jimmy; direkte Typ-Wiederholungen kommen nicht vor; Preisperzentil-Pools respektieren das aktuelle Sortiment.
 - `StickerSystem`: taeglicher Refill, Verbrauch, Zielvalidierung und Produkt-Multiplikatoren.
 

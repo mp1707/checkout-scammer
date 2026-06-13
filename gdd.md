@@ -128,9 +128,9 @@
 - Der Signalträger deutet den Kunden an, ohne einen vollständigen Kunden zu zeigen.
 - Es gibt vier optisch unterscheidbare Kundentypen: Jimmy, Margaret, Chad und Doris.
 - Der Signalträger zeigt die aktuelle Suspicion über drei gezeichnete Sprite-Stufen:
-  - Grün: Anfangszustand.
-  - Gelb: nach einem erfolgreichen Doppel-Scan.
-  - Rot: nach zwei oder mehr erfolgreichen Doppel-Scans.
+  - Grün: bis inklusive `30%` Suspicion.
+  - Gelb: ab `31%` bis inklusive `60%` Suspicion.
+  - Rot: ab `61%` Suspicion.
 - Es gibt keine plumpe Suspicion-Progressbar mit Zahl.
 - Der Signalträger ist die kreative, diegetische Anzeige des Suspicion-Meters.
 - Mouseover über den Kunden-/Signalträgerbereich zeigt Name und Beschreibung des Kundentyps.
@@ -292,7 +292,7 @@ Jeder Kunde hat einen Typ. Der Typ bestimmt, aus welchem Preisbereich des aktuel
 - Ein Caught-Roll passiert bei jedem Produkt-Scan ab dem zweiten Scan desselben Produkts und bei jeder Wiegung ab der zweiten Wiegung desselben Obstes.
 - Der erste Scan oder die erste Wiegung eines Produkts ist immer sicher.
 - Coupon-Scam löst keinen Caught-Roll aus.
-- Wenn ein Mehrfachscan nicht erwischt wird, steigt die Suspicion danach an.
+- Jeder Mehrfachscan- oder Wiege-Scam-Versuch erhöht die Suspicion nach dem Caught-Roll, auch wenn der Spieler erwischt wird.
 - Jimmy steigt über `0 -> 20 -> 45 -> 70`.
 - Margaret steigt über `10 -> 50 -> 75 -> 90`.
 - Chad steigt über `30 -> 65 -> 85 -> 95`.
@@ -303,6 +303,7 @@ Jeder Kunde hat einen Typ. Der Typ bestimmt, aus welchem Preisbereich des aktuel
 - Doris kann durch Caught einen `+20%` Start-Suspicion-Bonus für den nächsten Kunden stapeln.
 - Dieser Bonus wird beim nächsten Kunden auf dessen Kundentyp-Startwert addiert und bei `100%` gecappt.
 - Die aktuelle Suspicion wird ausschließlich über den grün/gelb/roten Sprite-Zustand des Kundensignals angezeigt.
+- Die sichtbaren Signal-Farben sind für alle Kundentypen gleich: bis inklusive `30%` grün, bis inklusive `60%` gelb, darüber rot.
 - Es gibt keine zusätzliche Suspicion-Zahl und keine Progressbar.
 
 ## Erwischen / Strafe
@@ -496,7 +497,7 @@ Out of scope für den Prototyp:
 - Dadurch wird der Scan-Moment klarer und absichtlicher.
 - Der erste erfolgreiche Scan eines Produkts zeigt den offenen Verkaufsbetrag im Kassendisplay.
 - Jeder weitere erfolgreiche Scan desselben gehaltenen Produkts erhöht diesen offenen Verkaufsbetrag erneut um den Produktwert.
-- Bei Mehrfachscans wird vor dem erfolgreichen Hinzufügen ein Caught-Roll gegen die aktuelle Suspicion ausgeführt.
+- Bei Mehrfachscans wird vor dem erfolgreichen Hinzufügen ein Caught-Roll gegen die aktuelle Suspicion ausgeführt. Danach steigt die Suspicion auch dann, wenn der Spieler erwischt wurde.
 
 ## Drag-&-Drop-Regeln
 
@@ -543,7 +544,7 @@ Out of scope für den Prototyp:
 
 ### Suspicion-Juice
 
-- Das Kundensignal wechselt zwischen grünem, gelbem und rotem Sprite des aktiven Kundentyps.
+- Das Kundensignal wechselt zwischen grünem, gelbem und rotem Sprite des aktiven Kundentyps nach den globalen Signal-Farben: bis inklusive `30%` grün, bis inklusive `60%` gelb, darüber rot.
 - Bei steigender Suspicion kann das Kundensignal kurz pulsieren.
 - Bei hoher Suspicion kann das Kundensignal minimal unruhig wirken.
 - Kein komplexes Animationssystem nötig.
