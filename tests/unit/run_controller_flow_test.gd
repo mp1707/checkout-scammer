@@ -36,10 +36,11 @@ func _run() -> void:
 
 	_expect_equal_int(1, controller.run_state.current_day, "Run starts on day one")
 	_expect_equal_int(1, controller.run_state.current_customer_number, "Run starts on first customer")
+	_expect_equal_string("jimmy", controller.run_state.current_customer.customer_type.id, "Run starts with Jimmy")
 	_expect_equal_int(4, controller.run_state.current_customer.visible_slots.size(), "Run displays four visible object slots")
 
 	var actor_container: Node = app.get_node("CheckoutTable/ProductScatterView/ActorContainer")
-	var product_actor: ProductActor = _get_first_fixed_price_product_actor(actor_container)
+	var product_actor: ProductActor = _get_first_product_actor(actor_container)
 	_expect_true(product_actor != null, "Product scatter view spawns product actors")
 	if product_actor == null:
 		app.queue_free()
@@ -51,15 +52,18 @@ func _run() -> void:
 	_expect_equal_int(4, controller.run_state.current_customer.visible_slots.size(), "Taking a product keeps visible slot records")
 	_expect_equal_int(6, controller.run_state.current_customer.product_queue.size(), "Taking a product keeps hidden queue unchanged")
 
-	product_actor.is_held = true
-	product_actor.is_touching_scanner = true
-	product_actor.movement_direction = Vector2.LEFT
-	checkout_table.emit_signal("product_scan_contact_started", product_actor, product_actor.global_position)
-	_expect_true(product_actor.product_instance.open_amount_cents > 0, "Right-to-left scanner intent adds open product amount")
+	if product_actor.product_instance.is_weighable():
+		checkout_table.emit_signal("actor_scale_drop_requested", product_actor)
+	else:
+		product_actor.is_held = true
+		product_actor.is_touching_scanner = true
+		product_actor.movement_direction = Vector2.LEFT
+		checkout_table.emit_signal("product_scan_contact_started", product_actor, product_actor.global_position)
+	_expect_true(product_actor.product_instance.open_amount_cents > 0, "Checkout charge intent adds open product amount")
 	_expect_equal_string(
 		_format_cents(product_actor.product_instance.open_amount_cents),
 		_get_register_display_text(register_display),
-		"Right-to-left scanner intent updates register display"
+		"Checkout charge intent updates register display"
 	)
 
 	var cash_after_scan_before_payout: int = controller.run_state.cash_cents
@@ -81,6 +85,19 @@ func _run() -> void:
 		app.queue_free()
 		_finish()
 		return
+
+	var fixed_actor: ProductActor = product_actor_scene.instantiate() as ProductActor
+	var fixed_product: ProductInstance = ProductInstance.new(controller.registry.get_product_variant("chewing_gum"), "direct_scan_gum")
+	fixed_actor.set_product_instance(fixed_product)
+	checkout_table.add_child(fixed_actor)
+	fixed_actor.is_held = true
+	fixed_actor.is_touching_scanner = true
+	fixed_actor.movement_direction = Vector2.LEFT
+	checkout_table.emit_signal("product_scan_contact_started", fixed_actor, fixed_actor.global_position)
+	_expect_equal_int(95, fixed_product.open_amount_cents, "Direct scanner intent charges fixed-price products")
+	_expect_equal_string("$0.95", _get_register_display_text(register_display), "Direct scanner intent updates register display")
+	fixed_actor.queue_free()
+	checkout_table.clear_scanned_product_amount()
 
 	var fruit_actor: ProductActor = product_actor_scene.instantiate() as ProductActor
 	var fruit_product: ProductInstance = ProductInstance.new(controller.registry.get_product_variant("apple"), "direct_weigh_apple")
@@ -120,13 +137,13 @@ func _run() -> void:
 	_finish()
 
 
-func _get_first_fixed_price_product_actor(actor_container: Node) -> ProductActor:
+func _get_first_product_actor(actor_container: Node) -> ProductActor:
 	if actor_container == null:
 		return null
 
 	for child: Node in actor_container.get_children():
 		var product_actor: ProductActor = child as ProductActor
-		if product_actor != null and product_actor.product_instance != null and not product_actor.product_instance.is_weighable():
+		if product_actor != null and product_actor.product_instance != null:
 			return product_actor
 
 	return null

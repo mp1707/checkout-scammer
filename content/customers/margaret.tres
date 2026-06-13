@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="CustomerTypeResource" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/gameplay/state/customer_type_resource.gd" id="1_customer_type"]
+[ext_resource type="Texture2D" path="res://assets/textures/customer/fatwoman_green.png" id="2_green"]
+[ext_resource type="Texture2D" path="res://assets/textures/customer/fatwoman_yellow.png" id="3_yellow"]
+[ext_resource type="Texture2D" path="res://assets/textures/customer/fatwoman_red.png" id="4_red"]
+
+[resource]
+script = ExtResource("1_customer_type")
+id = "margaret"
+display_name = "Margaret"
+tooltip = "A wealthy regular who trusts you completely - unless the mood ring turns red."
+suspicion_stage_percentages = Array[int]([10, 50, 75, 90])
+green_texture = ExtResource("2_green")
+yellow_texture = ExtResource("3_yellow")
+red_texture = ExtResource("4_red")

@@ -2,6 +2,7 @@ extends RefCounted
 class_name CustomerState
 
 var id: String = ""
+var customer_type: CustomerTypeResource
 var product_queue: Array[ProductInstance] = []
 var visible_slots: Array[VisibleObjectSlot] = []
 var coupon_instance: CouponInstance

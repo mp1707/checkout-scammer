@@ -31,6 +31,20 @@ func is_weighable() -> bool:
 	return sale_mode == SaleMode.WEIGHED
 
 
+func get_expected_unit_value_cents() -> int:
+	if not is_weighable():
+		return price_cents
+	if max_weight_grams <= min_weight_grams:
+		return 0
+
+	var expected_weight_grams: float = float(min_weight_grams) \
+		+ float(max_weight_grams - min_weight_grams) / (weight_distribution_power + 1.0)
+	var weight_step: int = maxi(1, weight_step_grams)
+	var rounded_weight_grams: int = roundi(expected_weight_grams / float(weight_step)) * weight_step
+	var clamped_weight_grams: int = clampi(rounded_weight_grams, min_weight_grams, max_weight_grams)
+	return roundi(float(clamped_weight_grams * price_per_kg_cents) / 1000.0)
+
+
 func get_visual_scale_for_weight(weight_grams: int) -> float:
 	if not is_weighable():
 		return 1.0

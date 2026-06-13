@@ -87,6 +87,29 @@ func trash_product(run_state: RunState, product_instance: ProductInstance) -> Pa
 	return outcome
 
 
+func calculate_caught_cash_penalty_cents(product_instance: ProductInstance, honest_coupons: Array[CouponInstance]) -> int:
+	if product_instance == null:
+		return 0
+	if product_instance.is_weighable():
+		return calculate_weighed_amount_cents(product_instance, honest_coupons)
+	return calculate_scan_amount_cents(product_instance, honest_coupons)
+
+
+func apply_caught_cash_penalty(
+	run_state: RunState,
+	product_instance: ProductInstance,
+	honest_coupons: Array[CouponInstance],
+	multiplier_percent: int
+) -> int:
+	if run_state == null or multiplier_percent <= 0:
+		return 0
+
+	var base_penalty_cents: int = calculate_caught_cash_penalty_cents(product_instance, honest_coupons)
+	var penalty_cents: int = floori(float(base_penalty_cents * multiplier_percent) / 100.0)
+	run_state.cash_cents = maxi(0, run_state.cash_cents - penalty_cents)
+	return penalty_cents
+
+
 func get_best_discount_percent(product: ProductVariantResource, honest_coupons: Array[CouponInstance]) -> int:
 	var best_discount_percent: int = 0
 	for coupon_instance: CouponInstance in honest_coupons:

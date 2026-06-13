@@ -50,43 +50,53 @@ func _test_customer_generator() -> void:
 
 	var customer_a: CustomerState = _generator.generate_customer(_registry, run_a)
 	var customer_b: CustomerState = _generator.generate_customer(_registry, run_b)
-	_expect_string_arrays_equal(
-		_product_ids(customer_a.product_queue),
-		_product_ids(customer_b.product_queue),
+	_expect_equal_string(
+		_customer_signature(customer_a),
+		_customer_signature(customer_b),
 		"CustomerGenerator keeps equal seeds deterministic"
 	)
 
 	run_b.run_seed = 78
 	var customer_c: CustomerState = _generator.generate_customer(_registry, run_b)
 	_expect_true(
-		_product_ids(customer_a.product_queue) != _product_ids(customer_c.product_queue),
+		_customer_signature(customer_a) != _customer_signature(customer_c),
 		"CustomerGenerator changes generated customers when seed changes"
 	)
 
-	var scripted_run: RunState = _create_run_state(77)
-	scripted_run.current_day = 1
-	scripted_run.current_customer_number = 1
-	var scripted_customer: CustomerState = _generator.generate_customer(_registry, scripted_run)
-	_expect_string_arrays_equal(
-		PackedStringArray(["apple", "chewing_gum", "orange", "candy", "banana", "tissue", "apple", "banana", "orange", "chewing_gum"]),
-		_product_ids(scripted_customer.product_queue),
-		"CustomerGenerator models scripted first customer"
+	var first_run: RunState = _create_run_state(77)
+	first_run.current_day = 1
+	first_run.current_customer_number = 1
+	var first_customer: CustomerState = _generator.generate_customer(_registry, first_run)
+	_expect_equal_string("jimmy", first_customer.customer_type.id, "CustomerGenerator starts every run with Jimmy")
+	_expect_true(
+		_all_products_match_customer_type(first_customer, _registry.game_balance.starting_assortment_level),
+		"CustomerGenerator restricts first customer products to Jimmy's price pool"
 	)
-	_expect_true(_all_weighed_products_have_valid_weights(scripted_customer.product_queue), "CustomerGenerator assigns valid fruit weights")
+	_expect_true(_all_weighed_products_have_valid_weights(first_customer.product_queue), "CustomerGenerator assigns valid fruit weights")
 
-	var no_active_coupons_for_upgrade: Array[CouponInstance] = []
-	var upgraded_first_day_customer: CustomerState = _generator.generate_customer_for_context(
-		_registry,
-		_registry.game_balance.default_run_seed,
-		1,
-		2,
-		2,
-		no_active_coupons_for_upgrade,
-		_registry.game_balance.products_per_customer
+	var no_repeat_run: RunState = _create_run_state(77)
+	no_repeat_run.current_day = 1
+	no_repeat_run.current_customer_number = 2
+	no_repeat_run.last_customer_type_id = "jimmy"
+	var no_repeat_customer: CustomerState = _generator.generate_customer(_registry, no_repeat_run)
+	_expect_true(no_repeat_customer.customer_type.id != "jimmy", "CustomerGenerator avoids direct customer type repeats")
+
+	var starting_products: Array[ProductVariantResource] = _available_products_for_assortment(1)
+	var chad_products: Array[ProductVariantResource] = CustomerGenerator.get_products_for_customer_type(
+		starting_products,
+		_registry.get_customer_type("chad")
+	)
+	_expect_true(_product_pool_contains(chad_products, "tissue"), "CustomerGenerator includes expensive starting products for Chad")
+	_expect_false(_product_pool_contains(chad_products, "banana"), "CustomerGenerator excludes cheap starting products for Chad")
+
+	var upgraded_products: Array[ProductVariantResource] = _available_products_for_assortment(2)
+	var upgraded_chad_products: Array[ProductVariantResource] = CustomerGenerator.get_products_for_customer_type(
+		upgraded_products,
+		_registry.get_customer_type("chad")
 	)
 	_expect_true(
-		_has_product_at_assortment_level(upgraded_first_day_customer, 2),
-		"CustomerGenerator uses expanded assortment once a level-up is active"
+		_product_pool_contains(upgraded_chad_products, "brown_snackbar"),
+		"CustomerGenerator percentile pools shift when the assortment expands"
 	)
 
 	var apple_coupon: CouponInstance = CouponInstance.new(_registry.get_coupon("apple_20_discount"), "test_coupon")
@@ -134,13 +144,14 @@ func _test_visible_object_queue_system() -> void:
 
 func _test_scan_system() -> void:
 	var customer: CustomerState = CustomerState.new("scan_customer")
-	_suspicion_system.setup_customer(customer, _registry.suspicion_curve)
+	customer.customer_type = _registry.get_customer_type("margaret")
+	_suspicion_system.setup_customer(customer)
 	var product: ProductInstance = ProductInstance.new(_registry.get_product_variant("chewing_gum"), "scan_product")
 	var random: RandomNumberGenerator = RandomNumberGenerator.new()
 	random.seed = 10
 
 	var valid_request: ScanRequest = _create_scan_request(product, true, true, Vector2.LEFT)
-	var valid_result: ScanResult = _scan_system.evaluate_scan(valid_request, customer, _suspicion_system, _registry.suspicion_curve, random)
+	var valid_result: ScanResult = _scan_system.evaluate_scan(valid_request, customer, _suspicion_system, random)
 	_expect_true(valid_result.is_valid_scan, "ScanSystem accepts held right-to-left scanner contact")
 	_expect_true(valid_result.is_first_scan, "ScanSystem marks first scan")
 
@@ -148,7 +159,6 @@ func _test_scan_system() -> void:
 		_create_scan_request(product, true, true, Vector2.RIGHT),
 		customer,
 		_suspicion_system,
-		_registry.suspicion_curve,
 		random
 	)
 	_expect_equal_int(ScanResult.FailureReason.WRONG_DIRECTION, wrong_direction.failure_reason, "ScanSystem rejects left-to-right movement")
@@ -157,7 +167,6 @@ func _test_scan_system() -> void:
 		_create_scan_request(product, true, false, Vector2.LEFT),
 		customer,
 		_suspicion_system,
-		_registry.suspicion_curve,
 		random
 	)
 	_expect_equal_int(ScanResult.FailureReason.NOT_TOUCHING_SCANNER, not_touching.failure_reason, "ScanSystem rejects missing scanner contact")
@@ -166,7 +175,6 @@ func _test_scan_system() -> void:
 		_create_scan_request(product, false, true, Vector2.LEFT),
 		customer,
 		_suspicion_system,
-		_registry.suspicion_curve,
 		random
 	)
 	_expect_equal_int(ScanResult.FailureReason.NOT_HELD, not_held.failure_reason, "ScanSystem rejects products that are not held")
@@ -176,7 +184,6 @@ func _test_scan_system() -> void:
 		_create_scan_request(apple, true, true, Vector2.LEFT),
 		customer,
 		_suspicion_system,
-		_registry.suspicion_curve,
 		random
 	)
 	_expect_equal_int(ScanResult.FailureReason.PRODUCT_WEIGHABLE, weighed_scan.failure_reason, "ScanSystem rejects fruit scanner sales")
@@ -184,27 +191,48 @@ func _test_scan_system() -> void:
 
 func _test_suspicion_system() -> void:
 	var customer: CustomerState = CustomerState.new("suspicion_customer")
-	_suspicion_system.setup_customer(customer, _registry.suspicion_curve)
+	customer.customer_type = _registry.get_customer_type("margaret")
+	_suspicion_system.setup_customer(customer)
 	_expect_equal_int(10, customer.current_suspicion_percent, "SuspicionSystem starts customer at 10 percent")
 
-	var was_caught: bool = _suspicion_system.roll_for_duplicate_scan_with_value(customer, _registry.suspicion_curve, 11)
+	var was_caught: bool = _suspicion_system.roll_for_duplicate_scan_with_value(customer, 11)
 	_expect_false(was_caught, "SuspicionSystem does not catch rolls above current suspicion")
 	_expect_equal_int(50, customer.current_suspicion_percent, "SuspicionSystem raises double-scan suspicion to 50")
 
-	_suspicion_system.roll_for_duplicate_scan_with_value(customer, _registry.suspicion_curve, 51)
+	_suspicion_system.roll_for_duplicate_scan_with_value(customer, 51)
 	_expect_equal_int(75, customer.current_suspicion_percent, "SuspicionSystem raises next stage to 75")
-	_suspicion_system.roll_for_duplicate_scan_with_value(customer, _registry.suspicion_curve, 76)
+	_suspicion_system.roll_for_duplicate_scan_with_value(customer, 76)
 	_expect_equal_int(90, customer.current_suspicion_percent, "SuspicionSystem raises next stage to 90")
-	_suspicion_system.roll_for_duplicate_scan_with_value(customer, _registry.suspicion_curve, 91)
+	_suspicion_system.roll_for_duplicate_scan_with_value(customer, 91)
 	_expect_equal_int(90, customer.current_suspicion_percent, "SuspicionSystem caps at 90")
 
-	_suspicion_system.setup_customer(customer, _registry.suspicion_curve)
-	was_caught = _suspicion_system.roll_for_duplicate_scan_with_value(customer, _registry.suspicion_curve, 10)
+	_suspicion_system.setup_customer(customer)
+	was_caught = _suspicion_system.roll_for_duplicate_scan_with_value(customer, 10)
 	_expect_true(was_caught, "SuspicionSystem catches rolls at or below current suspicion")
 	_expect_equal_int(10, customer.current_suspicion_percent, "SuspicionSystem does not advance suspicion after caught roll")
-	_expect_equal_int(0, _suspicion_system.get_customer_hand_stage_index(10, _registry.suspicion_curve), "SuspicionSystem maps green hand stage")
-	_expect_equal_int(1, _suspicion_system.get_customer_hand_stage_index(50, _registry.suspicion_curve), "SuspicionSystem maps yellow hand stage")
-	_expect_equal_int(2, _suspicion_system.get_customer_hand_stage_index(75, _registry.suspicion_curve), "SuspicionSystem maps red hand stage")
+	_expect_equal_int(0, _suspicion_system.get_customer_hand_stage_index(10, customer.customer_type), "SuspicionSystem maps green hand stage")
+	_expect_equal_int(1, _suspicion_system.get_customer_hand_stage_index(50, customer.customer_type), "SuspicionSystem maps yellow hand stage")
+	_expect_equal_int(2, _suspicion_system.get_customer_hand_stage_index(75, customer.customer_type), "SuspicionSystem maps red hand stage")
+
+	var jimmy: CustomerState = CustomerState.new("jimmy_suspicion")
+	jimmy.customer_type = _registry.get_customer_type("jimmy")
+	_suspicion_system.setup_customer(jimmy)
+	_expect_equal_int(0, jimmy.current_suspicion_percent, "SuspicionSystem uses Jimmy's zero suspicion start")
+	_suspicion_system.roll_for_duplicate_scan_with_value(jimmy, 100)
+	_expect_equal_int(20, jimmy.current_suspicion_percent, "SuspicionSystem advances Jimmy on his own curve")
+
+	var doris: CustomerState = CustomerState.new("doris_suspicion")
+	doris.customer_type = _registry.get_customer_type("doris")
+	var run_state: RunState = _create_run_state(44)
+	_suspicion_system.apply_next_customer_suspicion_bonus(doris, run_state)
+	_suspicion_system.apply_next_customer_suspicion_bonus(doris, run_state)
+	_expect_equal_int(40, run_state.next_customer_suspicion_bonus_percent, "SuspicionSystem stacks Doris next-customer bonus")
+
+	var chad: CustomerState = CustomerState.new("chad_suspicion")
+	chad.customer_type = _registry.get_customer_type("chad")
+	_suspicion_system.setup_customer(chad, run_state)
+	_expect_equal_int(70, chad.current_suspicion_percent, "SuspicionSystem applies stacked bonus to next customer start")
+	_expect_equal_int(0, run_state.next_customer_suspicion_bonus_percent, "SuspicionSystem consumes next-customer bonus")
 
 
 func _test_economy_system() -> void:
@@ -248,6 +276,14 @@ func _test_economy_system() -> void:
 	_expect_equal_int(1095, run_state.cash_cents, "EconomySystem trash leaves cash unchanged")
 	_expect_equal_int(0, trash_product.open_amount_cents, "EconomySystem trash clears open amount")
 	_expect_equal_string("$10.95", _economy_system.format_cents(run_state.cash_cents), "EconomySystem formats cents for display")
+
+	var penalty_product: ProductInstance = ProductInstance.new(_registry.get_product_variant("chewing_gum"), "chad_penalty_gum")
+	var penalty_cents: int = _economy_system.apply_caught_cash_penalty(run_state, penalty_product, no_coupons, 100)
+	_expect_equal_int(95, penalty_cents, "EconomySystem calculates caught product value penalty")
+	_expect_equal_int(1000, run_state.cash_cents, "EconomySystem deducts caught cash penalty")
+	run_state.cash_cents = 50
+	_economy_system.apply_caught_cash_penalty(run_state, penalty_product, no_coupons, 100)
+	_expect_equal_int(0, run_state.cash_cents, "EconomySystem caps caught cash penalty at zero")
 
 
 func _test_coupon_system() -> void:
@@ -340,7 +376,7 @@ func _test_sticker_system() -> void:
 func _test_complete_customer_flow_without_scenes() -> void:
 	var run_state: RunState = _create_run_state(5)
 	var customer: CustomerState = _generator.generate_customer(_registry, run_state)
-	_suspicion_system.setup_customer(customer, _registry.suspicion_curve)
+	_suspicion_system.setup_customer(customer, run_state)
 	_visible_object_queue_system.start_customer(customer, _registry.game_balance.visible_object_slots)
 
 	while not customer.is_complete:
@@ -363,7 +399,6 @@ func _test_complete_customer_flow_without_scenes() -> void:
 				product,
 				customer,
 				_suspicion_system,
-				_registry.suspicion_curve,
 				random
 			)
 			_economy_system.apply_successful_weighing(weigh_result, _coupon_system.get_honest_customer_coupons(customer))
@@ -372,7 +407,6 @@ func _test_complete_customer_flow_without_scenes() -> void:
 				_create_scan_request(product, true, true, Vector2.LEFT),
 				customer,
 				_suspicion_system,
-				_registry.suspicion_curve,
 				random
 			)
 			_economy_system.apply_successful_scan(scan_result, _coupon_system.get_honest_customer_coupons(customer))
@@ -421,6 +455,43 @@ func _product_ids(products: Array[ProductInstance]) -> PackedStringArray:
 	return ids
 
 
+func _customer_signature(customer: CustomerState) -> String:
+	var customer_type_id: String = customer.customer_type.id if customer != null and customer.customer_type != null else "none"
+	return "%s:%s" % [customer_type_id, ",".join(_product_ids(customer.product_queue))]
+
+
+func _all_products_match_customer_type(customer: CustomerState, assortment_level: int) -> bool:
+	if customer == null or customer.customer_type == null:
+		return false
+
+	var available_products: Array[ProductVariantResource] = _available_products_for_assortment(assortment_level)
+	var product_pool: Array[ProductVariantResource] = CustomerGenerator.get_products_for_customer_type(
+		available_products,
+		customer.customer_type
+	)
+	for product_instance: ProductInstance in customer.product_queue:
+		if product_instance == null or product_instance.variant == null:
+			return false
+		if not _product_pool_contains(product_pool, product_instance.variant.id):
+			return false
+	return true
+
+
+func _available_products_for_assortment(assortment_level: int) -> Array[ProductVariantResource]:
+	var available_products: Array[ProductVariantResource] = []
+	for product_variant: ProductVariantResource in _registry.product_variants:
+		if product_variant.is_available_at_assortment_level(assortment_level):
+			available_products.append(product_variant)
+	return available_products
+
+
+func _product_pool_contains(products: Array[ProductVariantResource], product_id: String) -> bool:
+	for product_variant: ProductVariantResource in products:
+		if product_variant != null and product_variant.id == product_id:
+			return true
+	return false
+
+
 func _all_weighed_products_have_valid_weights(products: Array[ProductInstance]) -> bool:
 	for product: ProductInstance in products:
 		if product == null or product.variant == null or not product.variant.is_weighable():
@@ -451,11 +522,3 @@ func _count_generated_product(product_id: String, sample_count: int, active_coup
 				count += 1
 
 	return count
-
-
-func _has_product_at_assortment_level(customer: CustomerState, assortment_level: int) -> bool:
-	for product: ProductInstance in customer.product_queue:
-		if product.variant != null and product.variant.assortment_level == assortment_level:
-			return true
-	return false
-

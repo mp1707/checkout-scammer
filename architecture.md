@@ -341,7 +341,7 @@ Root-Assets werden nicht als dauerhafte Asset-Ablage genutzt. Dauerhafte Ziele:
 
 Produkt-Schatten werden nicht als Standardprodukt gebaked, sondern im `ProductActor` separat aufgebaut.
 
-Die alten `assets/textures/environment/hand_*.png` sind durch die typisierten Customer-Sprites abgeloest. Sie werden erst entfernt, wenn keine Scene, kein Script und keine Resource sie mehr referenziert.
+Die alten `assets/textures/environment/hand_*.png` sind durch die typisierten Customer-Sprites abgeloest und aus der Runtime-Asset-Pipeline entfernt.
 
 ## Ordnerstruktur
 

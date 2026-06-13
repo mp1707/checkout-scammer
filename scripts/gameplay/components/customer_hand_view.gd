@@ -2,10 +2,9 @@ extends Node2D
 class_name CustomerHandView
 
 @export var theme_resource: CheckoutThemeResource = preload("res://content/ui/checkout_theme.tres")
+@export var default_customer_type: CustomerTypeResource = preload("res://content/customers/jimmy.tres")
 @export var hand_sprite: Sprite2D
-@export var green_texture: Texture2D = preload("res://assets/textures/environment/hand_green.png")
-@export var yellow_texture: Texture2D = preload("res://assets/textures/environment/hand_yellow.png")
-@export var red_texture: Texture2D = preload("res://assets/textures/environment/hand_red.png")
+@export var tooltip_area: CustomerTooltipArea
 @export var animation_player: AnimationPlayer
 @export var yellow_alert_vfx: OneShotAnimatedVfx
 @export var red_alert_vfx: OneShotAnimatedVfx
@@ -16,19 +15,30 @@ var _base_position: Vector2 = Vector2.ZERO
 var _pulse_tween: Tween
 var _jitter_tween: Tween
 var _current_hand_stage_index: int = -1
+var _current_customer_type: CustomerTypeResource
 
 
 func _ready() -> void:
 	_base_position = position
 	if hand_sprite == null:
 		push_error("%s is missing required scene reference 'hand_sprite'." % get_path())
-	set_suspicion_state(0, 10)
+	if tooltip_area == null:
+		push_error("%s is missing required scene reference 'tooltip_area'." % get_path())
+	set_suspicion_state(default_customer_type, 0, 0)
 
 
-func set_suspicion_state(hand_stage_index: int, suspicion_percent: int) -> void:
+func set_suspicion_state(customer_type: CustomerTypeResource, hand_stage_index: int, suspicion_percent: int) -> void:
+	if customer_type != null and customer_type != _current_customer_type:
+		_current_customer_type = customer_type
+		_current_hand_stage_index = -1
+		_reset_hand_jitter()
+		if tooltip_area != null:
+			tooltip_area.set_customer_type(customer_type)
+
 	var previous_stage_index: int = _current_hand_stage_index
 	if hand_sprite != null:
 		hand_sprite.texture = _get_texture_for_stage(hand_stage_index)
+		hand_sprite.position = _current_customer_type.sprite_offset if _current_customer_type != null else Vector2.ZERO
 	_current_hand_stage_index = hand_stage_index
 	_play_alert_transition_vfx(previous_stage_index, hand_stage_index)
 	if hand_stage_index >= 2:
@@ -68,13 +78,9 @@ func play_caught_sound() -> void:
 
 
 func _get_texture_for_stage(hand_stage_index: int) -> Texture2D:
-	match hand_stage_index:
-		0:
-			return green_texture
-		1:
-			return yellow_texture
-		_:
-			return red_texture
+	if _current_customer_type == null:
+		return null
+	return _current_customer_type.get_stage_texture(hand_stage_index)
 
 
 func _play_high_suspicion_jitter(suspicion_percent: int) -> void:
@@ -121,4 +127,3 @@ func _play_audio_player(player: AudioStreamPlayer2D) -> void:
 
 	player.stop()
 	player.play()
-

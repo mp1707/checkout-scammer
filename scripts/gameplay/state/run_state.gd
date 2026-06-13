@@ -11,6 +11,8 @@ var pending_assortment_level: int = 1
 var pending_assortment_activation_day: int = 1
 var pending_assortment_activation_customer_number: int = 1
 var current_customer: CustomerState
+var last_customer_type_id: String = ""
+var next_customer_suspicion_bonus_percent: int = 0
 var active_coupons: Array[CouponInstance] = []
 var pending_coupons: Array[CouponInstance] = []
 var sticker_inventory: Array[StickerInventoryEntry] = []
@@ -24,3 +26,5 @@ func apply_balance(balance: GameBalanceResource) -> void:
 	pending_assortment_level = balance.starting_assortment_level
 	pending_assortment_activation_day = current_day
 	pending_assortment_activation_customer_number = current_customer_number
+	last_customer_type_id = ""
+	next_customer_suspicion_bonus_percent = 0

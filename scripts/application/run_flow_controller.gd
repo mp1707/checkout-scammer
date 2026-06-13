@@ -83,12 +83,13 @@ func refresh_customer_hand() -> void:
 	if not _context.has_active_customer():
 		return
 
-	var suspicion_percent: int = _context.run_state.current_customer.current_suspicion_percent
+	var customer: CustomerState = _context.run_state.current_customer
+	var suspicion_percent: int = customer.current_suspicion_percent
 	var hand_stage_index: int = _context.suspicion_system.get_customer_hand_stage_index(
 		suspicion_percent,
-		_context.registry.suspicion_curve
+		customer.customer_type
 	)
-	_context.checkout_table.set_customer_hand_state(hand_stage_index, suspicion_percent)
+	_context.checkout_table.set_customer_hand_state(customer.customer_type, hand_stage_index, suspicion_percent)
 
 
 func show_caught_dialog() -> void:
@@ -133,7 +134,7 @@ func _start_customer() -> void:
 	_context.upgrade_system.apply_pending_assortment_for_customer(run_state)
 
 	var customer: CustomerState = _context.customer_generator.generate_customer(_context.registry, run_state)
-	_context.suspicion_system.setup_customer(customer, _context.registry.suspicion_curve)
+	_context.suspicion_system.setup_customer(customer, run_state)
 	var customer_coupon: CouponInstance = _context.coupon_system.create_customer_visible_coupon(run_state)
 	_context.visible_object_queue_system.start_customer(customer, _context.get_balance().visible_object_slots, customer_coupon)
 	run_state.current_customer = customer

@@ -1,22 +1,20 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scripts/gameplay/components/customer_hand_view.gd" id="1_customer_hand"]
-[ext_resource type="Texture2D" path="res://assets/textures/environment/hand_green.png" id="2_hand_green"]
-[ext_resource type="Texture2D" path="res://assets/textures/environment/hand_yellow.png" id="3_hand_yellow"]
-[ext_resource type="Texture2D" path="res://assets/textures/environment/hand_red.png" id="4_hand_red"]
+[ext_resource type="Resource" path="res://content/customers/jimmy.tres" id="2_jimmy"]
+[ext_resource type="Script" path="res://scripts/gameplay/components/customer_tooltip_area.gd" id="3_tooltip_area"]
 [ext_resource type="Resource" path="res://content/ui/checkout_theme.tres" id="5_theme"]
 [ext_resource type="PackedScene" path="res://scenes/vfx/customer_alert_yellow_vfx.tscn" id="6_yellow_alert"]
 [ext_resource type="PackedScene" path="res://scenes/vfx/customer_alert_red_vfx.tscn" id="7_red_alert"]
 [ext_resource type="AudioStream" path="res://assets/audio/sfx/customer/alarm_sound.wav" id="8_alarm_sound"]
 [ext_resource type="AudioStream" path="res://assets/audio/sfx/customer/caught.wav" id="9_caught"]
 
-[node name="CustomerHandView" type="Node2D" node_paths=PackedStringArray("hand_sprite", "animation_player", "yellow_alert_vfx", "red_alert_vfx", "alert_sound_player", "caught_sound_player")]
+[node name="CustomerHandView" type="Node2D" node_paths=PackedStringArray("hand_sprite", "tooltip_area", "animation_player", "yellow_alert_vfx", "red_alert_vfx", "alert_sound_player", "caught_sound_player")]
 script = ExtResource("1_customer_hand")
 theme_resource = ExtResource("5_theme")
+default_customer_type = ExtResource("2_jimmy")
 hand_sprite = NodePath("HandSprite")
-green_texture = ExtResource("2_hand_green")
-yellow_texture = ExtResource("3_hand_yellow")
-red_texture = ExtResource("4_hand_red")
+tooltip_area = NodePath("TooltipArea")
 animation_player = NodePath("AnimationPlayer")
 yellow_alert_vfx = NodePath("YellowAlertVfx")
 red_alert_vfx = NodePath("RedAlertVfx")
@@ -24,7 +22,14 @@ alert_sound_player = NodePath("AlertSoundPlayer")
 caught_sound_player = NodePath("CaughtSoundPlayer")
 
 [node name="HandSprite" type="Sprite2D" parent="."]
-texture = ExtResource("2_hand_green")
+
+[node name="TooltipArea" type="Control" parent="."]
+offset_left = -96.0
+offset_top = -48.0
+offset_right = 96.0
+offset_bottom = 48.0
+mouse_filter = 1
+script = ExtResource("3_tooltip_area")
 
 [node name="YellowAlertVfx" parent="." instance=ExtResource("6_yellow_alert")]
 z_index = 4

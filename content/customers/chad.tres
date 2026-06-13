@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="CustomerTypeResource" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/gameplay/state/customer_type_resource.gd" id="1_customer_type"]
+[ext_resource type="Texture2D" path="res://assets/textures/customer/business_green.png" id="2_green"]
+[ext_resource type="Texture2D" path="res://assets/textures/customer/business_yellow.png" id="3_yellow"]
+[ext_resource type="Texture2D" path="res://assets/textures/customer/business_red.png" id="4_red"]
+
+[resource]
+script = ExtResource("1_customer_type")
+id = "chad"
+display_name = "Chad"
+tooltip = "Always in a hurry, yet paranoid enough to watch your every move."
+price_percentile_min = 70
+suspicion_stage_percentages = Array[int]([30, 65, 85, 95])
+caught_penalty_kind = 1
+cash_penalty_product_value_multiplier_percent = 100
+green_texture = ExtResource("2_green")
+yellow_texture = ExtResource("3_yellow")
+red_texture = ExtResource("4_red")

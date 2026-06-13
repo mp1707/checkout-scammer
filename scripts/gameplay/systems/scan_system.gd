@@ -6,7 +6,6 @@ func evaluate_scan(
 	request: ScanRequest,
 	customer: CustomerState,
 	suspicion_system: SuspicionSystem,
-	curve: SuspicionCurveResource,
 	random: RandomNumberGenerator
 ) -> ScanResult:
 	var result: ScanResult = ScanResult.new()
@@ -35,14 +34,13 @@ func evaluate_scan(
 		result.failure_reason = ScanResult.FailureReason.PRODUCT_WEIGHABLE
 		return result
 
-	return evaluate_product_charge_attempt(request.product_instance, customer, suspicion_system, curve, random)
+	return evaluate_product_charge_attempt(request.product_instance, customer, suspicion_system, random)
 
 
 func evaluate_product_charge_attempt(
 	product_instance: ProductInstance,
 	customer: CustomerState,
 	suspicion_system: SuspicionSystem,
-	curve: SuspicionCurveResource,
 	random: RandomNumberGenerator
 ) -> ScanResult:
 	var result: ScanResult = ScanResult.new()
@@ -61,7 +59,7 @@ func evaluate_product_charge_attempt(
 	result.is_duplicate_scan = product_instance.scan_count > 0
 
 	if result.is_duplicate_scan:
-		result.was_caught = suspicion_system.roll_for_duplicate_scan(customer, curve, random)
+		result.was_caught = suspicion_system.roll_for_duplicate_scan(customer, random)
 		result.suspicion_percent_after = customer.current_suspicion_percent
 		if result.was_caught:
 			result.failure_reason = ScanResult.FailureReason.CAUGHT

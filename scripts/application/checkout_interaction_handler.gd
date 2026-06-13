@@ -41,7 +41,6 @@ func handle_product_scan_contact(actor: ProductActor, contact_position: Vector2)
 		request,
 		customer,
 		_context.suspicion_system,
-		_context.registry.suspicion_curve,
 		_context.scan_random
 	)
 	if result.was_caught:
@@ -208,6 +207,7 @@ func _process_coupon_honestly(actor: CouponActor, coupon_instance: CouponInstanc
 
 
 func _handle_caught_scan(actor: TableActor, product_instance: ProductInstance) -> void:
+	_apply_customer_caught_penalty(product_instance)
 	_context.economy_system.trash_product(_context.run_state, product_instance)
 	_context.checkout_table.release_scale_actor(actor)
 	_context.checkout_table.clear_scanned_product_amount()
@@ -224,7 +224,6 @@ func _charge_weighed_product(actor: ProductActor, product_instance: ProductInsta
 		product_instance,
 		customer,
 		_context.suspicion_system,
-		_context.registry.suspicion_curve,
 		_context.scan_random
 	)
 	if result.was_caught:
@@ -254,6 +253,25 @@ func _refresh_active_scale_amount(product_instance: ProductInstance) -> void:
 		_context.coupon_system.get_honest_customer_coupons(_context.run_state.current_customer)
 	)
 	_context.checkout_table.show_scanned_product_amount(product_instance.open_amount_cents)
+
+
+func _apply_customer_caught_penalty(product_instance: ProductInstance) -> void:
+	var customer: CustomerState = _context.run_state.current_customer
+	if customer == null or customer.customer_type == null:
+		return
+
+	match customer.customer_type.caught_penalty_kind:
+		CustomerTypeResource.CaughtPenaltyKind.NONE:
+			return
+		CustomerTypeResource.CaughtPenaltyKind.CASH_PRODUCT_VALUE:
+			_context.economy_system.apply_caught_cash_penalty(
+				_context.run_state,
+				product_instance,
+				_context.coupon_system.get_honest_customer_coupons(customer),
+				customer.customer_type.cash_penalty_product_value_multiplier_percent
+			)
+		CustomerTypeResource.CaughtPenaltyKind.NEXT_CUSTOMER_SUSPICION_BONUS:
+			_context.suspicion_system.apply_next_customer_suspicion_bonus(customer, _context.run_state)
 
 
 func _finish_actor(actor: TableActor, is_sale: bool) -> void:

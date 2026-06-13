@@ -9,13 +9,13 @@ func _initialize() -> void:
 		_fail("content validation", message)
 
 	if _failure_count == 0:
-		print("Content loaded: %d lines, %d products, %d coupons, %d stickers, %d upgrades, %d scripted customers." % [
+		print("Content loaded: %d lines, %d products, %d coupons, %d stickers, %d upgrades, %d customer types." % [
 			registry.product_lines.size(),
 			registry.product_variants.size(),
 			registry.coupons.size(),
 			registry.stickers.size(),
 			registry.upgrades.size(),
-			registry.scripted_customers.size(),
+			registry.customer_types.size(),
 		])
 
 	_finish_suite("Content validation")

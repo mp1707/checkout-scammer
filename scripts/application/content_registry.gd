@@ -8,7 +8,7 @@ const PRODUCT_VARIANTS_DIR: String = "res://content/products/variants"
 const COUPONS_DIR: String = "res://content/coupons"
 const STICKERS_DIR: String = "res://content/stickers"
 const UPGRADES_DIR: String = "res://content/upgrades"
-const SCRIPTED_CUSTOMERS_DIR: String = "res://content/customers"
+const CUSTOMER_TYPES_DIR: String = "res://content/customers"
 
 var game_balance: GameBalanceResource
 var suspicion_curve: SuspicionCurveResource
@@ -17,14 +17,14 @@ var product_variants: Array[ProductVariantResource] = []
 var coupons: Array[CouponResource] = []
 var stickers: Array[StickerResource] = []
 var upgrades: Array[UpgradeResource] = []
-var scripted_customers: Array[ScriptedCustomerResource] = []
+var customer_types: Array[CustomerTypeResource] = []
 
 var _product_lines_by_id: Dictionary[String, Resource] = {}
 var _product_variants_by_id: Dictionary[String, Resource] = {}
 var _coupons_by_id: Dictionary[String, Resource] = {}
 var _stickers_by_id: Dictionary[String, Resource] = {}
 var _upgrades_by_id: Dictionary[String, Resource] = {}
-var _scripted_customers_by_calendar_key: Dictionary[String, Resource] = {}
+var _customer_types_by_id: Dictionary[String, Resource] = {}
 
 
 func load_all() -> PackedStringArray:
@@ -38,7 +38,7 @@ func load_all() -> PackedStringArray:
 	coupons = _load_coupons(errors)
 	stickers = _load_stickers(errors)
 	upgrades = _load_upgrades(errors)
-	scripted_customers = _load_scripted_customers(errors)
+	customer_types = _load_customer_types(errors)
 
 	_build_indexes(errors)
 	_validate_balance(errors)
@@ -48,7 +48,7 @@ func load_all() -> PackedStringArray:
 	_validate_coupons(errors)
 	_validate_stickers(errors)
 	_validate_upgrades(errors)
-	_validate_scripted_customers(errors)
+	_validate_customer_types(errors)
 
 	return errors
 
@@ -61,13 +61,13 @@ func clear() -> void:
 	coupons.clear()
 	stickers.clear()
 	upgrades.clear()
-	scripted_customers.clear()
+	customer_types.clear()
 	_product_lines_by_id.clear()
 	_product_variants_by_id.clear()
 	_coupons_by_id.clear()
 	_stickers_by_id.clear()
 	_upgrades_by_id.clear()
-	_scripted_customers_by_calendar_key.clear()
+	_customer_types_by_id.clear()
 
 
 func get_product_line(id: String) -> ProductLineResource:
@@ -90,8 +90,8 @@ func get_upgrade(id: String) -> UpgradeResource:
 	return _upgrades_by_id.get(id) as UpgradeResource
 
 
-func get_scripted_customer(day: int, customer_number: int) -> ScriptedCustomerResource:
-	return _scripted_customers_by_calendar_key.get(_scripted_customer_key(day, customer_number)) as ScriptedCustomerResource
+func get_customer_type(id: String) -> CustomerTypeResource:
+	return _customer_types_by_id.get(id) as CustomerTypeResource
 
 
 func _load_game_balance(errors: PackedStringArray) -> GameBalanceResource:
@@ -187,19 +187,19 @@ func _load_upgrades(errors: PackedStringArray) -> Array[UpgradeResource]:
 	return loaded_upgrades
 
 
-func _load_scripted_customers(errors: PackedStringArray) -> Array[ScriptedCustomerResource]:
-	var loaded_scripted_customers: Array[ScriptedCustomerResource] = []
-	for path: String in _list_resource_paths(SCRIPTED_CUSTOMERS_DIR, errors):
+func _load_customer_types(errors: PackedStringArray) -> Array[CustomerTypeResource]:
+	var loaded_customer_types: Array[CustomerTypeResource] = []
+	for path: String in _list_resource_paths(CUSTOMER_TYPES_DIR, errors):
 		var resource: Resource = _load_required_resource(path, errors)
-		var scripted_customer: ScriptedCustomerResource = resource as ScriptedCustomerResource
-		if resource != null and scripted_customer == null:
-			errors.append("Expected ScriptedCustomerResource at %s." % path)
+		var customer_type: CustomerTypeResource = resource as CustomerTypeResource
+		if resource != null and customer_type == null:
+			errors.append("Expected CustomerTypeResource at %s." % path)
 			continue
 
-		if scripted_customer != null:
-			loaded_scripted_customers.append(scripted_customer)
+		if customer_type != null:
+			loaded_customer_types.append(customer_type)
 
-	return loaded_scripted_customers
+	return loaded_customer_types
 
 
 func _load_required_resource(path: String, errors: PackedStringArray) -> Resource:
@@ -249,12 +249,8 @@ func _build_indexes(errors: PackedStringArray) -> void:
 	for upgrade: UpgradeResource in upgrades:
 		_add_unique_resource_id(upgrade.id, "upgrade", upgrade.resource_path, _upgrades_by_id, upgrade, errors)
 
-	for scripted_customer: ScriptedCustomerResource in scripted_customers:
-		var calendar_key: String = _scripted_customer_key(scripted_customer.day, scripted_customer.customer_number)
-		if _scripted_customers_by_calendar_key.has(calendar_key):
-			errors.append("Duplicate scripted customer for day %d customer %d in %s." % [scripted_customer.day, scripted_customer.customer_number, scripted_customer.resource_path])
-			continue
-		_scripted_customers_by_calendar_key[calendar_key] = scripted_customer
+	for customer_type: CustomerTypeResource in customer_types:
+		_add_unique_resource_id(customer_type.id, "customer type", customer_type.resource_path, _customer_types_by_id, customer_type, errors)
 
 
 func _add_unique_resource_id(
@@ -412,25 +408,78 @@ func _validate_upgrades(errors: PackedStringArray) -> void:
 				errors.append("Upgrade '%s' unlocks product '%s' at assortment level %d but targets level %d." % [upgrade.id, product_variant.id, product_variant.assortment_level, upgrade.target_assortment_level])
 
 
-func _validate_scripted_customers(errors: PackedStringArray) -> void:
-	for scripted_customer: ScriptedCustomerResource in scripted_customers:
-		if scripted_customer.id.strip_edges().is_empty():
-			errors.append("Scripted customer in %s needs an id." % scripted_customer.resource_path)
-		if scripted_customer.day < 1:
-			errors.append("Scripted customer '%s' day must be at least one." % scripted_customer.id)
-		if scripted_customer.customer_number < 1:
-			errors.append("Scripted customer '%s' customer_number must be at least one." % scripted_customer.id)
-		if scripted_customer.required_assortment_level < 1:
-			errors.append("Scripted customer '%s' required_assortment_level must be at least one." % scripted_customer.id)
-		if scripted_customer.products.is_empty():
-			errors.append("Scripted customer '%s' needs at least one product." % scripted_customer.id)
+func _validate_customer_types(errors: PackedStringArray) -> void:
+	if customer_types.is_empty():
+		errors.append("At least one customer type is required.")
+	if get_customer_type(CustomerGenerator.FIRST_CUSTOMER_TYPE_ID) == null:
+		errors.append("Customer types need required first-customer id '%s'." % CustomerGenerator.FIRST_CUSTOMER_TYPE_ID)
 
-		for product_variant: ProductVariantResource in scripted_customer.products:
-			if product_variant == null:
-				errors.append("Scripted customer '%s' contains an empty product reference." % scripted_customer.id)
-			elif not _product_variants_by_id.has(product_variant.id):
-				errors.append("Scripted customer '%s' references missing product '%s'." % [scripted_customer.id, product_variant.id])
+	for customer_type: CustomerTypeResource in customer_types:
+		if customer_type.display_name.strip_edges().is_empty():
+			errors.append("Customer type '%s' needs a display_name." % customer_type.id)
+		if customer_type.tooltip.strip_edges().is_empty():
+			errors.append("Customer type '%s' needs a tooltip." % customer_type.id)
+		if customer_type.price_percentile_min < 0 or customer_type.price_percentile_min > 100:
+			errors.append("Customer type '%s' price_percentile_min must be between 0 and 100." % customer_type.id)
+		if customer_type.price_percentile_max < 0 or customer_type.price_percentile_max > 100:
+			errors.append("Customer type '%s' price_percentile_max must be between 0 and 100." % customer_type.id)
+		if customer_type.price_percentile_max <= customer_type.price_percentile_min:
+			errors.append("Customer type '%s' price percentile max must be greater than min." % customer_type.id)
+		_validate_customer_type_suspicion_stages(customer_type, errors)
+		_validate_customer_type_penalty(customer_type, errors)
+		_validate_customer_type_textures(customer_type, errors)
+		_validate_customer_type_product_pool(customer_type, errors)
 
 
-func _scripted_customer_key(day: int, customer_number: int) -> String:
-	return "d%d_c%d" % [day, customer_number]
+func _validate_customer_type_suspicion_stages(customer_type: CustomerTypeResource, errors: PackedStringArray) -> void:
+	if customer_type.suspicion_stage_percentages.size() < 3:
+		errors.append("Customer type '%s' needs at least three suspicion stages." % customer_type.id)
+		return
+
+	var previous_percent: int = -1
+	for percent: int in customer_type.suspicion_stage_percentages:
+		if percent <= previous_percent:
+			errors.append("Customer type '%s' suspicion stages must be strictly ascending." % customer_type.id)
+		if percent < 0 or percent > 100:
+			errors.append("Customer type '%s' suspicion stage %d must be between 0 and 100." % [customer_type.id, percent])
+		previous_percent = percent
+
+
+func _validate_customer_type_penalty(customer_type: CustomerTypeResource, errors: PackedStringArray) -> void:
+	match customer_type.caught_penalty_kind:
+		CustomerTypeResource.CaughtPenaltyKind.NONE:
+			pass
+		CustomerTypeResource.CaughtPenaltyKind.CASH_PRODUCT_VALUE:
+			if customer_type.cash_penalty_product_value_multiplier_percent <= 0:
+				errors.append("Customer type '%s' cash penalty multiplier must be greater than zero." % customer_type.id)
+		CustomerTypeResource.CaughtPenaltyKind.NEXT_CUSTOMER_SUSPICION_BONUS:
+			if customer_type.next_customer_suspicion_bonus_percent <= 0:
+				errors.append("Customer type '%s' next customer suspicion bonus must be greater than zero." % customer_type.id)
+		_:
+			errors.append("Customer type '%s' has an unknown caught_penalty_kind." % customer_type.id)
+
+
+func _validate_customer_type_textures(customer_type: CustomerTypeResource, errors: PackedStringArray) -> void:
+	if customer_type.green_texture == null:
+		errors.append("Customer type '%s' is missing green_texture." % customer_type.id)
+	if customer_type.yellow_texture == null:
+		errors.append("Customer type '%s' is missing yellow_texture." % customer_type.id)
+	if customer_type.red_texture == null:
+		errors.append("Customer type '%s' is missing red_texture." % customer_type.id)
+
+
+func _validate_customer_type_product_pool(customer_type: CustomerTypeResource, errors: PackedStringArray) -> void:
+	if game_balance == null:
+		return
+
+	var available_products: Array[ProductVariantResource] = []
+	for product_variant: ProductVariantResource in product_variants:
+		if product_variant.is_available_at_assortment_level(game_balance.starting_assortment_level):
+			available_products.append(product_variant)
+
+	var product_pool: Array[ProductVariantResource] = CustomerGenerator.get_products_for_customer_type(
+		available_products,
+		customer_type
+	)
+	if product_pool.is_empty():
+		errors.append("Customer type '%s' has no products in the starting assortment price range." % customer_type.id)

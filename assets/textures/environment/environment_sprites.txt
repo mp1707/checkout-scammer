@@ -1,6 +1,3 @@
 Measurements:
 - bag 96x96
-- hand_green 96x96
-- hand_yellow 96x96
-- hand_red 96x96
 - table 640x360 (full game screen. Has padding built in for menus etc. left menu space is 104 px wide, then comes the table with 431px width, then another 104px for the right menu bar)

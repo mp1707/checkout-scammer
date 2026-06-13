@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="CustomerTypeResource" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/gameplay/state/customer_type_resource.gd" id="1_customer_type"]
+[ext_resource type="Texture2D" path="res://assets/textures/customer/kid_green.png" id="2_green"]
+[ext_resource type="Texture2D" path="res://assets/textures/customer/kid_yellow.png" id="3_yellow"]
+[ext_resource type="Texture2D" path="res://assets/textures/customer/kid_red.png" id="4_red"]
+
+[resource]
+script = ExtResource("1_customer_type")
+id = "jimmy"
+display_name = "Jimmy"
+tooltip = "Doesn't pay attention at all and pays with the credit card of his mom."
+price_percentile_max = 30
+suspicion_stage_percentages = Array[int]([0, 20, 45, 70])
+green_texture = ExtResource("2_green")
+yellow_texture = ExtResource("3_yellow")
+red_texture = ExtResource("4_red")

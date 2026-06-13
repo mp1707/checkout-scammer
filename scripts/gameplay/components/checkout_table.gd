@@ -49,8 +49,8 @@ func release_scale_actor(actor: TableActor) -> void:
 	scale_station.release_actor(actor)
 
 
-func set_customer_hand_state(hand_stage_index: int, suspicion_percent: int) -> void:
-	customer_hand_view.set_suspicion_state(hand_stage_index, suspicion_percent)
+func set_customer_hand_state(customer_type: CustomerTypeResource, hand_stage_index: int, suspicion_percent: int) -> void:
+	customer_hand_view.set_suspicion_state(customer_type, hand_stage_index, suspicion_percent)
 
 
 func pulse_customer_hand() -> void:
