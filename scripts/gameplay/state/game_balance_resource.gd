@@ -8,5 +8,5 @@ class_name GameBalanceResource
 @export var products_per_customer: int = 10
 @export var visible_object_slots: int = 4
 @export var starting_assortment_level: int = 1
-@export var default_run_seed: int = 1
-
+## 0 creates a fresh seed for normal runs. Positive values force reproducible runs.
+@export var default_run_seed: int = 0

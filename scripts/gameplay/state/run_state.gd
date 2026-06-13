@@ -1,6 +1,10 @@
 extends RefCounted
 class_name RunState
 
+const MAX_RUN_SEED: int = 2147483647
+
+static var _last_generated_run_seed: int = 0
+
 var run_seed: int = 0
 var current_day: int = 1
 var current_customer_number: int = 1
@@ -19,7 +23,7 @@ var sticker_inventory: Array[StickerInventoryEntry] = []
 
 
 func apply_balance(balance: GameBalanceResource) -> void:
-	run_seed = balance.default_run_seed
+	run_seed = balance.default_run_seed if balance.default_run_seed > 0 else create_fresh_run_seed()
 	cash_cents = balance.start_money_cents
 	rent_due_cents = balance.daily_rent_cents
 	assortment_level = balance.starting_assortment_level
@@ -28,3 +32,14 @@ func apply_balance(balance: GameBalanceResource) -> void:
 	pending_assortment_activation_customer_number = current_customer_number
 	last_customer_type_id = ""
 	next_customer_suspicion_bonus_percent = 0
+
+
+static func create_fresh_run_seed() -> int:
+	var random: RandomNumberGenerator = RandomNumberGenerator.new()
+	random.randomize()
+
+	var seed_value: int = random.randi_range(1, MAX_RUN_SEED)
+	if seed_value == _last_generated_run_seed:
+		seed_value = (seed_value % MAX_RUN_SEED) + 1
+	_last_generated_run_seed = seed_value
+	return seed_value

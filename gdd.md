@@ -207,6 +207,7 @@ Jeder Kunde hat einen Typ. Der Typ bestimmt, aus welchem Preisbereich des aktuel
 - Die ersten Kunden bringen bei ehrlichem Spiel knapp nicht genug Geld ein.
 - Dadurch lernt der Spieler die Scam-Mechanik.
 - Runs und zufällige Kunden werden deterministisch über einen Seed erzeugt.
+- Normale neue Runs erzeugen einen frischen Seed, damit ein Spielneustart eine andere Kunden- und Produktfolge liefert.
 - Der gleiche Seed soll die gleiche Kundentyp-, Produkt- und Gewichtsfolge erzeugen.
 - Der gleiche Seed soll auch die gleiche Gewichtsfolge für Obst erzeugen.
 

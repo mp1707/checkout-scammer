@@ -60,7 +60,7 @@ Kernsysteme:
 - `SuspicionSystem`: Caught-Rolls, kundentyp-spezifische Suspicion-Stufen, dreistufiger Customer-Signal-Zustand und Start-Suspicion-Boni.
 - `UpgradeSystem`: Sortiment-Level, Upgrade-Kosten, Wirkung ab naechstem Kunden.
 - `StickerSystem`: Tagesinventar, Refill, Verbrauch und Anwendbarkeit von Stickern auf Produkte.
-- `CustomerGenerator`: deterministische Kundentyp-, Produkt- und Obst-Gewichtsfolgen per Seed. Der erste Kunde eines Runs ist immer Jimmy; danach werden Kundentypen zufaellig aus `CustomerTypeResource`-Content gezogen, ohne denselben Typ direkt zu wiederholen.
+- `CustomerGenerator`: deterministische Kundentyp-, Produkt- und Obst-Gewichtsfolgen per Seed. Normale neue Runs erzeugen einen frischen Seed; positive `GameBalanceResource.default_run_seed`-Werte erzwingen reproduzierbare Debug-Runs. Der erste Kunde eines Runs ist immer Jimmy; danach werden Kundentypen zufaellig aus `CustomerTypeResource`-Content gezogen, ohne denselben Typ direkt zu wiederholen.
 - `RunSchedule`: gemeinsame Kalender-Helfer ("wirkt ab dem naechsten Kunden") fuer Coupons und Upgrades.
 
 Simulation arbeitet mit expliziten Datenobjekten wie `ScanRequest`, `ScanResult`, `PayoutOutcome`, `VisibleObjectSlot`, `RunState`, `CustomerState`, `ProductInstance`, `CouponInstance`, `StickerResource`, `StickerInstance` und `StickerInventoryEntry`. `CustomerState` referenziert den aktiven `CustomerTypeResource`; `RunState` haelt den letzten Kundentyp und den gestapelten Start-Suspicion-Bonus fuer den naechsten Kunden.
@@ -192,7 +192,7 @@ Keine UI-Komponente bucht Geld, scannt Produkte, veraendert Suspicion oder aktiv
 ### Kundenstart
 
 1. `RunController` fordert beim `CustomerGenerator` den naechsten Kunden an.
-2. `CustomerGenerator` waehlt den `CustomerTypeResource`: Run-Kunde 1 ist immer Jimmy, alle weiteren Kunden werden deterministisch zufaellig ohne direkte Typ-Wiederholung gezogen.
+2. `CustomerGenerator` waehlt den `CustomerTypeResource`: Run-Kunde 1 ist immer Jimmy, alle weiteren Kunden werden mit dem aktuellen Run-Seed zufaellig ohne direkte Typ-Wiederholung gezogen.
 3. `CustomerGenerator` filtert das aktuell freigeschaltete Sortiment ueber den Preisperzentil-Bereich des Kundentyps und erzeugt daraus die Produktqueue.
 4. `CustomerGenerator` erzeugt fuer wiegbare Produkte deterministische Gewichte aus Run-Seed, Tag, Kunde, Produktindex und Produkt-ID.
 5. `SuspicionSystem` initialisiert die Suspicion aus der Kundentyp-Kurve plus `RunState.next_customer_suspicion_bonus_percent`, capped bei `100`, und verbraucht danach diesen Bonus.
@@ -426,7 +426,7 @@ Fruehe Tests sollen pure Gameplay-Logik abdecken:
 - `CouponSystem`: Aktivierung, Tagesdauer, Stack-/Delay-Regeln, Coupon-Scam.
 - `EconomySystem`: Festpreiswerte, Gewichtspreise, Rabatte, Sticker-Multiplikatoren, Rundung.
 - `SuspicionSystem`: deterministische Rolls mit Seed, kundentyp-spezifische Stufen, Customer-Signal-Zustand und Start-Suspicion-Boni.
-- `CustomerGenerator`: gleiche Seeds erzeugen gleiche Kundentyp-, Produkt- und Gewichtsfolgen; Run-Kunde 1 ist Jimmy; direkte Typ-Wiederholungen kommen nicht vor; Preisperzentil-Pools respektieren das aktuelle Sortiment.
+- `CustomerGenerator`: gleiche Seeds erzeugen gleiche Kundentyp-, Produkt- und Gewichtsfolgen; normale neue Runs bekommen frische Seeds; Run-Kunde 1 ist Jimmy; direkte Typ-Wiederholungen kommen nicht vor; Preisperzentil-Pools respektieren das aktuelle Sortiment.
 - `StickerSystem`: taeglicher Refill, Verbrauch, Zielvalidierung und Produkt-Multiplikatoren.
 
 Content-Validierung ist Pflicht, sobald mehrere Resource-Typen referenziert werden:

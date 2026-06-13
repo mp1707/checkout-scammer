@@ -28,6 +28,7 @@ func _initialize() -> void:
 	_sticker_system = StickerSystem.new()
 
 	_test_customer_generator()
+	_test_run_seed_initialization()
 	_test_visible_object_queue_system()
 	_test_scan_system()
 	_test_suspicion_system()
@@ -81,6 +82,16 @@ func _test_customer_generator() -> void:
 	var no_repeat_customer: CustomerState = _generator.generate_customer(_registry, no_repeat_run)
 	_expect_true(no_repeat_customer.customer_type.id != "jimmy", "CustomerGenerator avoids direct customer type repeats")
 
+	var later_day_run: RunState = _create_run_state(77)
+	later_day_run.current_day = 2
+	later_day_run.current_customer_number = 1
+	later_day_run.last_customer_type_id = "jimmy"
+	var later_day_customer: CustomerState = _generator.generate_customer(_registry, later_day_run)
+	_expect_true(
+		later_day_customer.customer_type.id != "jimmy",
+		"CustomerGenerator only forces Jimmy for the first customer of the whole run"
+	)
+
 	var starting_products: Array[ProductVariantResource] = _available_products_for_assortment(1)
 	var chad_products: Array[ProductVariantResource] = CustomerGenerator.get_products_for_customer_type(
 		starting_products,
@@ -109,6 +120,25 @@ func _test_customer_generator() -> void:
 		"CustomerGenerator applies coupon weight multipliers without mutating resources"
 	)
 	_expect_equal_int(10, _registry.get_product_variant("apple").generator_weight, "Product resource weight remains immutable")
+
+
+func _test_run_seed_initialization() -> void:
+	var random_seed_balance: GameBalanceResource = GameBalanceResource.new()
+	random_seed_balance.default_run_seed = 0
+
+	var first_run: RunState = RunState.new()
+	first_run.apply_balance(random_seed_balance)
+	var second_run: RunState = RunState.new()
+	second_run.apply_balance(random_seed_balance)
+	_expect_true(first_run.run_seed > 0, "RunState creates a positive fresh seed when default_run_seed is zero")
+	_expect_true(second_run.run_seed > 0, "RunState creates a positive fresh seed for every new run")
+	_expect_true(first_run.run_seed != second_run.run_seed, "RunState gives consecutive fresh runs different seeds")
+
+	var fixed_seed_balance: GameBalanceResource = GameBalanceResource.new()
+	fixed_seed_balance.default_run_seed = 12345
+	var fixed_run: RunState = RunState.new()
+	fixed_run.apply_balance(fixed_seed_balance)
+	_expect_equal_int(12345, fixed_run.run_seed, "RunState keeps positive default_run_seed values reproducible")
 
 
 func _test_visible_object_queue_system() -> void:

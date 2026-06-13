@@ -290,6 +290,10 @@ func _validate_balance(errors: PackedStringArray) -> void:
 		errors.append("Game balance visible_object_slots must be greater than zero.")
 	if game_balance.starting_assortment_level <= 0:
 		errors.append("Game balance starting_assortment_level must be greater than zero.")
+	if game_balance.default_run_seed < 0:
+		errors.append("Game balance default_run_seed must be zero or greater.")
+	if game_balance.default_run_seed > RunState.MAX_RUN_SEED:
+		errors.append("Game balance default_run_seed must be %d or lower." % RunState.MAX_RUN_SEED)
 
 
 func _validate_suspicion_curve(errors: PackedStringArray) -> void:
