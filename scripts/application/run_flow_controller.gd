@@ -95,7 +95,7 @@ func refresh_customer_hand() -> void:
 func show_caught_dialog() -> void:
 	refresh_customer_views()
 	refresh_hud()
-	_show_dialog(UiTexts.CUSTOMER_CAUGHT_DIALOG, DialogKind.CAUGHT)
+	_show_dialog(_get_current_customer_caught_dialog_text(), DialogKind.CAUGHT)
 
 
 ## Called after every processed product/coupon: refreshes views and moves to
@@ -163,7 +163,7 @@ func _queue_customer_done_dialog() -> void:
 		_is_advancing_customer = false
 		return
 
-	_show_dialog(UiTexts.CUSTOMER_BYE_DIALOG, DialogKind.CUSTOMER_BYE)
+	_show_dialog(_get_current_customer_farewell_dialog_text(), DialogKind.CUSTOMER_BYE)
 
 
 func _advance_after_customer() -> void:
@@ -205,3 +205,26 @@ func _finish_day() -> void:
 func _show_dialog(message: String, dialog_kind: DialogKind) -> void:
 	_dialog_kind = dialog_kind
 	_context.hud_root.show_dialog(message)
+
+
+func _get_current_customer_caught_dialog_text() -> String:
+	var customer_type: CustomerTypeResource = _get_current_customer_type()
+	if customer_type == null or customer_type.caught_dialog_text.strip_edges().is_empty():
+		return UiTexts.DEFAULT_CUSTOMER_CAUGHT_DIALOG
+
+	return customer_type.caught_dialog_text.strip_edges()
+
+
+func _get_current_customer_farewell_dialog_text() -> String:
+	var customer_type: CustomerTypeResource = _get_current_customer_type()
+	if customer_type == null or customer_type.farewell_dialog_text.strip_edges().is_empty():
+		return UiTexts.DEFAULT_CUSTOMER_FAREWELL_DIALOG
+
+	return customer_type.farewell_dialog_text.strip_edges()
+
+
+func _get_current_customer_type() -> CustomerTypeResource:
+	if not _context.has_active_customer():
+		return null
+
+	return _context.run_state.current_customer.customer_type

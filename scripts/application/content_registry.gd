@@ -419,6 +419,10 @@ func _validate_customer_types(errors: PackedStringArray) -> void:
 			errors.append("Customer type '%s' needs a display_name." % customer_type.id)
 		if customer_type.tooltip.strip_edges().is_empty():
 			errors.append("Customer type '%s' needs a tooltip." % customer_type.id)
+		if customer_type.caught_dialog_text.strip_edges().is_empty():
+			errors.append("Customer type '%s' needs a caught_dialog_text." % customer_type.id)
+		if customer_type.farewell_dialog_text.strip_edges().is_empty():
+			errors.append("Customer type '%s' needs a farewell_dialog_text." % customer_type.id)
 		if customer_type.price_percentile_min < 0 or customer_type.price_percentile_min > 100:
 			errors.append("Customer type '%s' price_percentile_min must be between 0 and 100." % customer_type.id)
 		if customer_type.price_percentile_max < 0 or customer_type.price_percentile_max > 100:

@@ -1,6 +1,6 @@
 # Checkout Scammer - Architektur
 
-Stand: 2026-06-12
+Stand: 2026-06-13
 
 Diese Datei ist die verbindliche technische Grundlage fuer Checkout Scammer. Aenderungen an dieser Architektur brauchen vorherige Ruecksprache mit Marco, wenn sie Ownership, Datenfluss, Szenenstruktur, Autoloads, UI-Architektur oder zentrale Gameplay-Systeme betreffen.
 
@@ -100,7 +100,7 @@ Alles Konfigurierbare wird als Resource modelliert:
 - `CouponResource`: Zielprodukt/-linie, Rabatt, Kaufpreis, Gewichtungsbonus, Dauer.
 - `StickerResource`: Sticker-ID, Tooltip, Texture, Multiplikator, Zielart und taeglicher Refill.
 - `UpgradeResource`: Sortiment-Level-Up und spaetere Upgrades.
-- `CustomerTypeResource`: Kundentyp-ID, Anzeigename, Tooltip, Preisperzentil-Bereich, Suspicion-Stufen, Caught-Strafe und drei Stage-Texturen fuer gruen/gelb/rot.
+- `CustomerTypeResource`: Kundentyp-ID, Anzeigename, Tooltip, Caught-/Abschiedsdialog, Preisperzentil-Bereich, Suspicion-Stufen, Caught-Strafe und drei Stage-Texturen fuer gruen/gelb/rot.
 - `SuspicionCurveResource`: optionaler Migrations-/Fallback-Default. Die verbindlichen Suspicion-Werte liegen in `CustomerTypeResource`.
 - `CheckoutThemeResource`: Font, 9-Slice-Panel-Texture, Fontgroessen, Endesga-64-UI-Farben.
 
@@ -115,6 +115,8 @@ Pflichtfelder:
 - stabile `id`, z. B. `jimmy`, `margaret`, `chad`, `doris`
 - player-sichtbarer englischer `display_name`
 - player-sichtbarer englischer Tooltip-Text
+- player-sichtbarer englischer `caught_dialog_text`, der die konkrete Caught-Konsequenz des Kundentyps verstaendlich macht
+- player-sichtbarer englischer `farewell_dialog_text`
 - `price_percentile_min` und `price_percentile_max` fuer die Produktauswahl im aktuell freigeschalteten Sortiment
 - `suspicion_stage_percentages` als streng aufsteigende Werte im Bereich `0..100`
 - `caught_penalty_kind` als `enum`, nicht als String

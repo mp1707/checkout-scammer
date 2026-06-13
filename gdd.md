@@ -153,28 +153,36 @@
 
 ## Kundentypen
 
-Jeder Kunde hat einen Typ. Der Typ bestimmt, aus welchem Preisbereich des aktuellen Sortiments Produkte gezogen werden, wie schnell Suspicion steigt und welche Zusatzstrafe bei Caught passiert.
+Jeder Kunde hat einen Typ. Der Typ bestimmt, aus welchem Preisbereich des aktuellen Sortiments Produkte gezogen werden, wie schnell Suspicion steigt, welche Zusatzstrafe bei Caught passiert und welche Kundendialoge gezeigt werden.
 
 - Jimmy (Kid)
   - Tooltip: `Doesn't pay attention at all and pays with the credit card of his mom.`
   - Kaufverhalten: billigste `30%` des aktuell freigeschalteten Sortiments.
   - Suspicion: `0 -> 20 -> 45 -> 70`.
   - Caught-Strafe: nur das aktuelle Produkt geht verloren.
+  - Caught-Text: `Jimmy: Hey, that beep happened twice. I'm putting this one back.`
+  - Abschied: `Jimmy: Bye! Mom's card worked, right?`
 - Margaret (Fatlady)
   - Tooltip: `A wealthy regular who trusts you completely — unless the mood ring turns red.`
   - Kaufverhalten: gesamtes aktuell freigeschaltetes Sortiment.
   - Suspicion: `10 -> 50 -> 75 -> 90`.
   - Caught-Strafe: nur das aktuelle Produkt geht verloren.
+  - Caught-Text: `Margaret: That was an extra scan, dear. Remove this item from my bill.`
+  - Abschied: `Margaret: Thank you, dear. See you next time.`
 - Chad (Businessman)
   - Tooltip: `Always in a hurry, yet paranoid enough to watch your every move.`
   - Kaufverhalten: teuerste `30%` des aktuell freigeschalteten Sortiments.
   - Suspicion: `30 -> 65 -> 85 -> 95`.
   - Caught-Strafe: aktuelles Produkt geht verloren und zusätzlich wird einmal dessen Produktwert vom aktuellen Geldbestand abgezogen. Der Geldbestand kann dadurch nicht unter `0$` fallen.
+  - Caught-Text: `Chad: I saw the double charge. Refund me this item's price from the drawer. Now.`
+  - Abschied: `Chad: Receipt. Bag. I'm already late.`
 - Doris (Oldlady)
   - Tooltip: `The sweetest, slowest customer — but get caught and she'll tell the whole neighborhood.`
   - Kaufverhalten: billigste `60%` des aktuell freigeschalteten Sortiments.
   - Suspicion: `5 -> 30 -> 55 -> 75`.
   - Caught-Strafe: aktuelles Produkt geht verloren und die Start-Suspicion des nächsten Kunden steigt um `+20%`. Mehrfaches Erwischtwerden bei Doris stapelt diesen Aufschlag.
+  - Caught-Text: `Doris: Oh dear, an extra charge. Put this back, and I'll warn the next person in line.`
+  - Abschied: `Doris: Thank you, sweetheart. I'll shuffle along now.`
 
 ### Kaufverhalten über Preis-Perzentile
 
@@ -221,6 +229,7 @@ Jeder Kunde hat einen Typ. Der Typ bestimmt, aus welchem Preisbereich des aktuel
   - Obst-Gewichtsranges, Rundung, Verteilung und Sprite-Skalierung
   - Produktgewichte für die Kundengenerierung
   - Kundentypen, Kundentyp-Tooltips und Kundentyp-Texturen
+  - Kundentyp-Caught- und Abschiedsdialoge
   - Preis-Perzentile je Kundentyp
   - Coupon-Kosten
   - Coupon-Rabatte
@@ -297,9 +306,8 @@ Jeder Kunde hat einen Typ. Der Typ bestimmt, aus welchem Preisbereich des aktuel
 
 ## Erwischen / Strafe
 
-- Wird man erwischt, erscheint eine Textbox:
-
-`Kunde: Hey, do you want to scam me? I want compensation!`
+- Wird man erwischt, erscheint eine kundentyp-spezifische Textbox aus `CustomerTypeResource.caught_dialog_text`.
+- Der Text nennt die konkrete Konsequenz, damit der Spieler versteht, ob nur das Produkt verloren geht oder eine Zusatzstrafe ausgelöst wurde.
 
 - Die Textbox muss mit Enter weggeklickt werden.
 - Die Wirkung:
@@ -465,9 +473,7 @@ Out of scope für den Prototyp:
 - Obst kann mehrfach gewogen werden.
 - Mehrfaches Scannen oder mehrfaches Wiegen erhöht die Suspicion.
 - Die Suspicion wird über den Sprite-Zustand des Kundensignals angezeigt.
-- Nach dem letzten verarbeiteten Produkt erscheint nach einer Sekunde eine Textbox:
-
-`Thanks, byyyyyeeeeee`
+- Nach dem letzten verarbeiteten Produkt erscheint nach einer Sekunde eine kundentyp-spezifische Textbox aus `CustomerTypeResource.farewell_dialog_text`.
 
 - Die Textbox muss mit Enter weggeklickt werden.
 - Danach kommt der nächste Kunde.

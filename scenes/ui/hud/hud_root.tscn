@@ -77,7 +77,7 @@ theme_override_constants/separation = 5
 [node name="DialogMessage" type="Label" parent="DialogLayer/DialogFrame/MainPanel/DialogContent" unique_id=1415840619]
 custom_minimum_size = Vector2(320, 0)
 layout_mode = 2
-text = "Customer: Hey, do you want to scam me? I want compensation!"
+text = "Customer: That extra charge is not staying on my bill."
 autowrap_mode = 3
 
 [node name="ButtonRow" type="HBoxContainer" parent="DialogLayer/DialogFrame/MainPanel/DialogContent" unique_id=1537334196]

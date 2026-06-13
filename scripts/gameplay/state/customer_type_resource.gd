@@ -10,6 +10,8 @@ enum CaughtPenaltyKind {
 @export var id: String = ""
 @export var display_name: String = ""
 @export_multiline var tooltip: String = ""
+@export_multiline var caught_dialog_text: String = ""
+@export_multiline var farewell_dialog_text: String = ""
 @export_range(0, 100, 1) var price_percentile_min: int = 0
 @export_range(0, 100, 1) var price_percentile_max: int = 100
 @export var suspicion_stage_percentages: Array[int] = [10, 50, 75, 90]

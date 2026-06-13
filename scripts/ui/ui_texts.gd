@@ -5,8 +5,8 @@ class_name UiTexts
 ## (English) and route new UI copy through constants here so a later
 ## localization pass only has to touch this file.
 
-const CUSTOMER_CAUGHT_DIALOG: String = "Customer: Hey, do you want to scam me? I want compensation!"
-const CUSTOMER_BYE_DIALOG: String = "Thanks, byyyyyeeeeee"
+const DEFAULT_CUSTOMER_CAUGHT_DIALOG: String = "Customer: That extra charge is not staying on my bill."
+const DEFAULT_CUSTOMER_FAREWELL_DIALOG: String = "Customer: Thanks, bye."
 const RUN_LOST_DIALOG: String = "Rent is due, but the drawer is short. Shift over."
 const RUN_WON_DIALOG_FORMAT: String = "Day %d rent is paid. You win!"
 
