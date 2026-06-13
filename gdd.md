@@ -21,7 +21,7 @@
 - 1-Screen-Gameplay
 - Abstrakt, ohne sichtbaren Player-Sprite
 - Kein vollständig sichtbarer Kunde
-- Der Kunde wird nur durch eine Hand angedeutet
+- Der Kunde wird nur durch einen kundenspezifischen Signalträger im rechten Tischbereich angedeutet
 - UI-Stil angelehnt an Scritchy Scratch / Balatro
 - Alle Spiel- und UI-Farben nutzen die Endesga-64-Palette: <https://lospec.com/palette-list/endesga-64>
 - Menüs, Schriften, Buttons, Tooltips, Scannerfeedback, Schatten und Popups verwenden nur Farben aus dieser Palette.
@@ -122,16 +122,18 @@
 - Das ist eine versteckte Scam-Mechanik.
 - Wird ein Produkt mit offenem Verkaufsbetrag in den Müll geworfen, verschwindet es und der offene Betrag wird nicht gebucht.
 
-### Kundenhand
+### Kundensignal
 
-- Rechts oben über der Produktfläche ist eine Kundenhand sichtbar.
-- Die Hand deutet den Kunden an, ohne einen vollständigen Kunden zu zeigen.
-- Die Hand zeigt die aktuelle Suspicion über drei gezeichnete Sprite-Stufen:
+- Rechts oben über der Produktfläche ist der Signalträger des aktuellen Kundentyps sichtbar.
+- Der Signalträger deutet den Kunden an, ohne einen vollständigen Kunden zu zeigen.
+- Es gibt vier optisch unterscheidbare Kundentypen: Jimmy, Margaret, Chad und Doris.
+- Der Signalträger zeigt die aktuelle Suspicion über drei gezeichnete Sprite-Stufen:
   - Grün: Anfangszustand.
   - Gelb: nach einem erfolgreichen Doppel-Scan.
   - Rot: nach zwei oder mehr erfolgreichen Doppel-Scans.
 - Es gibt keine plumpe Suspicion-Progressbar mit Zahl.
-- Die Hand ist die kreative, diegetische Anzeige des Suspicion-Meters.
+- Der Signalträger ist die kreative, diegetische Anzeige des Suspicion-Meters.
+- Mouseover über den Kunden-/Signalträgerbereich zeigt Name und Beschreibung des Kundentyps.
 
 ### Rechte Menüleiste
 
@@ -149,18 +151,55 @@
 - Die Summe des normalen Produktwerts reicht knapp nicht aus, um die Miete zu zahlen.
 - Man muss also kreativ werden und Kunden betrügen, indem man Produkte mehrfach scannt.
 
+## Kundentypen
+
+Jeder Kunde hat einen Typ. Der Typ bestimmt, aus welchem Preisbereich des aktuellen Sortiments Produkte gezogen werden, wie schnell Suspicion steigt und welche Zusatzstrafe bei Caught passiert.
+
+- Jimmy (Kid)
+  - Tooltip: `Doesn't pay attention at all and pays with the credit card of his mom.`
+  - Kaufverhalten: billigste `30%` des aktuell freigeschalteten Sortiments.
+  - Suspicion: `0 -> 20 -> 45 -> 70`.
+  - Caught-Strafe: nur das aktuelle Produkt geht verloren.
+- Margaret (Fatlady)
+  - Tooltip: `A wealthy regular who trusts you completely — unless the mood ring turns red.`
+  - Kaufverhalten: gesamtes aktuell freigeschaltetes Sortiment.
+  - Suspicion: `10 -> 50 -> 75 -> 90`.
+  - Caught-Strafe: nur das aktuelle Produkt geht verloren.
+- Chad (Businessman)
+  - Tooltip: `Always in a hurry, yet paranoid enough to watch your every move.`
+  - Kaufverhalten: teuerste `30%` des aktuell freigeschalteten Sortiments.
+  - Suspicion: `30 -> 65 -> 85 -> 95`.
+  - Caught-Strafe: aktuelles Produkt geht verloren und zusätzlich wird einmal dessen Produktwert vom aktuellen Geldbestand abgezogen. Der Geldbestand kann dadurch nicht unter `0$` fallen.
+- Doris (Oldlady)
+  - Tooltip: `The sweetest, slowest customer — but get caught and she'll tell the whole neighborhood.`
+  - Kaufverhalten: billigste `60%` des aktuell freigeschalteten Sortiments.
+  - Suspicion: `5 -> 30 -> 55 -> 75`.
+  - Caught-Strafe: aktuelles Produkt geht verloren und die Start-Suspicion des nächsten Kunden steigt um `+20%`. Mehrfaches Erwischtwerden bei Doris stapelt diesen Aufschlag.
+
+### Kaufverhalten über Preis-Perzentile
+
+- Kundentypen kaufen nicht aus festen Produktlisten, sondern aus Preisbereichen des aktuellen Sortiments.
+- Das Sortiment wird dafür nach Produktwert sortiert.
+- Festpreis-Produkte nutzen `price_cents`.
+- Wiegbare Produkte nutzen den erwarteten Stückpreis aus durchschnittlichem generierten Gewicht mal Kilopreis.
+- Die Perzentilgrenzen werden immer neu aus dem aktuell freigeschalteten Sortiment berechnet.
+- Sortiment-Level-Ups verschieben die Perzentilgrenzen automatisch.
+- Die Prozentwerte sind Balancing-Werte und zentral anpassbar.
+
 ## Grundstruktur / Runs
 
 - Ein Run besteht aus 8 Geschäftstagen.
 - Ein Geschäftstag besteht aus 3 Kunden.
 - Ein Kunde hat 10 zufällige Produkte.
 - Für den Prototyp ist die Produktanzahl auf 10 gesetzt, aber zentral im Balancing pflegbar.
-- Der erste Tag hat 3 gescriptete Kunden.
-- Die gescripteten Tag-1-Kunden gelten fuer das Startsortiment. Sobald ein Sortiment-Level-Up aktiv ist, wird der naechste Kunde aus dem erweiterten Produktpool generiert.
-- Diese 3 Kunden bringen bei ehrlichem Spiel knapp nicht genug Geld ein.
+- Der erste Kunde eines Runs ist immer Jimmy.
+- Alle weiteren Kunden werden zufällig aus den vier Kundentypen gezogen.
+- Nie zweimal derselbe Kundentyp direkt hintereinander.
+- Es gibt aktuell keine vordefinierten Kundenfolgen. Falls sie später wieder gebraucht werden, werden sie als separates Content-System ergänzt.
+- Die ersten Kunden bringen bei ehrlichem Spiel knapp nicht genug Geld ein.
 - Dadurch lernt der Spieler die Scam-Mechanik.
 - Runs und zufällige Kunden werden deterministisch über einen Seed erzeugt.
-- Der gleiche Seed soll die gleiche Kunden- und Produktfolge erzeugen.
+- Der gleiche Seed soll die gleiche Kundentyp-, Produkt- und Gewichtsfolge erzeugen.
 - Der gleiche Seed soll auch die gleiche Gewichtsfolge für Obst erzeugen.
 
 ## Balancing-Defaults
@@ -181,12 +220,15 @@
   - Kilopreise für Obst
   - Obst-Gewichtsranges, Rundung, Verteilung und Sprite-Skalierung
   - Produktgewichte für die Kundengenerierung
+  - Kundentypen, Kundentyp-Tooltips und Kundentyp-Texturen
+  - Preis-Perzentile je Kundentyp
   - Coupon-Kosten
   - Coupon-Rabatte
   - Coupon-Gewichtungsboni
   - Sticker-Multiplikatoren und tägliche Sticker-Refills
   - Sortiment-Level-Up-Kosten
-  - Suspicion-Stufen
+  - Suspicion-Stufen je Kundentyp
+  - Chad-Geldstrafe und Doris-Start-Suspicion-Bonus
 
 ### Aktuelle Produkt-Werte
 
@@ -204,6 +246,8 @@
 ## Kunden-Produktfluss
 
 - Ein Kunde hat intern eine Queue aus 10 Produkten.
+- Der Kundentyp bestimmt, aus welchem Preisbereich des aktuellen Sortiments diese Produkte gezogen werden.
+- Coupons können die Gewichtung innerhalb dieses Kundentyp-Produktpools verändern.
 - Zu Beginn eines Kunden rutschen die ersten 4 Objekte von rechts in die Produktfläche.
 - Nur diese 4 Objekte sind gleichzeitig sichtbar.
 - Wenn ein Coupon für diesen Kunden aktiv ist, ist der Coupon das erste Objekt und danach folgen die ersten Produkte.
@@ -234,18 +278,22 @@
 
 - Jeder Kunde hat ein internes Suspicion-Meter.
 - Das Suspicion-Meter ist die Wahrscheinlichkeit, beim Betrügen erwischt zu werden.
-- Es startet pro Kunde bei 10%.
+- Die Start-Suspicion und alle Steigerungsstufen kommen aus dem aktuellen Kundentyp.
 - Ein Caught-Roll passiert bei jedem Produkt-Scan ab dem zweiten Scan desselben Produkts und bei jeder Wiegung ab der zweiten Wiegung desselben Obstes.
 - Der erste Scan oder die erste Wiegung eines Produkts ist immer sicher.
 - Coupon-Scam löst keinen Caught-Roll aus.
 - Wenn ein Mehrfachscan nicht erwischt wird, steigt die Suspicion danach an.
-- Nach einem erfolgreichen Double Scan steigt sie auf 50%.
-- Danach steigt sie auf 75%.
-- Danach steigt sie auf 90%.
-- Bei 90% bleibt es.
+- Jimmy steigt über `0 -> 20 -> 45 -> 70`.
+- Margaret steigt über `10 -> 50 -> 75 -> 90`.
+- Chad steigt über `30 -> 65 -> 85 -> 95`.
+- Doris steigt über `5 -> 30 -> 55 -> 75`.
+- Nach der letzten Stufe bleibt die Suspicion beim letzten Wert des Kundentyps.
 - Mehrfachscans sind unbegrenzt möglich, bis der Spieler erwischt wird oder das Produkt verkauft.
-- Neuer Kunde = neues Suspicion-Meter bei 10%.
-- Die aktuelle Suspicion wird über den Sprite-Zustand der Kundenhand angezeigt.
+- Neuer Kunde = neues Suspicion-Meter mit Startwert des Kundentyps.
+- Doris kann durch Caught einen `+20%` Start-Suspicion-Bonus für den nächsten Kunden stapeln.
+- Dieser Bonus wird beim nächsten Kunden auf dessen Kundentyp-Startwert addiert und bei `100%` gecappt.
+- Die aktuelle Suspicion wird ausschließlich über den grün/gelb/roten Sprite-Zustand des Kundensignals angezeigt.
+- Es gibt keine zusätzliche Suspicion-Zahl und keine Progressbar.
 
 ## Erwischen / Strafe
 
@@ -257,8 +305,11 @@
 - Die Wirkung:
   - Das aktuelle Produkt verschwindet visuell.
   - Der offene Verkaufsbetrag im Kassendisplay wird gelöscht.
-  - Es wird kein Geld vom Total-Wert abgezogen.
-  - Dadurch verliert der Spieler nur den noch nicht gebuchten Wert dieses Produkts.
+  - Es wird kein Geld vom offenen Produktbetrag gebucht.
+  - Jeder Kundentyp verliert immer mindestens das aktuelle Produkt.
+  - Jimmy und Margaret haben keine weitere Strafe.
+  - Chad zieht zusätzlich einmal den Produktwert vom aktuellen Geldbestand ab. Der Geldbestand ist bei `0$` gecappt.
+  - Doris erhöht zusätzlich die Start-Suspicion des nächsten Kunden um `+20%`. Dieser Aufschlag stapelt, wenn Doris mehrfach erwischt.
 - Danach geht der Kunde weiter normal.
 
 ## Tagesende
@@ -394,6 +445,8 @@ Out of scope für den Prototyp:
 ## Core-Gameplay-Loop
 
 - Kunde startet.
+- Der Kundentyp wird rechts oben über der Produktfläche sichtbar.
+- Beim ersten Kunden eines Runs ist der Kundentyp immer Jimmy.
 - Die ersten 4 Objekte rutschen von rechts in die verstreute Produktfläche.
 - Falls für diesen Kunden ein Coupon aktiv ist, liegt er zuerst in der Produktfläche.
 - Der Spieler nimmt ein Produkt von der Produktfläche.
@@ -411,7 +464,7 @@ Out of scope für den Prototyp:
 - Festpreis-Produkte können mehrfach gescannt werden.
 - Obst kann mehrfach gewogen werden.
 - Mehrfaches Scannen oder mehrfaches Wiegen erhöht die Suspicion.
-- Die Suspicion wird über den Sprite-Zustand der Kundenhand angezeigt.
+- Die Suspicion wird über den Sprite-Zustand des Kundensignals angezeigt.
 - Nach dem letzten verarbeiteten Produkt erscheint nach einer Sekunde eine Textbox:
 
 `Thanks, byyyyyeeeeee`
@@ -483,9 +536,9 @@ Out of scope für den Prototyp:
 
 ### Suspicion-Juice
 
-- Die Kundenhand wechselt zwischen gruenem, gelbem und rotem Sprite.
-- Bei steigender Suspicion kann die Hand kurz pulsieren.
-- Bei hoher Suspicion kann die Kundenhand minimal unruhig wirken.
+- Das Kundensignal wechselt zwischen grünem, gelbem und rotem Sprite des aktiven Kundentyps.
+- Bei steigender Suspicion kann das Kundensignal kurz pulsieren.
+- Bei hoher Suspicion kann das Kundensignal minimal unruhig wirken.
 - Kein komplexes Animationssystem nötig.
 - Kleine visuelle Andeutungen reichen.
 
@@ -506,12 +559,14 @@ Für den ersten spielbaren Prototyp ist wichtig:
 - Waage im Tischbereich
 - Tüte über dem Scanner
 - Müll-Loch rechts unten
-- Kundenhand rechts oben mit drei Suspicion-Sprites
+- Kundensignal rechts oben mit vier Kundentypen und je drei Suspicion-Sprites
 - Offener Verkaufsbetrag im Kassendisplay
 - Coin-Animation beim Ablegen in die Tüte
 - Geld zählt beim Ablegen in der Tüte direkt hoch
 - Double-Scan erhöht Suspicion
 - Mehrfaches Wiegen erhöht Suspicion wie Mehrfachscans
+- Erster Kunde eines Runs ist Jimmy, danach random Kundentypen ohne direkte Wiederholung
+- Kundentypen steuern Produkt-Preisbereich, Suspicion-Kurve und Caught-Strafe
 - Sticker-Button mit `3x` Bio-Stickern pro Tag
 - Miete am Tagesende
 - Lose bei nicht bezahlbarer Miete
