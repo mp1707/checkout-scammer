@@ -20,7 +20,7 @@ func reset_for_new_customer() -> void:
 	_active_scale_actor = null
 
 
-func handle_product_scan_contact(actor: ProductActor, contact_position: Vector2) -> void:
+func handle_product_hand_scan(actor: ProductActor, contact_position: Vector2) -> void:
 	if _flow.is_player_input_locked():
 		return
 	if actor == null or actor.product_instance == null:
@@ -31,9 +31,6 @@ func handle_product_scan_contact(actor: ProductActor, contact_position: Vector2)
 	var request: ScanRequest = ScanRequest.new()
 	request.actor_id = actor.actor_id
 	request.product_instance = actor.product_instance
-	request.is_held = actor.is_held
-	request.is_touching_scanner = actor.is_touching_scanner
-	request.movement_direction = actor.movement_direction
 	request.scanner_contact_position = contact_position
 	request.product_rotation_degrees = actor.rotation_degrees
 
@@ -62,22 +59,34 @@ func handle_product_scan_contact(actor: ProductActor, contact_position: Vector2)
 		_context.checkout_table.pulse_customer_hand()
 
 
-func handle_coupon_scan_contact(actor: TableActor) -> void:
+func handle_coupon_hand_scan(actor: CouponActor) -> void:
 	if _flow.is_player_input_locked():
 		return
 
-	var coupon_actor: CouponActor = actor as CouponActor
-	if coupon_actor == null or coupon_actor.coupon_instance == null:
+	if actor == null or actor.coupon_instance == null:
 		return
-	var coupon_instance: CouponInstance = coupon_actor.coupon_instance
+	var coupon_instance: CouponInstance = actor.coupon_instance
 	if coupon_instance.was_activated_honestly or coupon_instance.was_trashed:
 		return
-	if not coupon_actor.is_held:
+
+	_process_coupon_honestly(actor, coupon_instance)
+
+
+func handle_product_click_sale(actor: ProductActor, click_position: Vector2) -> void:
+	if _flow.is_player_input_locked():
 		return
-	if coupon_actor.movement_direction.x >= 0.0:
+	if actor == null or actor.product_instance == null:
 		return
 
-	_process_coupon_honestly(coupon_actor, coupon_instance)
+	var product_instance: ProductInstance = actor.product_instance
+	if product_instance.is_processed or product_instance.is_weighable() or product_instance.open_amount_cents <= 0:
+		return
+
+	_context.economy_system.payout_product(_context.run_state, product_instance)
+	_context.checkout_table.clear_scanned_product_amount()
+	_context.visible_object_queue_system.mark_product_processed(_context.run_state.current_customer, product_instance)
+	_finish_actor(actor, true, true, click_position)
+	_flow.notify_customer_object_processed()
 
 
 func handle_bag_drop(actor: TableActor) -> void:
@@ -87,7 +96,10 @@ func handle_bag_drop(actor: TableActor) -> void:
 	var product_actor: ProductActor = actor as ProductActor
 	if product_actor != null and product_actor.product_instance != null:
 		var product_instance: ProductInstance = product_actor.product_instance
-		if product_instance.is_weighable() and product_instance.open_amount_cents <= 0:
+		if not product_instance.is_weighable():
+			_context.checkout_table.play_rejected_drop_feedback(product_actor)
+			return
+		if product_instance.open_amount_cents <= 0:
 			_context.checkout_table.play_rejected_drop_feedback(product_actor)
 			return
 		_context.economy_system.payout_product(_context.run_state, product_instance)
@@ -274,8 +286,18 @@ func _apply_customer_caught_penalty(product_instance: ProductInstance) -> void:
 			_context.suspicion_system.apply_next_customer_suspicion_bonus(customer, _context.run_state)
 
 
-func _finish_actor(actor: TableActor, is_sale: bool) -> void:
+func _finish_actor(
+	actor: TableActor,
+	is_sale: bool,
+	use_custom_coin_burst_position: bool = false,
+	coin_burst_global_position: Vector2 = Vector2.ZERO
+) -> void:
 	if actor != null and not actor.actor_id.is_empty():
 		_taken_actor_ids.erase(actor.actor_id)
 	if actor != null and is_instance_valid(actor):
-		_context.checkout_table.play_actor_finish_feedback(actor, is_sale)
+		_context.checkout_table.play_actor_finish_feedback(
+			actor,
+			is_sale,
+			use_custom_coin_burst_position,
+			coin_burst_global_position
+		)

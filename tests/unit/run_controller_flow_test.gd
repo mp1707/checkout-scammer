@@ -55,10 +55,7 @@ func _run() -> void:
 	if product_actor.product_instance.is_weighable():
 		checkout_table.emit_signal("actor_scale_drop_requested", product_actor)
 	else:
-		product_actor.is_held = true
-		product_actor.is_touching_scanner = true
-		product_actor.movement_direction = Vector2.LEFT
-		checkout_table.emit_signal("product_scan_contact_started", product_actor, product_actor.global_position)
+		checkout_table.emit_signal("product_hand_scan_requested", product_actor, product_actor.global_position)
 	_expect_true(product_actor.product_instance.open_amount_cents > 0, "Checkout charge intent adds open product amount")
 	_expect_equal_string(
 		_format_cents(product_actor.product_instance.open_amount_cents),
@@ -67,12 +64,15 @@ func _run() -> void:
 	)
 
 	var cash_after_scan_before_payout: int = controller.run_state.cash_cents
-	checkout_table.emit_signal("actor_bag_drop_requested", product_actor)
+	if product_actor.product_instance.is_weighable():
+		checkout_table.emit_signal("actor_bag_drop_requested", product_actor)
+	else:
+		checkout_table.emit_signal("product_click_sale_requested", product_actor, product_actor.global_position)
 	await process_frame
-	_expect_true(controller.run_state.cash_cents > cash_after_scan_before_payout, "Bag drop pays product into drawer")
-	_expect_equal_string("", _get_register_display_text(register_display), "Bag drop clears register display")
-	_expect_equal_int(1, controller.run_state.current_customer.processed_product_count, "Bag drop marks product processed")
-	_expect_equal_int(5, controller.run_state.current_customer.product_queue.size(), "Bag drop refills from hidden queue")
+	_expect_true(controller.run_state.cash_cents > cash_after_scan_before_payout, "Final sale pays product into drawer")
+	_expect_equal_string("", _get_register_display_text(register_display), "Final sale clears register display")
+	_expect_equal_int(1, controller.run_state.current_customer.processed_product_count, "Final sale marks product processed")
+	_expect_equal_int(5, controller.run_state.current_customer.product_queue.size(), "Final sale refills from hidden queue")
 
 	var cash_before_coupon: int = controller.run_state.cash_cents
 	hud_root.emit_signal("coupon_selected", "apple_20_discount")
@@ -90,14 +90,36 @@ func _run() -> void:
 	var fixed_product: ProductInstance = ProductInstance.new(controller.registry.get_product_variant("chewing_gum"), "direct_scan_gum")
 	fixed_actor.set_product_instance(fixed_product)
 	checkout_table.add_child(fixed_actor)
-	fixed_actor.is_held = true
-	fixed_actor.is_touching_scanner = true
-	fixed_actor.movement_direction = Vector2.LEFT
-	checkout_table.emit_signal("product_scan_contact_started", fixed_actor, fixed_actor.global_position)
-	_expect_equal_int(95, fixed_product.open_amount_cents, "Direct scanner intent charges fixed-price products")
-	_expect_equal_string("$0.95", _get_register_display_text(register_display), "Direct scanner intent updates register display")
-	fixed_actor.queue_free()
+	controller.run_state.current_customer.current_suspicion_percent = 0
+	checkout_table.emit_signal("product_hand_scan_requested", fixed_actor, fixed_actor.global_position)
+	_expect_equal_int(95, fixed_product.open_amount_cents, "Handscanner intent charges fixed-price products")
+	_expect_equal_string("$0.95", _get_register_display_text(register_display), "Handscanner intent updates register display")
+
+	checkout_table.emit_signal("product_hand_scan_requested", fixed_actor, fixed_actor.global_position)
+	_expect_equal_int(190, fixed_product.open_amount_cents, "Second handscanner entry charges fixed-price products again")
+	_expect_true(controller.run_state.current_customer.current_suspicion_percent > 0, "Second handscanner entry raises suspicion")
+
+	var cash_before_click_sale: int = controller.run_state.cash_cents
+	checkout_table.emit_signal("product_click_sale_requested", fixed_actor, fixed_actor.global_position)
+	_expect_true(controller.run_state.cash_cents > cash_before_click_sale, "Click sale pays scanned fixed-price product into drawer")
+	_expect_true(fixed_product.is_processed, "Click sale marks fixed-price product processed")
+	_expect_equal_string("", _get_register_display_text(register_display), "Click sale clears register display")
 	checkout_table.clear_scanned_product_amount()
+
+	var coupon_actor_scene: PackedScene = load("res://scenes/gameplay/products/coupon_actor.tscn") as PackedScene
+	_expect_true(coupon_actor_scene != null, "CouponActor scene loads for handscanner test")
+	if coupon_actor_scene == null:
+		app.queue_free()
+		_finish()
+		return
+
+	var coupon_actor: CouponActor = coupon_actor_scene.instantiate() as CouponActor
+	var coupon_instance: CouponInstance = CouponInstance.new(controller.registry.get_coupon("apple_20_discount"), "direct_scan_coupon")
+	coupon_actor.set_coupon_instance(coupon_instance)
+	checkout_table.add_child(coupon_actor)
+	checkout_table.emit_signal("coupon_hand_scan_requested", coupon_actor, coupon_actor.global_position)
+	_expect_true(coupon_instance.was_activated_honestly, "Handscanner intent activates coupons honestly")
+	coupon_actor.queue_free()
 
 	var fruit_actor: ProductActor = product_actor_scene.instantiate() as ProductActor
 	var fruit_product: ProductInstance = ProductInstance.new(controller.registry.get_product_variant("apple"), "direct_weigh_apple")

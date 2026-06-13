@@ -2,9 +2,10 @@ extends TableActor
 class_name ProductActor
 
 signal rotation_changed(actor: ProductActor, rotation_degrees: float)
-signal scanner_contact_changed(actor: ProductActor, is_touching_scanner: bool, contact_position: Vector2)
+signal click_sale_requested(actor: ProductActor, click_position: Vector2)
 
 const ROTATION_STEP_DEGREES: float = 15.0
+const CLICK_SALE_MAX_DISTANCE_SQUARED: float = 16.0
 
 @export var theme_resource: CheckoutThemeResource = preload("res://content/ui/checkout_theme.tres")
 @export var product_sprite: Sprite2D
@@ -17,8 +18,6 @@ const ROTATION_STEP_DEGREES: float = 15.0
 @export var sticker_visual_scene: PackedScene = preload("res://scenes/gameplay/stickers/sticker_visual.tscn")
 
 var product_instance: ProductInstance
-var is_touching_scanner: bool = false
-var scanner_contact_position: Vector2 = Vector2.ZERO
 
 var _base_collision_size: Vector2 = Vector2(32.0, 32.0)
 var _is_collision_size_cached: bool = false
@@ -77,15 +76,6 @@ func contains_global_point(global_point: Vector2) -> bool:
 	return false
 
 
-func set_touching_scanner(value: bool, contact_position: Vector2) -> void:
-	if is_touching_scanner == value and scanner_contact_position == contact_position:
-		return
-
-	is_touching_scanner = value
-	scanner_contact_position = contact_position
-	scanner_contact_changed.emit(self, is_touching_scanner, scanner_contact_position)
-
-
 func play_successful_scan_feedback(scan_count: int) -> void:
 	if animation_player != null and animation_player.has_animation("scan_success"):
 		animation_player.play("scan_success")
@@ -118,9 +108,20 @@ func play_finish_feedback(target_global_position: Vector2, is_sale: bool) -> voi
 
 
 func _on_finish_started() -> void:
-	is_touching_scanner = false
 	if _feedback_tween != null and _feedback_tween.is_valid():
 		_feedback_tween.kill()
+
+
+func _handle_click_release(drop_position: Vector2) -> bool:
+	if product_instance == null:
+		return false
+	if product_instance.is_weighable() or product_instance.open_amount_cents <= 0:
+		return false
+	if _drag_start_position.distance_squared_to(drop_position) > CLICK_SALE_MAX_DISTANCE_SQUARED:
+		return false
+
+	click_sale_requested.emit(self, drop_position.round())
+	return true
 
 
 func _handle_secondary_press(mouse_button_event: InputEventMouseButton) -> void:

@@ -1,9 +1,10 @@
 extends Control
 class_name CheckoutTable
 
-signal product_scan_contact_started(actor: ProductActor, contact_position: Vector2)
-signal actor_scan_contact_started(actor: TableActor, contact_position: Vector2)
+signal product_hand_scan_requested(actor: ProductActor, contact_position: Vector2)
+signal coupon_hand_scan_requested(actor: CouponActor, contact_position: Vector2)
 signal actor_taken_from_product_area(actor: TableActor)
+signal product_click_sale_requested(actor: ProductActor, click_position: Vector2)
 signal actor_bag_drop_requested(actor: TableActor)
 signal actor_trash_drop_requested(actor: TableActor)
 signal actor_scale_drop_requested(actor: ProductActor)
@@ -21,6 +22,7 @@ signal actor_scale_removed(actor: ProductActor)
 
 var _shake_tween: Tween
 var _base_position: Vector2
+var _is_actor_input_enabled: bool = true
 
 
 func _ready() -> void:
@@ -105,14 +107,20 @@ func find_product_actor_at_global_position(global_point: Vector2) -> ProductActo
 	return product_scatter_view.find_product_actor_at(global_point)
 
 
-func play_actor_finish_feedback(actor: TableActor, is_sale: bool) -> void:
+func play_actor_finish_feedback(
+	actor: TableActor,
+	is_sale: bool,
+	use_custom_coin_burst_position: bool = false,
+	coin_burst_global_position: Vector2 = Vector2.ZERO
+) -> void:
 	if actor == null or not is_instance_valid(actor):
 		return
 
 	var finish_position: Vector2 = _get_actor_finish_position(actor, is_sale)
 	var product_actor: ProductActor = actor as ProductActor
 	if is_sale and product_actor != null and product_actor.product_instance != null:
-		_spawn_coin_burst(finish_position, _product_uses_bonus_coin_sound(product_actor.product_instance))
+		var burst_position: Vector2 = coin_burst_global_position if use_custom_coin_burst_position else finish_position
+		_spawn_coin_burst(burst_position, _product_uses_bonus_coin_sound(product_actor.product_instance))
 	actor.play_finish_feedback(finish_position, is_sale)
 
 
@@ -137,8 +145,9 @@ func _validate_required_references() -> void:
 
 func _connect_children() -> void:
 	if scanner_station != null:
-		scanner_station.actor_contact_started.connect(_on_actor_scan_contact_started)
-		scanner_station.product_contact_started.connect(_on_product_scan_contact_started)
+		scanner_station.product_hand_scan_requested.connect(_on_product_hand_scan_requested)
+		scanner_station.coupon_hand_scan_requested.connect(_on_coupon_hand_scan_requested)
+		scanner_station.mouse_mode_changed.connect(_on_scanner_mouse_mode_changed)
 	if product_scatter_view != null:
 		product_scatter_view.product_actor_spawned.connect(_on_product_actor_spawned)
 		product_scatter_view.coupon_actor_spawned.connect(_on_coupon_actor_spawned)
@@ -153,10 +162,13 @@ func _connect_children() -> void:
 
 func _on_product_actor_spawned(actor: ProductActor, _slot_index: int) -> void:
 	_connect_actor_drag_signals(actor)
+	actor.click_sale_requested.connect(_on_product_click_sale_requested)
+	actor.set_interaction_enabled(_is_actor_input_enabled)
 
 
 func _on_coupon_actor_spawned(actor: CouponActor, _slot_index: int) -> void:
 	_connect_actor_drag_signals(actor)
+	actor.set_interaction_enabled(_is_actor_input_enabled)
 
 
 func _connect_actor_drag_signals(actor: TableActor) -> void:
@@ -184,12 +196,25 @@ func _route_actor_drop(actor: TableActor) -> void:
 		return
 
 
-func _on_product_scan_contact_started(actor: ProductActor, contact_position: Vector2) -> void:
-	product_scan_contact_started.emit(actor, contact_position)
+func _on_product_hand_scan_requested(actor: ProductActor, contact_position: Vector2) -> void:
+	product_hand_scan_requested.emit(actor, contact_position)
 
 
-func _on_actor_scan_contact_started(actor: TableActor, contact_position: Vector2) -> void:
-	actor_scan_contact_started.emit(actor, contact_position)
+func _on_coupon_hand_scan_requested(actor: CouponActor, contact_position: Vector2) -> void:
+	coupon_hand_scan_requested.emit(actor, contact_position)
+
+
+func _on_product_click_sale_requested(actor: ProductActor, click_position: Vector2) -> void:
+	product_click_sale_requested.emit(actor, click_position)
+
+
+func _on_scanner_mouse_mode_changed(is_mouse_mode: bool) -> void:
+	_is_actor_input_enabled = is_mouse_mode
+	if product_scatter_view != null:
+		product_scatter_view.set_actor_input_enabled(is_mouse_mode)
+	var scale_actor: ProductActor = scale_station.get_current_actor() if scale_station != null else null
+	if scale_actor != null:
+		scale_actor.set_interaction_enabled(is_mouse_mode)
 
 
 func _on_bag_zone_actor_dropped(actor: TableActor) -> void:

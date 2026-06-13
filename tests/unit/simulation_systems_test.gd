@@ -180,38 +180,26 @@ func _test_scan_system() -> void:
 	var random: RandomNumberGenerator = RandomNumberGenerator.new()
 	random.seed = 10
 
-	var valid_request: ScanRequest = _create_scan_request(product, true, true, Vector2.LEFT)
+	var valid_request: ScanRequest = _create_scan_request(product)
 	var valid_result: ScanResult = _scan_system.evaluate_scan(valid_request, customer, _suspicion_system, random)
-	_expect_true(valid_result.is_valid_scan, "ScanSystem accepts held right-to-left scanner contact")
+	_expect_true(valid_result.is_valid_scan, "ScanSystem accepts fixed-price handscanner contact")
 	_expect_true(valid_result.is_first_scan, "ScanSystem marks first scan")
 
-	var wrong_direction: ScanResult = _scan_system.evaluate_scan(
-		_create_scan_request(product, true, true, Vector2.RIGHT),
+	product.scan_count = 1
+	customer.current_suspicion_percent = 0
+	var duplicate_result: ScanResult = _scan_system.evaluate_scan(
+		_create_scan_request(product),
 		customer,
 		_suspicion_system,
 		random
 	)
-	_expect_equal_int(ScanResult.FailureReason.WRONG_DIRECTION, wrong_direction.failure_reason, "ScanSystem rejects left-to-right movement")
-
-	var not_touching: ScanResult = _scan_system.evaluate_scan(
-		_create_scan_request(product, true, false, Vector2.LEFT),
-		customer,
-		_suspicion_system,
-		random
-	)
-	_expect_equal_int(ScanResult.FailureReason.NOT_TOUCHING_SCANNER, not_touching.failure_reason, "ScanSystem rejects missing scanner contact")
-
-	var not_held: ScanResult = _scan_system.evaluate_scan(
-		_create_scan_request(product, false, true, Vector2.LEFT),
-		customer,
-		_suspicion_system,
-		random
-	)
-	_expect_equal_int(ScanResult.FailureReason.NOT_HELD, not_held.failure_reason, "ScanSystem rejects products that are not held")
+	_expect_true(duplicate_result.is_valid_scan, "ScanSystem accepts duplicate handscanner contact")
+	_expect_true(duplicate_result.is_duplicate_scan, "ScanSystem marks duplicate scan")
+	_expect_true(customer.current_suspicion_percent > 0, "ScanSystem duplicate path raises suspicion")
 
 	var apple: ProductInstance = ProductInstance.new(_registry.get_product_variant("apple"), "weighable_scan_product")
 	var weighed_scan: ScanResult = _scan_system.evaluate_scan(
-		_create_scan_request(apple, true, true, Vector2.LEFT),
+		_create_scan_request(apple),
 		customer,
 		_suspicion_system,
 		random
@@ -438,7 +426,7 @@ func _test_complete_customer_flow_without_scenes() -> void:
 			_economy_system.apply_successful_weighing(weigh_result, _coupon_system.get_honest_customer_coupons(customer))
 		else:
 			var scan_result: ScanResult = _scan_system.evaluate_scan(
-				_create_scan_request(product, true, true, Vector2.LEFT),
+				_create_scan_request(product),
 				customer,
 				_suspicion_system,
 				random
@@ -473,12 +461,9 @@ func _create_customer_with_products(product_count: int) -> CustomerState:
 	return customer
 
 
-func _create_scan_request(product: ProductInstance, is_held: bool, is_touching_scanner: bool, direction: Vector2) -> ScanRequest:
+func _create_scan_request(product: ProductInstance) -> ScanRequest:
 	var request: ScanRequest = ScanRequest.new()
 	request.product_instance = product
-	request.is_held = is_held
-	request.is_touching_scanner = is_touching_scanner
-	request.movement_direction = direction
 	return request
 
 

@@ -94,6 +94,12 @@ func release_actor(actor: TableActor) -> void:
 			_kill_spawn_tween(object_key)
 
 
+func set_actor_input_enabled(is_enabled: bool) -> void:
+	for actor: TableActor in _actors_by_object_key.values():
+		if actor != null and is_instance_valid(actor):
+			actor.set_interaction_enabled(is_enabled)
+
+
 ## Finds the topmost product actor whose hitbox contains the point. Searches the
 ## actor container directly so actors lying loose on the table are found too.
 func find_product_actor_at(global_point: Vector2) -> ProductActor:

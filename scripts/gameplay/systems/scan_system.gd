@@ -21,15 +21,6 @@ func evaluate_scan(
 	if request.product_instance.is_processed:
 		result.failure_reason = ScanResult.FailureReason.PRODUCT_PROCESSED
 		return result
-	if not request.is_held:
-		result.failure_reason = ScanResult.FailureReason.NOT_HELD
-		return result
-	if not request.is_touching_scanner:
-		result.failure_reason = ScanResult.FailureReason.NOT_TOUCHING_SCANNER
-		return result
-	if request.movement_direction.x >= 0.0:
-		result.failure_reason = ScanResult.FailureReason.WRONG_DIRECTION
-		return result
 	if request.product_instance.is_weighable():
 		result.failure_reason = ScanResult.FailureReason.PRODUCT_WEIGHABLE
 		return result

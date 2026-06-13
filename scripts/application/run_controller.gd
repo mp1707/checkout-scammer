@@ -47,8 +47,9 @@ func configure(content_registry: ContentRegistry) -> void:
 
 func _connect_presentation() -> void:
 	checkout_table.actor_taken_from_product_area.connect(_on_actor_taken_from_product_area)
-	checkout_table.actor_scan_contact_started.connect(_on_actor_scan_contact_started)
-	checkout_table.product_scan_contact_started.connect(_on_product_scan_contact_started)
+	checkout_table.product_hand_scan_requested.connect(_on_product_hand_scan_requested)
+	checkout_table.coupon_hand_scan_requested.connect(_on_coupon_hand_scan_requested)
+	checkout_table.product_click_sale_requested.connect(_on_product_click_sale_requested)
 	checkout_table.actor_bag_drop_requested.connect(_on_actor_bag_drop_requested)
 	checkout_table.actor_trash_drop_requested.connect(_on_actor_trash_drop_requested)
 	checkout_table.actor_scale_drop_requested.connect(_on_actor_scale_drop_requested)
@@ -62,14 +63,19 @@ func _connect_presentation() -> void:
 	hud_root.dialog_closed.connect(_on_dialog_closed)
 
 
-func _on_product_scan_contact_started(actor: ProductActor, contact_position: Vector2) -> void:
+func _on_product_hand_scan_requested(actor: ProductActor, contact_position: Vector2) -> void:
 	if _interaction != null:
-		_interaction.handle_product_scan_contact(actor, contact_position)
+		_interaction.handle_product_hand_scan(actor, contact_position)
 
 
-func _on_actor_scan_contact_started(actor: TableActor, _contact_position: Vector2) -> void:
+func _on_coupon_hand_scan_requested(actor: CouponActor, _contact_position: Vector2) -> void:
 	if _interaction != null:
-		_interaction.handle_coupon_scan_contact(actor)
+		_interaction.handle_coupon_hand_scan(actor)
+
+
+func _on_product_click_sale_requested(actor: ProductActor, click_position: Vector2) -> void:
+	if _interaction != null:
+		_interaction.handle_product_click_sale(actor, click_position)
 
 
 func _on_actor_bag_drop_requested(actor: TableActor) -> void:

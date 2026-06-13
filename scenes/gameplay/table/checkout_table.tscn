@@ -38,7 +38,7 @@ texture = ExtResource("8_table")
 position = Vector2(202, 243)
 
 [node name="ScannerStation" parent="." unique_id=678997339 instance=ExtResource("2_scanner")]
-position = Vector2(334, 250)
+position = Vector2(360, 263)
 
 [node name="ScaleStation" parent="." unique_id=306612671 instance=ExtResource("10_scale_station")]
 position = Vector2(334, 157)

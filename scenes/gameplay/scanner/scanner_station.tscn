@@ -1,44 +1,73 @@
-[gd_scene format=3 uid="uid://bmhawbmbff00f"]
+[gd_scene load_steps=6 format=3 uid="uid://bmhawbmbff00f"]
 
 [ext_resource type="Script" uid="uid://3vi35cs7l5l1" path="res://scripts/gameplay/components/scanner_station.gd" id="1_scanner_station"]
 [ext_resource type="AudioStream" uid="uid://1fyx0gof1646" path="res://assets/audio/sfx/scanner/high_beep.mp3" id="2_beep"]
+[ext_resource type="Texture2D" uid="uid://p3am6q0824xw" path="res://assets/textures/environment/scanner.png" id="3_scanner"]
+[ext_resource type="Texture2D" uid="uid://djgfd7y3k2mds" path="res://assets/textures/environment/scannerstation.png" id="4_station"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_scanner_hit"]
-size = Vector2(18, 29)
+size = Vector2(11, 11)
 
-[node name="ScannerStation" type="Node2D" unique_id=1456192738 node_paths=PackedStringArray("hit_area", "beam", "feedback_anchor", "flash_rect", "beep_player", "animation_player")]
+[node name="ScannerStation" type="Node2D" unique_id=1456192738 node_paths=PackedStringArray("hit_area", "scanner_cursor_root", "scanner_sprite", "docked_scanner_sprite", "station_sprite", "crosshair_root", "beam", "beep_player", "animation_player")]
 script = ExtResource("1_scanner_station")
-hit_area = NodePath("HitArea")
-beam = NodePath("Beam")
-feedback_anchor = NodePath("FeedbackAnchor")
-flash_rect = NodePath("FeedbackAnchor/ScannerFlash")
+hit_area = NodePath("ScannerCursorRoot/HitArea")
+scanner_cursor_root = NodePath("ScannerCursorRoot")
+scanner_sprite = NodePath("ScannerCursorRoot/ScannerSprite")
+docked_scanner_sprite = NodePath("DockedScannerSprite")
+station_sprite = NodePath("StationSprite")
+crosshair_root = NodePath("ScannerCursorRoot/CrosshairRoot")
+beam = NodePath("ScannerCursorRoot/Beam")
 beep_player = NodePath("BeepPlayer")
 animation_player = NodePath("AnimationPlayer")
 
-[node name="Beam" type="ColorRect" parent="." unique_id=189562903]
-offset_left = -1.0
-offset_top = -12.0
-offset_bottom = 9.0
-mouse_filter = 2
-color = Color(1, 0, 0.25098, 0.86)
+[node name="StationSprite" type="Sprite2D" parent="." unique_id=1145005385]
+texture = ExtResource("4_station")
 
-[node name="HitArea" type="Area2D" parent="." unique_id=1721715330]
+[node name="DockedScannerSprite" type="Sprite2D" parent="." unique_id=998124728]
+position = Vector2(0, 4)
+texture = ExtResource("3_scanner")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="HitArea" unique_id=203524572]
-position = Vector2(0, -1.5)
-shape = SubResource("RectangleShape2D_scanner_hit")
-
-[node name="FeedbackAnchor" type="Marker2D" parent="." unique_id=152760847]
-position = Vector2(0, -40)
-
-[node name="ScannerFlash" type="ColorRect" parent="FeedbackAnchor" unique_id=1341039214]
+[node name="ScannerCursorRoot" type="Node2D" parent="." unique_id=1299768392]
 visible = false
-offset_left = -18.0
+z_index = 220
+
+[node name="ScannerSprite" type="Sprite2D" parent="ScannerCursorRoot" unique_id=402925832]
+position = Vector2(0, 5)
+texture = ExtResource("3_scanner")
+
+[node name="Beam" type="ColorRect" parent="ScannerCursorRoot" unique_id=189562903]
+visible = false
+offset_left = -5.0
+offset_top = -49.0
+offset_right = 5.0
+offset_bottom = -17.0
+mouse_filter = 2
+color = Color(1, 0, 0.25098, 0.52)
+
+[node name="CrosshairRoot" type="Node2D" parent="ScannerCursorRoot" unique_id=1837823295]
+position = Vector2(0, -53)
+
+[node name="HorizontalLine" type="ColorRect" parent="ScannerCursorRoot/CrosshairRoot" unique_id=1050402677]
+offset_left = -8.0
+offset_top = -1.0
+offset_right = 8.0
+offset_bottom = 1.0
+mouse_filter = 2
+color = Color(1, 0, 0.25098, 1)
+
+[node name="VerticalLine" type="ColorRect" parent="ScannerCursorRoot/CrosshairRoot" unique_id=1558484068]
+offset_left = -1.0
 offset_top = -8.0
-offset_right = 18.0
+offset_right = 1.0
 offset_bottom = 8.0
 mouse_filter = 2
-color = Color(1, 0.921568, 0.341176, 1)
+color = Color(1, 0, 0.25098, 1)
+
+[node name="HitArea" type="Area2D" parent="ScannerCursorRoot" unique_id=1721715330]
+position = Vector2(0, -53)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ScannerCursorRoot/HitArea" unique_id=203524572]
+shape = SubResource("RectangleShape2D_scanner_hit")
 
 [node name="BeepPlayer" type="AudioStreamPlayer2D" parent="." unique_id=1775034560]
 stream = ExtResource("2_beep")
