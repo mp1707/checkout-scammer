@@ -1,0 +1,81 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/hud/receipt_popup.gd" id="1_receipt"]
+[ext_resource type="Script" path="res://scripts/ui/panels/pixel_button.gd" id="2_button"]
+[ext_resource type="Resource" path="res://content/ui/checkout_theme.tres" id="3_theme"]
+[ext_resource type="Script" path="res://scripts/ui/panels/pixel_panel.gd" id="4_panel"]
+[ext_resource type="PackedScene" path="res://scenes/ui/popups/receipt_line_row.tscn" id="5_line"]
+
+[node name="ReceiptPopup" type="Control" node_paths=PackedStringArray("main_panel", "shadow_panel", "title_label", "empty_label", "lines_container", "total_label", "continue_button")]
+offset_left = 214.0
+offset_top = 54.0
+offset_right = 426.0
+offset_bottom = 286.0
+mouse_filter = 2
+script = ExtResource("1_receipt")
+theme_resource = ExtResource("3_theme")
+main_panel = NodePath("MainPanel")
+shadow_panel = NodePath("ShadowPanel")
+panel_color = Color(0.780392, 0.811765, 0.866667, 1)
+content_margin_override = 6
+panel_width = 212
+shadow_offset = Vector2(2, 3)
+title_label = NodePath("MainPanel/VBox/TitleLabel")
+empty_label = NodePath("MainPanel/VBox/EmptyLabel")
+lines_container = NodePath("MainPanel/VBox/LinesContainer")
+total_label = NodePath("MainPanel/VBox/TotalLabel")
+continue_button = NodePath("MainPanel/VBox/ContinueButton")
+receipt_line_row_scene = ExtResource("5_line")
+
+[node name="ShadowPanel" type="PanelContainer" parent="."]
+layout_mode = 0
+offset_left = 2.0
+offset_top = 3.0
+offset_right = 214.0
+offset_bottom = 232.0
+mouse_filter = 2
+script = ExtResource("4_panel")
+theme_resource = ExtResource("3_theme")
+panel_color = Color(0.054902, 0.027451, 0.105882, 0.42)
+content_margin_override = 6
+
+[node name="MainPanel" type="PanelContainer" parent="."]
+layout_mode = 0
+offset_right = 212.0
+offset_bottom = 229.0
+mouse_filter = 2
+script = ExtResource("4_panel")
+theme_resource = ExtResource("3_theme")
+panel_color = Color(0.780392, 0.811765, 0.866667, 1)
+content_margin_override = 6
+
+[node name="VBox" type="VBoxContainer" parent="MainPanel"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="TitleLabel" type="Label" parent="MainPanel/VBox"]
+layout_mode = 2
+text = "Receipt"
+horizontal_alignment = 1
+
+[node name="EmptyLabel" type="Label" parent="MainPanel/VBox"]
+layout_mode = 2
+text = "No charged items."
+horizontal_alignment = 1
+
+[node name="LinesContainer" type="VBoxContainer" parent="MainPanel/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 1
+
+[node name="TotalLabel" type="Label" parent="MainPanel/VBox"]
+layout_mode = 2
+text = "Total $0.00"
+horizontal_alignment = 2
+
+[node name="ContinueButton" type="Button" parent="MainPanel/VBox"]
+custom_minimum_size = Vector2(0, 22)
+layout_mode = 2
+text = "Continue"
+script = ExtResource("2_button")
+theme_resource = ExtResource("3_theme")

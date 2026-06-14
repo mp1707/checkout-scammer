@@ -9,6 +9,5 @@ daily_rent_cents = 4000
 days_per_run = 8
 customers_per_day = 3
 products_per_customer = 10
-visible_object_slots = 4
 starting_assortment_level = 1
 default_run_seed = 0

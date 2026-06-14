@@ -11,6 +11,8 @@ enum DialogKind {
 	NONE,
 	CAUGHT,
 	CUSTOMER_BYE,
+	RECEIPT_CONFIRM,
+	RECEIPT,
 	LOSE,
 	WIN,
 }
@@ -75,7 +77,7 @@ func refresh_hud() -> void:
 
 func refresh_customer_views() -> void:
 	if _context.has_active_customer():
-		_context.checkout_table.display_visible_object_slots(_context.run_state.current_customer.visible_slots)
+		_context.checkout_table.display_customer_objects(_context.run_state.current_customer.visible_slots)
 	refresh_customer_hand()
 
 
@@ -98,17 +100,34 @@ func show_caught_dialog() -> void:
 	_show_dialog(_get_current_customer_caught_dialog_text(), DialogKind.CAUGHT)
 
 
+func show_receipt_confirm() -> void:
+	_dialog_kind = DialogKind.RECEIPT_CONFIRM
+	_context.hud_root.show_receipt_confirm()
+
+
+func show_receipt(lines: Array[ReceiptLine], total_cents: int) -> void:
+	_dialog_kind = DialogKind.RECEIPT
+	_context.hud_root.show_receipt(lines, total_cents)
+
+
+func handle_receipt_cancelled() -> void:
+	if _dialog_kind != DialogKind.RECEIPT_CONFIRM:
+		return
+	_dialog_kind = DialogKind.NONE
+
+
+func handle_receipt_closed() -> void:
+	if _dialog_kind != DialogKind.RECEIPT:
+		return
+	_dialog_kind = DialogKind.NONE
+	_advance_after_customer()
+
+
 ## Called after every processed product/coupon: refreshes views and moves to
 ## the next customer once everything is handled.
 func notify_customer_object_processed() -> void:
 	refresh_customer_views()
 	refresh_hud()
-	if not _context.has_active_customer():
-		return
-	if not _context.run_state.current_customer.is_complete:
-		return
-
-	_queue_customer_done_dialog()
 
 
 func handle_dialog_closed() -> void:
@@ -136,7 +155,7 @@ func _start_customer() -> void:
 	var customer: CustomerState = _context.customer_generator.generate_customer(_context.registry, run_state)
 	_context.suspicion_system.setup_customer(customer, run_state)
 	var customer_coupon: CouponInstance = _context.coupon_system.create_customer_visible_coupon(run_state)
-	_context.visible_object_queue_system.start_customer(customer, _context.get_balance().visible_object_slots, customer_coupon)
+	_context.customer_object_layout_system.start_customer(customer, customer_coupon)
 	run_state.current_customer = customer
 
 	customer_started.emit()

@@ -1,6 +1,6 @@
 # Checkout Scammer - Architektur
 
-Stand: 2026-06-13
+Stand: 2026-06-14
 
 Diese Datei ist die verbindliche technische Grundlage fuer Checkout Scammer. Aenderungen an dieser Architektur brauchen vorherige Ruecksprache mit Marco, wenn sie Ownership, Datenfluss, Szenenstruktur, Autoloads, UI-Architektur oder zentrale Gameplay-Systeme betreffen.
 
@@ -8,7 +8,7 @@ Diese Datei ist die verbindliche technische Grundlage fuer Checkout Scammer. Aen
 
 - Godot 4.6, 2D Pixel-Art, interne Authoring-Aufloesung `640x360`.
 - Ein 1-Screen-Spiel mit klaren, editorseitig bearbeitbaren Bereichen: linke Statusleiste, Kassentisch, rechte Upgrade-Leiste.
-- Der Scanner-Moment ist der wichtigste Kern: Handscanner-Modus, Crosshair, Beep, Geldfeedback im Kassendisplay, Scannerstrahl und Produktfeedback.
+- Der Scanner-Moment ist der wichtigste Kern: Der Handscanner ist dauerhaft der Cursor, das Crosshair sitzt exakt auf der Mausposition, Scannerstrahl, Beep, Geldfeedback im Kassendisplay und Produktfeedback tragen die Hauptinteraktion.
 - Gameplay-Regeln bleiben testbar und UI-unabhaengig.
 - Szenen bleiben Authoring-Flaechen. Layouts, Slots, Drop-Zonen, Hitboxen, Marker, AnimationPlayer und UI-Struktur muessen im Godot-Editor sichtbar und bearbeitbar bleiben.
 - Code erzeugt keine kompletten Gameplay- oder UI-Baeume von Grund auf. Code steuert vorhandene Szenen, befuellt vorbereitete Container und instanziiert nur fertige `PackedScene`s.
@@ -34,7 +34,7 @@ Haupttypen:
 - `RunController`: duenne Verdrahtungsschicht. Verbindet Presentation-Signale mit den Handlern, haelt selbst keine Spiellogik.
 - `RunContext`: gemeinsamer Zustand einer Session (Registry, RunState, Systeme, Presentation-Referenzen) fuer alle Handler.
 - `RunFlowController`: Run-/Tages-/Kunden-Lifecycle, Win/Lose und Dialog-Zustandsmaschine.
-- `CheckoutInteractionHandler`: uebersetzt Tisch-Intents (Scan, Wiegen, Bag, Trash, Sticker) in Simulation-Aufrufe und Feedback.
+- `CheckoutInteractionHandler`: uebersetzt Tisch-Intents (Scan, Wiegen, Kassenbon-Abschluss, Trash, Sticker) in Simulation-Aufrufe und Feedback.
 - `ShopHandler`: Coupon-Kauf, Sortiment-Upgrade, Sticker-Popup.
 - `HudStateUpdater`: synchronisiert Run-State in das HUD (Summary, Buttons, Tooltips).
 - `ContentRegistry`: zentraler Zugriff auf Produkt-, Coupon-, Upgrade-, Balance-, Customer-Type- und UI-Resources.
@@ -52,7 +52,7 @@ Simulation trifft Regelentscheidungen und mutiert Runtime-State. Sie hat keine A
 
 Kernsysteme:
 
-- `VisibleObjectQueueSystem`: Kunden-Queue, vier sichtbare Objekt-Slots, Nachruecken erst nach Verarbeitung, Coupon-Objekt als optionaler erster sichtbarer Eintrag.
+- `CustomerObjectLayoutSystem`: legt zu Kundenbeginn optionalen Coupon plus alle Kundenprodukte direkt als sichtbare `VisibleObjectSlot`s auf die Matte; es gibt keine versteckte Nachrueck-Queue mehr.
 - `ScanSystem`: Scan-Gueltigkeit fuer Handscanner-Kontakte, Rotation/Hit-Details, wiegbare-Produkte-Ablehnung und gemeinsamer Charge-/Caught-Pfad fuer Scan und Wiegen.
 - `EconomySystem`: Festpreiswerte, Gewichtspreise, Rabatte, Sticker-Multiplikatoren, Rundung, Payout.
 - `CouponSystem`: Aktivierung, Verzoegerung bis zum naechsten Kunden, Dauer bis Tagesende, Coupon-Scam.
@@ -76,14 +76,15 @@ Wichtige Szenen:
 - `TableActor` (Basisklasse): gemeinsame Drag-/Slot-/Finish-API fuer Produkt- und Coupon-Actors.
 - `CheckoutTable`: mittlerer Kassentisch als Root der spielbaren Flaeche.
 - `ProductScatterView`: verstreute sichtbare Objekt-Slots im rechten Tischbereich, Spawn-von-rechts-Animationen, Slot-Marker.
-- `ProductActor`: Drag, Rotation, Click-to-sell fuer gebuchte Fixpreis-Produkte, Schatten und Produktfeedback.
-- `ScannerStation`: Handscanner-Station, Scanner-Cursor, rotes Crosshair, Scannerstrahl, Hitbox/Area2D und SFX-/Feedback-Anker.
+- `ProductActor`: Rechtsklick-Drag, Rotation, Linksklick-Scan fuer Fixpreis-Produkte, Buchungszahl, Schatten und Produktfeedback.
+- `ScannerStation`: permanenter Scanner-Cursor, Crosshair exakt am Mauspunkt, Scanner-Sprite darunter, Scannerstrahl, Hitbox/Area2D und SFX-/Feedback-Anker.
 - `RegisterDisplay`: editorseitig platzierbares Kassendisplay im Tisch, zeigt den offenen Betrag des aktuell gebuchten Produktes.
-- `BagZone`: Drop-Zone fuer finalen Verkauf.
+- `RegisterCheckoutZone`: editorseitig platzierte Kassen-Hitbox zum Erzeugen des Kassenbons.
 - `TrashZone`: Drop-Zone fuer Produkt-/Coupon-Entsorgung.
 - `ScaleStation`: editorseitig platzierte Waagen-Drop-Zone fuer wiegbare Produkte, mit `waage_sheet.png`-Press-Frames.
 - `CustomerHandView`: typisierte Customer-Signal-View. Sie zeigt fuer den aktiven Kundentyp die drei Suspicion-Texturen gruen, gelb und rot nach den globalen Signal-Schwellen und stellt den Mouseover-Tooltip bereit.
 - `HudRoot`: linke Statusleiste, rechte Upgrade-Leiste, Dialoge, Coupon-Popup und Sticker-Popup.
+- `ReceiptConfirmPopup` und `ReceiptPopup`: 9-Slice-Popups fuer Bon-Bestaetigung, Kassenbon-Zeilen, Summe und Kundenabschluss.
 - `StickerPopup` und `StickerToken`: rechtes UI-Popup mit physischen draggable Sticker-Tokens.
 
 Node-Pfade werden nicht quer durch die Szene gesucht. Parent/Child-Kommunikation nutzt lokale Signals, `@export`-Referenzen oder kleine Controller-APIs.
@@ -146,8 +147,8 @@ Verbindlich sichtbar in Szenen:
 
 - Layout-Container fuer linke Statusleiste, Kassentisch und rechte Upgrade-Leiste.
 - Slot-Marker und Spawn-/Exit-Marker fuer die verstreute Produktflaeche.
-- Handscanner-Station, Scanner-Cursor, Crosshair, Scannerstrahl, Scanner-Hitbox und Feedback-Anker.
-- Bag- und Trash-Drop-Zonen inklusive Collision-/Area-Nodes.
+- Permanenter Scanner-Cursor, Crosshair, Scannerstrahl, Scanner-Hitbox und Feedback-Anker.
+- RegisterCheckout- und Trash-Drop-/Hit-Zonen inklusive Collision-/Area-Nodes.
 - Waagen-Drop-Zone, Waagen-Sprite, DropAnchor und Press-Feedback.
 - ProductActor-Root, Sprite-Anker, Schatten-Anker und Drag-Feedback-Anker.
 - ProductActor-StickerLayer und vorbereitete Sticker-Visual-Scene.
@@ -177,10 +178,11 @@ Wenn eine Runtime-Erzeugung noetig ist, muss sie eine vorbereitete Scene instanz
 
 Eine Szene hat genau eine Hauptaufgabe:
 
-- `ProductActor`: sammelt Drag-/Rotate-Input, meldet Click-to-sell-Intents fuer gebuchte Fixpreis-Produkte und zeigt Produktzustand.
-- `ScannerStation`: toggelt Maus-/Scannermodus, meldet Handscanner-Kontakte und zeigt Scannerfeedback.
+- `ProductActor`: sammelt Rechtsklick-Drag-/Rotate-Input, meldet Linksklick-Intents fuer Scanner-Scans, zeigt Produktzustand und die Buchungszahl ab `1`.
+- `ScannerStation`: folgt dauerhaft der Maus, versteckt den OS-Cursor, faerbt Crosshair/Beam nach Zielzustand und zeigt Scannerfeedback.
 - `ProductScatterView`: zeigt Slots verstreut im rechten Tischbereich und animiert neue Objekte von rechts herein.
-- `BagZone` und `TrashZone`: melden Drop-Intents.
+- `RegisterCheckoutZone`: meldet den Kassenbon-Abschluss-Intent.
+- `TrashZone`: meldet Drop-Intents.
 - `ScaleStation`: akzeptiert genau ein wiegbares Produkt visuell, spielt Waagenfeedback und meldet Drop-/Remove-Intents.
 - `CustomerHandView`: zeigt den aktiven Kundentyp, wechselt dessen gruen/gelb/rot-Textur nach den globalen Suspicion-Signal-Schwellen, spielt Alert-/Caught-Feedback und liefert den Kundentyp-Tooltip.
 - `StickerPopup`: zeigt verfuegbare Sticker-Instanzen und sendet Drag-Release-Intents mit Sticker-ID und Drop-Position.
@@ -195,27 +197,28 @@ Keine UI-Komponente bucht Geld, scannt Produkte, veraendert Suspicion oder aktiv
 
 1. `RunController` fordert beim `CustomerGenerator` den naechsten Kunden an.
 2. `CustomerGenerator` waehlt den `CustomerTypeResource`: Run-Kunde 1 ist immer Jimmy, alle weiteren Kunden werden mit dem aktuellen Run-Seed zufaellig ohne direkte Typ-Wiederholung gezogen.
-3. `CustomerGenerator` filtert das aktuell freigeschaltete Sortiment ueber den Preisperzentil-Bereich des Kundentyps und erzeugt daraus die Produktqueue.
+3. `CustomerGenerator` filtert das aktuell freigeschaltete Sortiment ueber den Preisperzentil-Bereich des Kundentyps und erzeugt daraus die Produktliste.
 4. `CustomerGenerator` erzeugt fuer wiegbare Produkte deterministische Gewichte aus Run-Seed, Tag, Kunde, Produktindex und Produkt-ID.
 5. `SuspicionSystem` initialisiert die Suspicion aus der Kundentyp-Kurve plus `RunState.next_customer_suspicion_bonus_percent`, capped bei `100`, und verbraucht danach diesen Bonus.
 6. `CouponSystem` bestimmt, ob ein aktiver Coupon als erstes sichtbares Objekt auftaucht.
-7. `VisibleObjectQueueSystem` baut aus Coupon plus Produktqueue die sichtbaren `VisibleObjectSlot`s.
-8. `ProductScatterView` instanziiert vorbereitete `PackedScene`s fuer Coupon-/Produkt-Actors in vorhandene Slot-Marker.
+7. `CustomerObjectLayoutSystem` baut aus optionalem Coupon plus allen Kundenprodukten direkt die sichtbaren `VisibleObjectSlot`s und leert die interne Produktqueue.
+8. `ProductScatterView` instanziiert vorbereitete `PackedScene`s fuer Coupon-/Produkt-Actors in vorhandene Slot-Marker; es gibt kein Nachruecken waehrend des Kunden.
 9. `CustomerHandView` zeigt die gruen/gelb/rot-Texturen nach den globalen Signal-Schwellen und den Tooltip des aktiven Kundentyps.
 10. `ProductActor` skaliert Obst-Sprite, Schatten und Interaction-Shape anhand des gespeicherten Gewichts.
 
 ### Scan
 
-1. Rechtsklick in der Tischflaeche toggelt zwischen Mausmodus und Scannermodus.
-2. Im Scannermodus versteckt `ScannerStation` den OS-Cursor, laesst den Scanner-Cursor der Maus folgen und zeigt ein rotes Crosshair ueber dem Scanner.
-3. Linksklick haelt den Scanner aktiv. Pro Crosshair-Eintritt wird der oberste `ProductActor` oder `CouponActor` unter der Hitbox gemeldet; stehenbleiben auf demselben Objekt scannt nicht erneut.
-4. `RunController` baut fuer Produkt-Scans einen `ScanRequest` mit Actor-ID, Kontaktposition, Rotation/Hit-Details und aktuellem Runtime-State.
-5. `ScanSystem` entscheidet, ob der Produkt-Scan gueltig ist. Wiegbare Produkte werden vor dem Caught-Roll abgelehnt.
-6. Bei Mehrfachscan fragt `ScanSystem` ueber den gemeinsamen Charge-Pfad den `SuspicionSystem`-Caught-Roll gegen die Suspicion-Kurve des aktiven Kundentyps ab.
-7. Der Mehrfachscan-Versuch erhoeht die Suspicion nach dem Caught-Roll auch dann auf die naechste Kundentyp-Stufe, wenn der Spieler erwischt wurde.
-8. `EconomySystem` berechnet den offenen Festpreis-Betrag.
-9. `RunController` aktualisiert Runtime-State und sendet Feedback-Events an Presentation: Beep, Scannerstrahl/Crosshair-Feedback, Betrag im Kassendisplay, Customer-Signal-State.
-10. Coupon-Scans ueber den Handscanner aktivieren Coupons ehrlich und verarbeiten den Coupon-Slot.
+1. `ScannerStation` versteckt den OS-Cursor immer, laesst den Scanner-Cursor dauerhaft der Maus folgen und positioniert das Crosshair exakt am Mauspunkt.
+2. Das Scanner-Sprite bleibt unterhalb des Crosshairs sichtbar; Scanner-Sprite, Crosshair und Strahl liegen immer ueber Gameplay-Objekten und UI-Popups. Waehrend Produkt-Drag wird nur das Crosshair ausgeblendet.
+3. Linksklick auf ein Festpreis-Produkt meldet einen Produkt-Scan.
+4. Linksklick auf einen Coupon aktiviert ihn ehrlich.
+5. Rechtsklick-Drag bewegt Produkte und Coupons; Coupon-Drag in `TrashZone` bleibt Coupon-Scam.
+6. Hovern ueber Obst faerbt das Crosshair blau. Obst wird per Rechtsklick-Drag normal mit sichtbarem Scanner-Sprite bewegt, ohne Scannerverkauf.
+7. `RunController` baut fuer Produkt-Scans einen `ScanRequest` mit Actor-ID, Kontaktposition, Rotation/Hit-Details und aktuellem Runtime-State.
+8. `ScanSystem` entscheidet, ob der Produkt-Scan gueltig ist. Wiegbare Produkte werden vor dem Caught-Roll abgelehnt.
+9. Bei Mehrfachscan fragt `ScanSystem` ueber den gemeinsamen Charge-Pfad den `SuspicionSystem`-Caught-Roll gegen die Suspicion-Kurve des aktiven Kundentyps ab.
+10. `EconomySystem` berechnet den offenen Festpreis-Betrag und erhoeht `ProductInstance.scan_count`.
+11. `RunController` aktualisiert Runtime-State und sendet Feedback-Events an Presentation: Beep, roter Scannerstrahl/Crosshair-Impuls, Betrag im Kassendisplay, Buchungszahl am Produkt, Customer-Signal-State.
 
 ### Wiegen
 
@@ -223,7 +226,7 @@ Keine UI-Komponente bucht Geld, scannt Produkte, veraendert Suspicion oder aktiv
 2. `ScaleStation` akzeptiert nur ein wiegbares Produkt gleichzeitig und meldet den Drop an `CheckoutTable`.
 3. `RunController` setzt den aktiven Waagen-Actor und nutzt `ScanSystem.evaluate_product_charge_attempt`, also denselben First-/Duplicate-/Caught-Pfad wie beim Scan.
 4. `EconomySystem` berechnet `weight_grams * price_per_kg_cents`, wendet ehrliche Coupons und aktuelle Sticker-Multiplikatoren an und addiert nur den neuen Betrag zum offenen Produktbetrag.
-5. `RunController` aktualisiert Runtime-State und sendet Feedback-Events an Presentation: Waagenfeedback, Betrag im Kassendisplay, Customer-Signal-State.
+5. `RunController` aktualisiert Runtime-State und sendet Feedback-Events an Presentation: Waagenfeedback, Betrag im Kassendisplay, Buchungszahl am Produkt, Customer-Signal-State.
 6. Zum Mehrfachbuchen kann der Spieler das Obst von der Waage hochheben und erneut ablegen. Jede weitere Wiegung nutzt den Duplicate-/Caught-Pfad und erhoeht die Suspicion nach dem Caught-Roll auch bei Caught.
 7. Beim Entfernen des Obstes von der Waage wird der Betrag im Kassendisplay ausgeblendet; der offene Betrag bleibt am Produkt.
 8. Wenn ein Sticker auf das aktuell auf der Waage liegende Obst geklebt wird, berechnet `EconomySystem` den offenen Produktbetrag mit den aktuellen Stickern neu und `RunController` aktualisiert das Kassendisplay sofort.
@@ -237,15 +240,18 @@ Keine UI-Komponente bucht Geld, scannt Produkte, veraendert Suspicion oder aktiv
 5. Doris addiert `caught_next_customer_suspicion_bonus_percent` auf `RunState.next_customer_suspicion_bonus_percent`. Mehrfaches Erwischtwerden stapelt, der beim naechsten Kunden angewendete Startwert wird bei `100` gecappt.
 6. Coupon-Scam loest keinen Caught-Roll und keine Kundentyp-Strafe aus.
 
-### Verkauf
+### Kassenbon
 
-1. Gebuchte Fixpreis-Produkte werden im Mausmodus per Linksklick verkauft.
-2. Obst wird weiterhin nach dem Wiegen per Drag in `BagZone` gedroppt; Produkte ohne offenen Betrag werden abgelehnt.
-3. `RunController` fragt `EconomySystem` nach `PayoutOutcome`.
-4. Offener Betrag wird dem Run-/Kunden-Total gutgeschrieben.
-5. `VisibleObjectQueueSystem` markiert das Objekt als verarbeitet und rueckt erst jetzt nach.
-6. `ProductActor` verschwindet ueber vorbereitete Animation/VFX in Richtung Tüte.
-7. Coin-VFX wird bei Click-to-sell am Mauszeiger und bei Drag-to-bag an der Tüte abgespielt, weil erst dort Geld gebucht wird.
+1. Erfolgreiche Scans und Wiegungen erhoehen nur den offenen Produktbetrag und `ProductInstance.scan_count`; sie buchen noch kein Geld in die Kasse.
+2. Ab `scan_count >= 1` zeigt `ProductActor` rechts unten am Sprite eine kleine Buchungszahl.
+3. Haelt der Spieler den Scanner ueber `RegisterCheckoutZone`, zeigt `ScannerStation` einen gruenen Scannerstrahl.
+4. Linksklick auf `RegisterCheckoutZone` oeffnet ein Confirm-Popup ueber `HudRoot`.
+5. Bei Nein wird nur das Popup geschlossen; der Kunde bleibt aktiv.
+6. Bei Ja baut `ReceiptBuilder` aus allen sichtbaren Produkten mit `scan_count > 0` und offenem Betrag die Bon-Zeilen.
+7. Mehrfach gebuchte Produkte erscheinen mehrfach auf dem Bon; zweite und weitere Zeilen derselben Produktinstanz werden leicht hervorgehoben.
+8. `EconomySystem.payout_product` bucht die Bon-Summe einmalig in `RunState.cash_cents`.
+9. `CustomerObjectLayoutSystem.mark_all_visible_objects_processed` verarbeitet danach alle noch sichtbaren Produkte/Coupons; ungebuchte Produkte werden ohne Geld verworfen.
+10. `ReceiptPopup` zeigt Zeilen, Summe und Continue. Continue schliesst den Kunden ab und `RunFlowController` startet den naechsten Kunden oder Tagesabschluss.
 
 ### Trash
 
@@ -253,7 +259,7 @@ Keine UI-Komponente bucht Geld, scannt Produkte, veraendert Suspicion oder aktiv
 2. `RunController` entscheidet anhand Runtime-Typ:
    - Produkt: verschwindet, offener Betrag wird verworfen.
    - Coupon: Coupon-Rabatt wird fuer diesen Kunden nicht aktiviert, Produktgewichtungs-Vorteil bleibt erhalten.
-3. `VisibleObjectQueueSystem` rueckt erst jetzt nach.
+3. `CustomerObjectLayoutSystem` leert den betroffenen Slot; es rueckt kein neues Produkt nach.
 
 ### Sticker
 
@@ -341,7 +347,7 @@ Root-Assets werden nicht als dauerhafte Asset-Ablage genutzt. Dauerhafte Ziele:
 - Produkt-Spritesheet-Mapping: `assets/textures/products/products_sheet.txt`
 - Bio-Sticker-Sprite: Atlas-Region aus `assets/textures/products/products_sheet.png`
 - Waage: `assets/textures/environment/waage_sheet.png`, 3 Frames à `96x96`
-- Handscanner: `assets/textures/environment/scanner.png` und `assets/textures/environment/scannerstation.png`
+- Handscanner-Cursor: `assets/textures/environment/scanner.png`. Die fruehere Ladestation ist nicht mehr Teil der Runtime-Szene.
 - Environment-Sprites: `assets/textures/environment`
 - Customer-Type-Sprites: `assets/textures/customer`, je Kundentyp drei Stage-Texturen fuer gruen/gelb/rot. `fatwoman_*` wird in Content als Margaret/Fatlady gemappt. Doris' `oldlady_*`-Sprites duerfen abweichende Abmessungen haben und muessen resource-/editorseitig sauber ausgerichtet werden.
 - Coin-/Scanner-VFX: `assets/vfx/coin`, `assets/vfx/scanner`
@@ -386,10 +392,10 @@ docs/
 scenes/
   application/
   gameplay/
-    bag/
     customer/
     product_area/
     products/
+    register/
     scale/
     stickers/
     scanner/
@@ -427,8 +433,9 @@ tools/
 
 Fruehe Tests sollen pure Gameplay-Logik abdecken:
 
-- `VisibleObjectQueueSystem`: Queue, sichtbare Slots, Coupon-Slot, Nachruecken erst nach Bag/Trash/Caught.
+- `CustomerObjectLayoutSystem`: alle Kundenprodukte plus optionaler Coupon liegen direkt sichtbar aus; keine Hidden Queue und kein Nachruecken.
 - `ScanSystem`: Handscanner-Kontakt, Obst-Ablehnung, Mehrfachscan, Rotation/Hit-Details.
+- `ReceiptBuilder`: gebuchte Produkte werden zu Bon-Zeilen aufgeteilt, Duplikate markiert und exakt aufsummiert.
 - `CouponSystem`: Aktivierung, Tagesdauer, Stack-/Delay-Regeln, Coupon-Scam.
 - `EconomySystem`: Festpreiswerte, Gewichtspreise, Rabatte, Sticker-Multiplikatoren, Rundung.
 - `SuspicionSystem`: deterministische Rolls mit Seed, kundentyp-spezifische Stufen, global einheitlicher Customer-Signal-Zustand und Start-Suspicion-Boni.

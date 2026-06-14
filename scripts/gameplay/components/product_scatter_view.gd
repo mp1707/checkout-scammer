@@ -59,7 +59,8 @@ func display_slots(slots: Array[VisibleObjectSlot]) -> void:
 		stale_object_keys.erase(object_key)
 		_actors_by_slot[slot.slot_index] = actor
 		_object_keys_by_slot[slot.slot_index] = object_key
-		_move_actor_to_slot(actor, object_key, slot_marker, is_new_actor, slot.slot_index)
+		if is_new_actor:
+			_move_actor_to_slot(actor, object_key, slot_marker, true, slot.slot_index)
 
 	for object_key: String in stale_object_keys.keys():
 		_remove_actor_for_object_key(object_key)
@@ -79,19 +80,11 @@ func clear_actors() -> void:
 
 
 func release_actor(actor: TableActor) -> void:
-	if actor == null:
+	if actor == null or actor.slot_index < 0:
 		return
-
-	var slot_index: int = actor.slot_index
-	if slot_index < 0:
-		return
-	if _actors_by_slot.get(slot_index) == actor:
-		_actors_by_slot.erase(slot_index)
-		var object_key: String = _object_keys_by_slot.get(slot_index, "")
-		_object_keys_by_slot.erase(slot_index)
-		if not object_key.is_empty() and _actors_by_object_key.get(object_key) == actor:
-			_actors_by_object_key.erase(object_key)
-			_kill_spawn_tween(object_key)
+	var object_key: String = _object_keys_by_slot.get(actor.slot_index, "")
+	if not object_key.is_empty():
+		_kill_spawn_tween(object_key)
 
 
 func set_actor_input_enabled(is_enabled: bool) -> void:

@@ -9,9 +9,9 @@
 
 - Mit dem Handscanner ein Produkt anvisieren und scannen
 - Das satisfying „Beep“-Geräusch hören
-- Coin-Animation beim finalen Verkauf sehen
+- Coin-Animation beim Kassenbon-Abschluss sehen
 - Den aktuellen Verkaufsbetrag im Kassendisplay sehen
-- Geld beim finalen Verkauf direkt hochzählen sehen
+- Geld beim Kassenbon-Abschluss direkt hochzählen sehen
 - Der Scanner-Moment ist der wichtigste Kern des Spiels
 
 ## Perspektive und Art-Style
@@ -55,20 +55,21 @@
 
 ### Scanner
 
-- Der Scanner ist ein Handscanner mit sichtbarer Station auf dem Kassentisch.
-- Rechtsklick toggelt zwischen Mausmodus und Scannermodus.
-- Im Mausmodus steht der Scanner in seiner Station; im Scannermodus ist der Scanner der Mauszeiger.
-- Über dem Scanner liegt ein rotes, halbtransparentes Crosshair.
-- Linksklick im Scannermodus aktiviert den Scanner dauerhaft, solange die Taste gedrückt bleibt.
-- Beim aktiven Scannen wird ein roter Scannerstrahl sichtbar und das Crosshair wirkt kräftiger.
-- Ein Objekt wird genau beim Eintritt ins Crosshair gescannt; bleibt das Crosshair auf demselben Objekt stehen, scannt es nicht erneut.
-- Mehrfachscans entstehen durch erneutes Hineinfahren in dasselbe Produkt oder durch erneutes Drücken.
-- Obst ist nicht scannerverkaufbar. Wird Obst mit dem Handscanner getroffen, wird kein Betrag hinzugefügt und kein Suspicion-Roll ausgelöst.
-- Coupons werden mit dem Handscanner ehrlich aktiviert.
+- Der Scanner ist dauerhaft der Maus-Cursor.
+- Der OS-Cursor ist im Spielbereich versteckt.
+- Das Crosshair sitzt exakt am Mauspunkt.
+- Das Scanner-Sprite bleibt sichtbar und sitzt unterhalb des Crosshairs.
+- Scanner-Sprite, Crosshair und Strahl liegen immer über Produkt-Sprites, Waagentexten und Popups.
+- Linksklick auf ein Festpreis-Produkt scannt dieses Produkt.
+- Beim erfolgreichen Scan wird ein roter Scannerstrahl sichtbar und das Crosshair wirkt kräftiger.
+- Mehrfachscans entstehen durch wiederholte Linksklicks auf dasselbe Produkt.
+- Hält man das Crosshair über Obst, wird das Crosshair blau.
+- Obst ist nicht scannerverkaufbar. Rechtsklick-Drag bewegt Obst normal mit sichtbarem Scanner-Sprite; während Drag verschwindet nur das Crosshair.
+- Coupons werden per Linksklick mit dem Handscanner ehrlich aktiviert.
 
 ### Waage
 
-- Obst muss über die Waage verkauft werden.
+- Obst muss über die Waage gebucht werden.
 - Die Waage steht im Tischbereich oberhalb des Scanners.
 - Die Waage ist eine eigene Drop-Zone und akzeptiert immer nur ein wiegbares Produkt gleichzeitig.
 - Wenn Obst auf die Waage gelegt wird, spielt die Waage die Press-Animation aus `waage_sheet.png`.
@@ -88,31 +89,28 @@
 
 - Im rechten Tischbereich liegen die Produkte verstreut auf dem Kassentisch.
 - Es gibt kein sichtbares Fließband mehr.
-- Neue Produkte rutschen weiterhin von rechts in die Produktfläche hinein.
-- Dadurch entsteht der Eindruck, dass neue Produkte von außerhalb des sichtbaren Bereichs kommen, ohne dass ein Band dargestellt wird.
-- Es werden immer maximal 4 aktive Objekte gleichzeitig auf der Produktfläche angezeigt.
-- Ohne Coupon sind das 4 Produkte.
-- Mit Coupon kann ein sichtbarer Slot durch den Coupon belegt sein.
 - Ein Kunde hat weiterhin 10 Produkte.
-- Initial fahren die ersten 4 Objekte ins Bild.
-- Wenn ein Coupon für diesen Kunden aktiv ist, ist er das erste Objekt, gefolgt von den ersten Produkten.
-- Sobald ein Produkt nur aufgenommen wurde, rutscht noch kein neues Produkt nach.
-- Ein neues Produkt rutscht erst nach, wenn eines der 4 aktiven Objekte in der Tüte, im Müll oder durch Erwischen verschwunden ist.
-- Das wiederholt sich, bis alle 10 Produkte des Kunden verarbeitet wurden.
-- Wenn keine Produkte mehr im Kunden-Queue sind, bleibt die Produktfläche leer.
+- Zu Beginn eines Kunden liegen alle 10 Produkte direkt auf der Matte.
+- Wenn ein Coupon für diesen Kunden aktiv ist, liegt der Coupon zusätzlich als erstes Objekt auf der Matte.
+- Neue Produkte rutschen während eines Kunden nicht nach.
+- Gescannte oder gewogene Produkte bleiben sichtbar und erhalten ab der ersten Buchung eine kleine Zahl rechts unten am Sprite.
+- Die Zahl zeigt, wie oft das Produkt gebucht wurde. Bei `0` wird keine Zahl angezeigt.
 
-### Tüte
+### Kassenbon
 
-- Gescannte Festpreis-Produkte werden im Mausmodus per Linksklick verkauft und fliegen automatisch in die Tüte.
-- Gewogenes Obst wird nach dem Wiegen manuell von der Waage genommen und in die Tüte gelegt.
-- Obst ohne offenen Verkaufsbetrag wird in der Tüte abgelehnt und nicht verarbeitet.
-- Ein Scan bucht noch kein Geld in den Total-Wert.
+- Ein Scan oder eine Wiegung bucht noch kein Geld in den Total-Wert.
 - Nach einem erfolgreichen Scan oder einer erfolgreichen Wiegung zeigt das Display der Kasse den offenen Verkaufsbetrag des aktuell gebuchten Produktes.
 - Der aktuelle Verkaufsbetrag nutzt grüne, displaytypische Schrift direkt im Kassendisplay.
-- Beim Click-to-sell oder Ablegen in der Tüte wird dieser aktuelle Verkaufsbetrag zum Total-Wert hinzugefügt.
-- Danach verschwindet das Produkt in der Tüte.
-- Ein in die Tüte gelegtes Produkt gilt als verkauft und kann nicht mehr aufgehoben oder erneut gescannt werden.
-- Mehrfachscans bei Festpreis-Produkten passieren, wenn der Spieler das Crosshair erneut in dasselbe Produkt führt oder neu scannt.
+- Ist der Einkauf fertig, hält der Spieler den Scanner über die Kasse.
+- Über der Kasse wird der Scannerstrahl grün.
+- Linksklick auf die Kasse öffnet ein Popup: Bon erzeugen? Ja/Nein.
+- Nein schließt nur das Popup.
+- Ja erzeugt den Kassenbon als Popup.
+- Der Kassenbon listet nur gebuchte Artikel.
+- Mehrfach gescannte oder mehrfach gewogene Produkte erscheinen mehrfach auf dem Bon; doppelte Einträge werden leicht hervorgehoben.
+- Unten steht die Summe.
+- Erst beim Erzeugen des Kassenbons wird die Summe zum Geldbestand gebucht.
+- Der Bon wird mit Continue beendet; danach kommt der nächste Kunde.
 
 ### Müll-Loch
 
@@ -177,7 +175,7 @@ Jeder Kunde hat einen Typ. Der Typ bestimmt, aus welchem Preisbereich des aktuel
   - Suspicion: `30 -> 65 -> 85 -> 95`.
   - Caught-Strafe: aktuelles Produkt geht verloren und zusätzlich wird einmal dessen Produktwert vom aktuellen Geldbestand abgezogen. Der Geldbestand kann dadurch nicht unter `0$` fallen.
   - Caught-Text: `Chad: I saw the double charge. Refund me this item's price from the drawer. Now.`
-  - Abschied: `Chad: Receipt. Bag. I'm already late.`
+  - Abschied: `Chad: Receipt. I'm already late.`
 - Doris (Oldlady)
   - Tooltip: `The sweetest, slowest customer — but get caught and she'll tell the whole neighborhood.`
   - Kaufverhalten: billigste `60%` des aktuell freigeschalteten Sortiments.
@@ -257,34 +255,29 @@ Jeder Kunde hat einen Typ. Der Typ bestimmt, aus welchem Preisbereich des aktuel
 
 ## Kunden-Produktfluss
 
-- Ein Kunde hat intern eine Queue aus 10 Produkten.
+- Ein Kunde hat 10 Produkte.
 - Der Kundentyp bestimmt, aus welchem Preisbereich des aktuellen Sortiments diese Produkte gezogen werden.
 - Coupons können die Gewichtung innerhalb dieses Kundentyp-Produktpools verändern.
-- Zu Beginn eines Kunden rutschen die ersten 4 Objekte von rechts in die Produktfläche.
-- Nur diese 4 Objekte sind gleichzeitig sichtbar.
-- Wenn ein Coupon für diesen Kunden aktiv ist, ist der Coupon das erste Objekt und danach folgen die ersten Produkte.
-- Wenn ein Produkt nur aufgenommen wird, bleibt sein sichtbarer Slot reserviert.
-- Erst wenn ein aktives Objekt verkauft, weggeworfen oder durch Erwischen entfernt wurde, rutscht das nächste Produkt aus der Queue nach.
-- Dadurch bleibt das Spielfeld übersichtlich.
-- Der Spieler verarbeitet alle 10 Produkte nacheinander.
+- Zu Beginn eines Kunden liegen alle 10 Produkte direkt sichtbar auf der Produktfläche.
+- Wenn ein Coupon für diesen Kunden aktiv ist, liegt er zusätzlich als erstes Objekt auf der Produktfläche.
+- Es gibt keine versteckte Nachzieh-Queue mehr.
+- Der Spieler kann die Produkte in freier Reihenfolge scannen, wiegen oder wegwerfen.
 - Die Reihenfolge innerhalb der sichtbaren Produkt-Slots ist frei wählbar.
 - Festpreis-Produkte können:
   - gescannt werden
-  - nach dem Scannen per Linksklick verkauft werden
   - mehrfach gescannt werden
   - in den Müll geworfen werden, falls das Produkt oder Objekt dafür gedacht ist
 - Obst kann:
   - auf die Waage gelegt werden
   - beim Ablegen auf der Waage abgerechnet werden
   - mehrfach gewogen werden
-  - nach offener Abrechnung in die Tüte gelegt werden
   - in den Müll geworfen werden
 - Obst bekommt beim Erstellen der Produktinstanz ein deterministisches zufälliges Gewicht.
 - Leichte und realistische Gewichte sind häufig, sehr schwere Früchte selten.
 - Die Gewichtsrundung liegt aktuell bei `10g`.
 - Die Obst-Spritegröße wird anhand des jeweiligen Gewichts von ca. `1.0x` bis maximal `2.0x` skaliert.
-- Jeder erfolgreiche Scan oder jede erfolgreiche Wiegung erhöht den offenen Verkaufsbetrag des betroffenen Produkts.
-- Der offene Verkaufsbetrag wird erst beim Ablegen in der Tüte zum Total-Wert gebucht.
+- Jeder erfolgreiche Scan oder jede erfolgreiche Wiegung erhöht den offenen Verkaufsbetrag und die sichtbare Buchungszahl des betroffenen Produkts.
+- Der offene Verkaufsbetrag wird erst beim Erzeugen des Kassenbons zum Total-Wert gebucht.
 
 ## Suspicion-System
 
@@ -300,7 +293,7 @@ Jeder Kunde hat einen Typ. Der Typ bestimmt, aus welchem Preisbereich des aktuel
 - Chad steigt über `30 -> 65 -> 85 -> 95`.
 - Doris steigt über `5 -> 30 -> 55 -> 75`.
 - Nach der letzten Stufe bleibt die Suspicion beim letzten Wert des Kundentyps.
-- Mehrfachscans sind unbegrenzt möglich, bis der Spieler erwischt wird oder das Produkt verkauft.
+- Mehrfachscans sind unbegrenzt möglich, bis der Spieler erwischt wird oder den Kassenbon abschließt.
 - Neuer Kunde = neues Suspicion-Meter mit Startwert des Kundentyps.
 - Doris kann durch Caught einen `+20%` Start-Suspicion-Bonus für den nächsten Kunden stapeln.
 - Dieser Bonus wird beim nächsten Kunden auf dessen Kundentyp-Startwert addiert und bei `100%` gecappt.
@@ -403,7 +396,7 @@ Jeder Kunde hat einen Typ. Der Typ bestimmt, aus welchem Preisbereich des aktuel
 - Der Spieler hat pro Tag `3x Bio-Sticker`.
 - Die Sticker werden als einzelne physische Sticker im Popup angezeigt.
 - Jeder Bio-Sticker kann aus dem Popup heraus per Drag-&-Drop auf Obst gezogen werden.
-- Bio-Sticker können nicht auf Festpreis-Produkte, Coupons, Müll, Scanner, Tüte oder leere Fläche geklebt werden.
+- Bio-Sticker können nicht auf Festpreis-Produkte, Coupons, Müll, Scanner, Kasse oder leere Fläche geklebt werden.
 - Nach dem Aufkleben ist der Sticker verbraucht und kann nicht entfernt werden.
 - Der Sticker ist sichtbar auf dem Obst und bewegt sich mit dem Produkt.
 - Tooltip: `Verdreifacht den Preis von Obst`
@@ -459,28 +452,25 @@ Out of scope für den Prototyp:
 - Kunde startet.
 - Der Kundentyp wird rechts oben über der Produktfläche sichtbar.
 - Beim ersten Kunden eines Runs ist der Kundentyp immer Jimmy.
-- Die ersten 4 Objekte rutschen von rechts in die verstreute Produktfläche.
-- Falls für diesen Kunden ein Coupon aktiv ist, liegt er zuerst in der Produktfläche.
+- Alle 10 Produkte liegen direkt in der verstreuten Produktfläche.
+- Falls für diesen Kunden ein Coupon aktiv ist, liegt er zusätzlich zuerst in der Produktfläche.
 - Der Spieler nimmt ein Produkt von der Produktfläche.
-- Festpreis-Produkte werden im Scannermodus mit dem Handscanner-Crosshair getroffen.
+- Der Handscanner ist permanent der Cursor.
+- Festpreis-Produkte werden per Linksklick mit dem Crosshair gescannt.
 - Ein gültiger Scan löst aus:
   - Beep
   - Verkaufsbetrag im Kassendisplay erhöht sich
   - Crosshair-/Scannerstrahl-Feedback
-- Obst wird auf die Waage gelegt, direkt abgerechnet und danach in die Tüte gelegt.
+- Obst wird mit dem Scanner-Cursor gedraggt und auf die Waage gelegt.
 - Danach kann der Spieler das Festpreis-Produkt nochmal scannen oder Obst erneut wiegen.
-- Bei Festpreis-Produkten bucht Linksklick im Mausmodus den offenen Verkaufsbetrag und laesst das Produkt automatisch in die Tüte fliegen.
-- Bei Obst wird der offene Verkaufsbetrag beim Ablegen in die Tüte zum Total-Wert gebucht.
-- Beim Festpreis-Click-to-sell spielt die Coin-Animation am Mauszeiger; beim Obst-Bagging spielt sie an der Tüte.
-- Wenn eines der 4 aktiven Objekte in der Tüte, im Müll oder durch Erwischen verschwunden ist, rutscht das nächste Produkt von rechts nach.
-- Der Spieler verarbeitet alle 10 Produkte des Kunden.
+- Ab der ersten Buchung zeigt das Produkt rechts unten seine Buchungszahl.
+- Wenn der Einkauf fertig ist, hält der Spieler den Scanner über die Kasse und klickt.
+- Bei Ja im Confirm-Popup wird der Kassenbon erzeugt, die Bon-Summe gebucht und der Bon angezeigt.
+- Continue auf dem Bon startet den nächsten Kunden.
 - Festpreis-Produkte können mehrfach gescannt werden.
 - Obst kann mehrfach gewogen werden.
 - Mehrfaches Scannen oder mehrfaches Wiegen erhöht die Suspicion.
 - Die Suspicion wird über den Sprite-Zustand des Kundensignals angezeigt.
-- Nach dem letzten verarbeiteten Produkt erscheint nach einer Sekunde eine kundentyp-spezifische Textbox aus `CustomerTypeResource.farewell_dialog_text`.
-
-- Die Textbox muss mit Enter weggeklickt werden.
 - Danach kommt der nächste Kunde.
 - Nach 3 Kunden endet der Geschäftstag.
 - Am Tagesende wird die Miete bezahlt.
@@ -489,34 +479,30 @@ Out of scope für den Prototyp:
 ## Scan-Regeln
 
 - Ein Scan zählt nur, wenn:
-  - der Spieler im Scannermodus Linksklick gedrückt hält
-  - das Handscanner-Crosshair neu in ein scanbares Objekt eintritt
+  - der Spieler kurz auf ein scanbares Objekt linksklickt
   - das getroffene Objekt ein Festpreis-Produkt oder Coupon ist
 - Kein Scan zählt, wenn:
-  - der Spieler im Mausmodus ist
-  - das Crosshair unverändert auf demselben Objekt stehen bleibt
-  - der Spieler nicht aktiv scannt
+  - der Spieler das Produkt nur zieht
   - das Produkt Obst bzw. ein wiegbares Produkt ist
 - Dadurch wird der Scan-Moment klarer und absichtlicher.
 - Der erste erfolgreiche Scan eines Produkts zeigt den offenen Verkaufsbetrag im Kassendisplay.
+- Ab dem ersten erfolgreichen Scan zeigt das Produkt seine Buchungszahl.
 - Jeder weitere erfolgreiche Scan desselben Produkts erhöht diesen offenen Verkaufsbetrag erneut um den Produktwert.
 - Bei Mehrfachscans wird vor dem erfolgreichen Hinzufügen ein Caught-Roll gegen die aktuelle Suspicion ausgeführt. Danach steigt die Suspicion auch dann, wenn der Spieler erwischt wurde.
 
 ## Drag-&-Drop-Regeln
 
-- Produkt wird angeklickt oder gedrückt gehalten.
+- Produkt wird mit Rechtsklick gedrückt gehalten.
 - Dadurch haftet es am Cursor.
 - Danach kann es abgelegt werden:
   - im Müll-Loch
   - auf der Waage, wenn es Obst ist
-  - in der Tüte, wenn es gewogenes Obst ist
   - optional zurück auf dem Tisch, falls nötig
-- Gescannte Festpreis-Produkte werden im Mausmodus per Linksklick verkauft und verarbeitet.
-- Beim Ablegen von Obst in der Tüte gilt das Produkt als verkauft und verarbeitet.
-- Obst ohne offenen Verkaufsbetrag wird von der Tüte abgelehnt.
-- Der offene Verkaufsbetrag wird erst in diesem Moment zum Total-Wert gebucht.
+- Linksklick auf Festpreis-Produkte scannt.
+- Rechtsklick-Drag bewegt Produkte und Coupons.
+- Obst kann mit dem Scanner-Cursor per Rechtsklick normal gedraggt werden; während des Drags verschwindet das Crosshair, das Scanner-Sprite bleibt sichtbar.
+- Der offene Verkaufsbetrag wird erst beim Erzeugen des Kassenbons zum Total-Wert gebucht.
 - Beim Ablegen im Müll-Loch verschwindet das Produkt oder der Coupon.
-- Produkte in der Tüte können nicht erneut aufgenommen werden.
 - Sticker werden aus dem Sticker-Popup gezogen und können nur auf Obst gedroppt werden.
 
 ## Juice-Fokus
@@ -530,11 +516,11 @@ Out of scope für den Prototyp:
 - Angenehmer Beep-SFX
 - Pitch-Eskalation bei Double-, Triple- und Multi-Scans
 - Offener Verkaufsbetrag sitzt gut lesbar im Kassendisplay
-- Geld zählt links in der Menüleiste animiert hoch, wenn das Produkt verkauft wird
+- Geld zählt links in der Menüleiste animiert hoch, wenn der Kassenbon erzeugt wird
 - Kurzer Screen Shake bei Double Scans
 - Visuelles Feedback am Scanner
 - Rotes Crosshair, das beim Scannen kräftiger wird
-- Sichtbarer Scannerstrahl beim gedrückten Linksklick
+- Sichtbarer Scannerstrahl beim Linksklick-Scan
 - Produkt wobbelt oder squasht kurz beim erfolgreichen Scan
 
 ### Produktflächen-Juice
@@ -562,18 +548,18 @@ Für den ersten spielbaren Prototyp ist wichtig:
 - Mittlerer Kassentisch
 - Rechte Upgrade-Leiste
 - Verstreute Produktfläche im rechten Tischbereich
-- Maximal 4 sichtbare aktive Objekte
 - 10 Produkte pro Kunde
-- Handscanner mit Station, Scannermodus per Rechtsklick und rotem Crosshair
-- Scannen per Linksklick-Halten und Crosshair-Eintritt
+- Alle Kundenprodukte direkt sichtbar auf der Matte
+- Handscanner als permanenter Cursor mit rotem Crosshair
+- Scannen per Linksklick auf Festpreis-Produkte und Coupons
 - Obst ist wiegbar und nicht scanbar
 - Waage im Tischbereich
-- Tüte über dem Scanner
+- Kassenbon-Abschluss über Register-Hitbox
 - Müll-Loch rechts unten
 - Kundensignal rechts oben mit vier Kundentypen und je drei Suspicion-Sprites
 - Offener Verkaufsbetrag im Kassendisplay
-- Coin-Animation beim Festpreis-Click-to-sell und Obst-Bagging
-- Geld zählt beim finalen Verkauf direkt hoch
+- Buchungszahl am Produkt ab der ersten erfolgreichen Buchung
+- Geld zählt beim Erzeugen des Kassenbons direkt hoch
 - Double-Scan erhöht Suspicion
 - Mehrfaches Wiegen erhöht Suspicion wie Mehrfachscans
 - Erster Kunde eines Runs ist Jimmy, danach random Kundentypen ohne direkte Wiederholung

@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://43dsrku7gbmo" path="res://scripts/gameplay/components/checkout_table.gd" id="1_checkout_table"]
 [ext_resource type="PackedScene" uid="uid://bmhawbmbff00f" path="res://scenes/gameplay/scanner/scanner_station.tscn" id="2_scanner"]
 [ext_resource type="PackedScene" uid="uid://ccyjowplbywsf" path="res://scenes/gameplay/product_area/product_scatter_view.tscn" id="3_product_scatter"]
-[ext_resource type="PackedScene" uid="uid://lwh375jkwy3g" path="res://scenes/gameplay/bag/bag_zone.tscn" id="4_bag"]
+[ext_resource type="PackedScene" path="res://scenes/gameplay/register/register_checkout_zone.tscn" id="4_register"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/trash/trash_zone.tscn" id="5_trash"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/customer/customer_hand_view.tscn" id="6_hand"]
 [ext_resource type="FontFile" uid="uid://ilorfjrobin5" path="res://assets/fonts/PixelOperator8.ttf" id="7_33trb"]
@@ -12,7 +12,7 @@
 [ext_resource type="Script" uid="uid://cqe1rqlfh7jru" path="res://scripts/gameplay/components/register_display.gd" id="9_register_display"]
 [ext_resource type="PackedScene" uid="uid://bsvrb5lcllis3" path="res://scenes/gameplay/scale/scale_station.tscn" id="10_scale_station"]
 
-[node name="CheckoutTable" type="Control" unique_id=845555887 node_paths=PackedStringArray("product_scatter_view", "scanner_station", "register_display", "bag_zone", "trash_zone", "scale_station", "customer_hand_view", "vfx_container")]
+[node name="CheckoutTable" type="Control" unique_id=845555887 node_paths=PackedStringArray("product_scatter_view", "scanner_station", "register_display", "register_checkout_zone", "trash_zone", "scale_station", "customer_hand_view", "vfx_container")]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 640.0
@@ -22,7 +22,7 @@ script = ExtResource("1_checkout_table")
 product_scatter_view = NodePath("ProductScatterView")
 scanner_station = NodePath("ScannerStation")
 register_display = NodePath("RegisterDisplay")
-bag_zone = NodePath("BagZone")
+register_checkout_zone = NodePath("RegisterCheckoutZone")
 trash_zone = NodePath("TrashZone")
 scale_station = NodePath("ScaleStation")
 customer_hand_view = NodePath("CustomerHandView")
@@ -34,11 +34,11 @@ z_index = -100
 position = Vector2(320, 180)
 texture = ExtResource("8_table")
 
-[node name="BagZone" parent="." unique_id=1494708852 instance=ExtResource("4_bag")]
-position = Vector2(202, 243)
-
 [node name="ScannerStation" parent="." unique_id=678997339 instance=ExtResource("2_scanner")]
-position = Vector2(360, 263)
+position = Vector2(0, 0)
+
+[node name="RegisterCheckoutZone" parent="." unique_id=1494708852 instance=ExtResource("4_register")]
+position = Vector2(195, 100)
 
 [node name="ScaleStation" parent="." unique_id=306612671 instance=ExtResource("10_scale_station")]
 position = Vector2(334, 157)

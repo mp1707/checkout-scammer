@@ -6,12 +6,17 @@ signal coupon_selected(coupon_id: String)
 signal assortment_upgrade_button_pressed()
 signal sticker_button_pressed()
 signal sticker_drag_released(sticker_id: String, global_drop_position: Vector2)
+signal receipt_confirmed()
+signal receipt_cancelled()
+signal receipt_closed()
 signal dialog_closed()
 
 const FALLBACK_VIEWPORT_SIZE: Vector2 = Vector2(640.0, 360.0)
 const DIALOG_HORIZONTAL_MARGIN: float = 16.0
 const DIALOG_BOTTOM_MARGIN: float = 28.0
 const DIALOG_PANEL_HORIZONTAL_PADDING: int = 24
+const DIALOG_LAYER_Z_INDEX: int = 1000
+const POPUP_LAYER_Z_INDEX: int = 1100
 
 @export var theme_resource: CheckoutThemeResource = preload("res://content/ui/checkout_theme.tres")
 @export var left_status_panel: LeftStatusPanel
@@ -23,6 +28,8 @@ const DIALOG_PANEL_HORIZONTAL_PADDING: int = 24
 @export var popup_layer: Control
 @export var coupon_popup_scene: PackedScene
 @export var sticker_popup_scene: PackedScene
+@export var receipt_confirm_popup_scene: PackedScene
+@export var receipt_popup_scene: PackedScene
 @export var dialog_min_text_width: int = 120
 @export var dialog_max_text_width: int = 380
 @export var sticker_popup_position: Vector2 = Vector2(532.0, 134.0)
@@ -32,6 +39,7 @@ var _active_popup: Control
 
 func _ready() -> void:
 	_validate_required_references()
+	_apply_layer_order()
 	_connect_panel_signals()
 	_connect_dialog_signals()
 	_apply_label_theme(dialog_layer)
@@ -131,6 +139,40 @@ func refresh_sticker_popup(entries: Array[StickerInventoryEntry]) -> void:
 		sticker_popup.configure_inventory(entries)
 
 
+func show_receipt_confirm() -> void:
+	if receipt_confirm_popup_scene == null or popup_layer == null:
+		return
+
+	close_active_popup()
+	var popup: ReceiptConfirmPopup = receipt_confirm_popup_scene.instantiate() as ReceiptConfirmPopup
+	if popup == null:
+		push_error("Configured receipt_confirm_popup_scene does not instance a ReceiptConfirmPopup.")
+		return
+
+	_active_popup = popup
+	popup_layer.add_child(popup)
+	_set_popup_layer_visible(true)
+	popup.confirmed.connect(_on_receipt_confirmed)
+	popup.cancelled.connect(_on_receipt_cancelled)
+
+
+func show_receipt(lines: Array[ReceiptLine], total_cents: int) -> void:
+	if receipt_popup_scene == null or popup_layer == null:
+		return
+
+	close_active_popup()
+	var popup: ReceiptPopup = receipt_popup_scene.instantiate() as ReceiptPopup
+	if popup == null:
+		push_error("Configured receipt_popup_scene does not instance a ReceiptPopup.")
+		return
+
+	_active_popup = popup
+	popup_layer.add_child(popup)
+	_set_popup_layer_visible(true)
+	popup.receipt_closed.connect(_on_receipt_closed)
+	popup.configure_receipt(lines, total_cents)
+
+
 func close_active_popup() -> void:
 	if _active_popup != null:
 		_active_popup.queue_free()
@@ -164,8 +206,19 @@ func _validate_required_references() -> void:
 		push_error("%s is missing required scene reference 'dialog_continue_button'." % get_path())
 	if popup_layer == null:
 		push_error("%s is missing required scene reference 'popup_layer'." % get_path())
+	if receipt_confirm_popup_scene == null:
+		push_error("%s is missing required scene reference 'receipt_confirm_popup_scene'." % get_path())
+	if receipt_popup_scene == null:
+		push_error("%s is missing required scene reference 'receipt_popup_scene'." % get_path())
 	if theme_resource == null or theme_resource.font == null:
 		push_error("%s needs a theme_resource with a font for dialog sizing." % get_path())
+
+
+func _apply_layer_order() -> void:
+	if dialog_layer != null:
+		dialog_layer.z_index = DIALOG_LAYER_Z_INDEX
+	if popup_layer != null:
+		popup_layer.z_index = POPUP_LAYER_Z_INDEX
 
 
 func _connect_panel_signals() -> void:
@@ -201,6 +254,21 @@ func _on_coupon_selected(coupon_id: String) -> void:
 
 func _on_sticker_drag_released(sticker_id: String, global_drop_position: Vector2) -> void:
 	sticker_drag_released.emit(sticker_id, global_drop_position)
+
+
+func _on_receipt_confirmed() -> void:
+	close_active_popup()
+	receipt_confirmed.emit()
+
+
+func _on_receipt_cancelled() -> void:
+	close_active_popup()
+	receipt_cancelled.emit()
+
+
+func _on_receipt_closed() -> void:
+	close_active_popup()
+	receipt_closed.emit()
 
 
 func _on_dialog_continue_pressed() -> void:

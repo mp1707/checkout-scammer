@@ -286,8 +286,6 @@ func _validate_balance(errors: PackedStringArray) -> void:
 		errors.append("Game balance customers_per_day must be greater than zero.")
 	if game_balance.products_per_customer <= 0:
 		errors.append("Game balance products_per_customer must be greater than zero.")
-	if game_balance.visible_object_slots <= 0:
-		errors.append("Game balance visible_object_slots must be greater than zero.")
 	if game_balance.starting_assortment_level <= 0:
 		errors.append("Game balance starting_assortment_level must be greater than zero.")
 	if game_balance.default_run_seed < 0:

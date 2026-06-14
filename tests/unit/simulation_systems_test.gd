@@ -3,7 +3,8 @@ class_name SimulationSystemsTest
 
 var _registry: ContentRegistry
 var _generator: CustomerGenerator
-var _visible_object_queue_system: VisibleObjectQueueSystem
+var _customer_object_layout_system: CustomerObjectLayoutSystem
+var _receipt_builder: ReceiptBuilder
 var _scan_system: ScanSystem
 var _suspicion_system: SuspicionSystem
 var _economy_system: EconomySystem
@@ -19,7 +20,8 @@ func _initialize() -> void:
 		_fail("content validation", message)
 
 	_generator = CustomerGenerator.new()
-	_visible_object_queue_system = VisibleObjectQueueSystem.new()
+	_customer_object_layout_system = CustomerObjectLayoutSystem.new()
+	_receipt_builder = ReceiptBuilder.new()
 	_scan_system = ScanSystem.new()
 	_suspicion_system = SuspicionSystem.new()
 	_economy_system = EconomySystem.new()
@@ -29,10 +31,11 @@ func _initialize() -> void:
 
 	_test_customer_generator()
 	_test_run_seed_initialization()
-	_test_visible_object_queue_system()
+	_test_customer_object_layout_system()
 	_test_scan_system()
 	_test_suspicion_system()
 	_test_economy_system()
+	_test_receipt_builder()
 	_test_coupon_system()
 	_test_upgrade_system()
 	_test_sticker_system()
@@ -141,35 +144,24 @@ func _test_run_seed_initialization() -> void:
 	_expect_equal_int(12345, fixed_run.run_seed, "RunState keeps positive default_run_seed values reproducible")
 
 
-func _test_visible_object_queue_system() -> void:
+func _test_customer_object_layout_system() -> void:
 	var customer: CustomerState = _create_customer_with_products(10)
 	var coupon_instance: CouponInstance = CouponInstance.new(_registry.get_coupon("apple_20_discount"), "visible_coupon")
-	_visible_object_queue_system.start_customer(customer, 4, coupon_instance)
+	_customer_object_layout_system.start_customer(customer, coupon_instance)
 
-	_expect_equal_int(4, customer.visible_slots.size(), "VisibleObjectQueueSystem creates visible slot records")
-	_expect_equal_int(VisibleObjectSlot.SlotKind.COUPON, customer.visible_slots[0].slot_kind, "VisibleObjectQueueSystem puts coupon first")
-	_expect_equal_int(3, _visible_object_queue_system.get_visible_product_count(customer), "VisibleObjectQueueSystem fills remaining slots with products")
-	_expect_equal_int(7, customer.product_queue.size(), "VisibleObjectQueueSystem keeps hidden queue after visible fill")
+	_expect_equal_int(11, customer.visible_slots.size(), "CustomerObjectLayoutSystem lays out coupon plus every product")
+	_expect_equal_int(VisibleObjectSlot.SlotKind.COUPON, customer.visible_slots[0].slot_kind, "CustomerObjectLayoutSystem puts coupon first")
+	_expect_equal_int(10, _customer_object_layout_system.get_visible_product_count(customer), "CustomerObjectLayoutSystem lays out every product")
+	_expect_equal_int(0, customer.product_queue.size(), "CustomerObjectLayoutSystem leaves no hidden product queue")
 
-	var taken_product_slot: VisibleObjectSlot = _visible_object_queue_system.take_slot_object(customer, 2)
-	_expect_equal_int(VisibleObjectSlot.SlotKind.PRODUCT, taken_product_slot.slot_kind, "VisibleObjectQueueSystem allows free product slot selection")
-	_expect_true(customer.visible_slots[2].is_taken, "VisibleObjectQueueSystem keeps taken product slot reserved")
-	_expect_equal_int(7, customer.product_queue.size(), "VisibleObjectQueueSystem waits to advance queue until product is processed")
+	var product_slot: VisibleObjectSlot = customer.visible_slots[2]
+	_customer_object_layout_system.mark_product_processed(customer, product_slot.product_instance)
+	_expect_equal_int(VisibleObjectSlot.SlotKind.EMPTY, customer.visible_slots[2].slot_kind, "CustomerObjectLayoutSystem clears processed product slots")
+	_expect_equal_int(1, customer.processed_product_count, "CustomerObjectLayoutSystem counts processed products")
 
-	_visible_object_queue_system.mark_product_processed(customer, taken_product_slot.product_instance)
-	_expect_equal_int(VisibleObjectSlot.SlotKind.PRODUCT, customer.visible_slots[2].slot_kind, "VisibleObjectQueueSystem refills selected product slot after processing")
-	_expect_equal_int(6, customer.product_queue.size(), "VisibleObjectQueueSystem advances queue after product processing")
-
-	var taken_coupon_slot: VisibleObjectSlot = _visible_object_queue_system.take_slot_object(customer, 0)
-	_expect_equal_int(VisibleObjectSlot.SlotKind.COUPON, taken_coupon_slot.slot_kind, "VisibleObjectQueueSystem allows coupon processing")
-	_expect_true(customer.visible_slots[0].is_taken, "VisibleObjectQueueSystem keeps taken coupon slot reserved")
-	_expect_equal_int(6, customer.product_queue.size(), "VisibleObjectQueueSystem waits to refill coupon slot until processed")
-
-	_visible_object_queue_system.mark_coupon_processed(customer, taken_coupon_slot.coupon_instance, false)
-	_expect_equal_int(VisibleObjectSlot.SlotKind.PRODUCT, customer.visible_slots[0].slot_kind, "VisibleObjectQueueSystem refills coupon slot with product after processing")
-	_expect_equal_int(5, customer.product_queue.size(), "VisibleObjectQueueSystem refills coupon slot from product queue")
-	_expect_equal_int(10, customer.total_product_count, "VisibleObjectQueueSystem coupon does not count against total product count")
-	_expect_equal_int(1, customer.processed_product_count, "VisibleObjectQueueSystem counts processed products")
+	_customer_object_layout_system.mark_coupon_processed(customer, coupon_instance, false)
+	_expect_equal_int(VisibleObjectSlot.SlotKind.EMPTY, customer.visible_slots[0].slot_kind, "CustomerObjectLayoutSystem clears processed coupon slots")
+	_expect_equal_int(10, customer.total_product_count, "CustomerObjectLayoutSystem coupon does not count against total product count")
 
 
 func _test_scan_system() -> void:
@@ -308,6 +300,26 @@ func _test_economy_system() -> void:
 	_expect_equal_int(0, run_state.cash_cents, "EconomySystem caps caught cash penalty at zero")
 
 
+func _test_receipt_builder() -> void:
+	var customer: CustomerState = _create_customer_with_products(3)
+	_customer_object_layout_system.start_customer(customer)
+	var first_product: ProductInstance = customer.visible_slots[0].product_instance
+	var second_product: ProductInstance = customer.visible_slots[1].product_instance
+	first_product.scan_count = 2
+	first_product.open_amount_cents = 121
+	second_product.scan_count = 0
+	second_product.open_amount_cents = 99
+
+	var lines: Array[ReceiptLine] = _receipt_builder.build_lines(customer)
+	_expect_equal_int(2, lines.size(), "ReceiptBuilder creates one line per successful charge")
+	_expect_equal_int(61, lines[0].amount_cents, "ReceiptBuilder preserves receipt cents when splitting duplicate charges")
+	_expect_equal_int(60, lines[1].amount_cents, "ReceiptBuilder distributes split remainders exactly once")
+	_expect_false(lines[0].is_duplicate, "ReceiptBuilder keeps first charge unhighlighted")
+	_expect_true(lines[1].is_duplicate, "ReceiptBuilder flags duplicate product charges")
+	_expect_equal_int(121, _receipt_builder.calculate_total_cents(lines), "ReceiptBuilder total equals open amount")
+	_expect_equal_int(1, _receipt_builder.get_billable_products(customer).size(), "ReceiptBuilder ignores uncharged products")
+
+
 func _test_coupon_system() -> void:
 	var run_state: RunState = _create_run_state(2)
 	var apple_coupon: CouponResource = _registry.get_coupon("apple_20_discount")
@@ -399,21 +411,21 @@ func _test_complete_customer_flow_without_scenes() -> void:
 	var run_state: RunState = _create_run_state(5)
 	var customer: CustomerState = _generator.generate_customer(_registry, run_state)
 	_suspicion_system.setup_customer(customer, run_state)
-	_visible_object_queue_system.start_customer(customer, _registry.game_balance.visible_object_slots)
+	_customer_object_layout_system.start_customer(customer)
 
 	while not customer.is_complete:
-		var slot_index: int = _visible_object_queue_system.get_first_occupied_slot_index(customer)
+		var slot_index: int = _customer_object_layout_system.get_first_occupied_slot_index(customer)
 		if slot_index < 0:
 			_fail("complete customer flow", "No visible object remained before customer completion.")
 			return
 
-		var taken_slot: VisibleObjectSlot = _visible_object_queue_system.take_slot_object(customer, slot_index)
-		if taken_slot.slot_kind == VisibleObjectSlot.SlotKind.COUPON:
-			_coupon_system.mark_coupon_honestly_activated(taken_slot.coupon_instance)
-			_visible_object_queue_system.mark_coupon_processed(customer, taken_slot.coupon_instance, false)
+		var active_slot: VisibleObjectSlot = customer.visible_slots[slot_index]
+		if active_slot.slot_kind == VisibleObjectSlot.SlotKind.COUPON:
+			_coupon_system.mark_coupon_honestly_activated(active_slot.coupon_instance)
+			_customer_object_layout_system.mark_coupon_processed(customer, active_slot.coupon_instance, false)
 			continue
 
-		var product: ProductInstance = taken_slot.product_instance
+		var product: ProductInstance = active_slot.product_instance
 		var random: RandomNumberGenerator = RandomNumberGenerator.new()
 		random.seed = 99
 		if product.is_weighable():
@@ -433,7 +445,7 @@ func _test_complete_customer_flow_without_scenes() -> void:
 			)
 			_economy_system.apply_successful_scan(scan_result, _coupon_system.get_honest_customer_coupons(customer))
 		_economy_system.payout_product(run_state, product)
-		_visible_object_queue_system.mark_product_processed(customer, product)
+		_customer_object_layout_system.mark_product_processed(customer, product)
 
 	_expect_true(customer.is_complete, "Complete customer flow reaches completion without loading scenes")
 	_expect_equal_int(10, customer.processed_product_count, "Complete customer flow processes every product")

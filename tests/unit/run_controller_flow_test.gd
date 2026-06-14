@@ -37,7 +37,7 @@ func _run() -> void:
 	_expect_equal_int(1, controller.run_state.current_day, "Run starts on day one")
 	_expect_equal_int(1, controller.run_state.current_customer_number, "Run starts on first customer")
 	_expect_equal_string("jimmy", controller.run_state.current_customer.customer_type.id, "Run starts with Jimmy")
-	_expect_equal_int(4, controller.run_state.current_customer.visible_slots.size(), "Run displays four visible object slots")
+	_expect_equal_int(10, controller.run_state.current_customer.visible_slots.size(), "Run lays out every customer product")
 
 	var actor_container: Node = app.get_node("CheckoutTable/ProductScatterView/ActorContainer")
 	var product_actor: ProductActor = _get_first_product_actor(actor_container)
@@ -49,8 +49,8 @@ func _run() -> void:
 
 	product_actor.emit_signal("drag_started", product_actor)
 	await process_frame
-	_expect_equal_int(4, controller.run_state.current_customer.visible_slots.size(), "Taking a product keeps visible slot records")
-	_expect_equal_int(6, controller.run_state.current_customer.product_queue.size(), "Taking a product keeps hidden queue unchanged")
+	_expect_equal_int(10, controller.run_state.current_customer.visible_slots.size(), "Taking a product keeps full visible layout")
+	_expect_equal_int(0, controller.run_state.current_customer.product_queue.size(), "Customer start leaves no hidden queue")
 
 	if product_actor.product_instance.is_weighable():
 		checkout_table.emit_signal("actor_scale_drop_requested", product_actor)
@@ -63,16 +63,21 @@ func _run() -> void:
 		"Checkout charge intent updates register display"
 	)
 
-	var cash_after_scan_before_payout: int = controller.run_state.cash_cents
-	if product_actor.product_instance.is_weighable():
-		checkout_table.emit_signal("actor_bag_drop_requested", product_actor)
-	else:
-		checkout_table.emit_signal("product_click_sale_requested", product_actor, product_actor.global_position)
+	var cash_after_charge_before_receipt: int = controller.run_state.cash_cents
+	checkout_table.emit_signal("register_checkout_requested")
+	hud_root.emit_signal("receipt_cancelled")
 	await process_frame
-	_expect_true(controller.run_state.cash_cents > cash_after_scan_before_payout, "Final sale pays product into drawer")
-	_expect_equal_string("", _get_register_display_text(register_display), "Final sale clears register display")
-	_expect_equal_int(1, controller.run_state.current_customer.processed_product_count, "Final sale marks product processed")
-	_expect_equal_int(5, controller.run_state.current_customer.product_queue.size(), "Final sale refills from hidden queue")
+	_expect_equal_int(cash_after_charge_before_receipt, controller.run_state.cash_cents, "Cancelled receipt keeps cash unchanged")
+
+	checkout_table.emit_signal("register_checkout_requested")
+	hud_root.emit_signal("receipt_confirmed")
+	await process_frame
+	_expect_true(controller.run_state.cash_cents > cash_after_charge_before_receipt, "Receipt confirm pays charged products into drawer")
+	_expect_equal_string("", _get_register_display_text(register_display), "Receipt confirm clears register display")
+	_expect_equal_int(10, controller.run_state.current_customer.processed_product_count, "Receipt confirm marks all products processed")
+	hud_root.emit_signal("receipt_closed")
+	await process_frame
+	_expect_equal_int(2, controller.run_state.current_customer_number, "Receipt continue advances to next customer")
 
 	var cash_before_coupon: int = controller.run_state.cash_cents
 	hud_root.emit_signal("coupon_selected", "apple_20_discount")
@@ -98,12 +103,8 @@ func _run() -> void:
 	checkout_table.emit_signal("product_hand_scan_requested", fixed_actor, fixed_actor.global_position)
 	_expect_equal_int(190, fixed_product.open_amount_cents, "Second handscanner entry charges fixed-price products again")
 	_expect_true(controller.run_state.current_customer.current_suspicion_percent > 0, "Second handscanner entry raises suspicion")
-
-	var cash_before_click_sale: int = controller.run_state.cash_cents
-	checkout_table.emit_signal("product_click_sale_requested", fixed_actor, fixed_actor.global_position)
-	_expect_true(controller.run_state.cash_cents > cash_before_click_sale, "Click sale pays scanned fixed-price product into drawer")
-	_expect_true(fixed_product.is_processed, "Click sale marks fixed-price product processed")
-	_expect_equal_string("", _get_register_display_text(register_display), "Click sale clears register display")
+	var fixed_count_label: Label = fixed_actor.get_node("SpriteRoot/CountLabel") as Label
+	_expect_true(fixed_count_label != null and fixed_count_label.visible and fixed_count_label.text == "2", "ProductActor shows successful charge count")
 	checkout_table.clear_scanned_product_amount()
 
 	var coupon_actor_scene: PackedScene = load("res://scenes/gameplay/products/coupon_actor.tscn") as PackedScene

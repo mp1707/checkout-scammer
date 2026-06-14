@@ -33,5 +33,7 @@ const PANEL_CONTENT_MARGIN: int = 2
 @export var overlay_dim_color: Color = Color(0.054902, 0.027451, 0.105882, 0.58)
 @export var shadow_color: Color = Color(0.054902, 0.027451, 0.105882, 0.42)
 @export var scanner_beam_color: Color = Color(1.0, 0.0, 0.25098, 0.86)
+@export var scanner_fruit_hover_color: Color = Color(0.133333, 0.588235, 0.952941, 0.86)
+@export var scanner_register_beam_color: Color = Color(0.117647, 0.435294, 0.313725, 0.88)
 @export var scanner_flash_color: Color = Color(1.0, 0.921568, 0.341176, 0.72)
 @export var hand_pulse_color: Color = Color(1.0, 1.0, 1.0, 1.0)

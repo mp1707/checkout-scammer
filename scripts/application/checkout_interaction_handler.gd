@@ -1,13 +1,15 @@
 extends RefCounted
 class_name CheckoutInteractionHandler
 
-## Translates checkout-table intents (scan, weigh, bag, trash, sticker) into
+## Translates checkout-table intents (scan, weigh, receipt, trash, sticker) into
 ## simulation calls and presentation feedback for the current customer.
 
 var _context: RunContext
 var _flow: RunFlowController
 var _taken_actor_ids: Dictionary[String, bool] = {}
 var _active_scale_actor: ProductActor
+var _pending_receipt_lines: Array[ReceiptLine] = []
+var _pending_receipt_total_cents: int = 0
 
 
 func _init(context: RunContext, flow: RunFlowController) -> void:
@@ -18,6 +20,8 @@ func _init(context: RunContext, flow: RunFlowController) -> void:
 func reset_for_new_customer() -> void:
 	_taken_actor_ids.clear()
 	_active_scale_actor = null
+	_pending_receipt_lines.clear()
+	_pending_receipt_total_cents = 0
 
 
 func handle_product_hand_scan(actor: ProductActor, contact_position: Vector2) -> void:
@@ -72,46 +76,34 @@ func handle_coupon_hand_scan(actor: CouponActor) -> void:
 	_process_coupon_honestly(actor, coupon_instance)
 
 
-func handle_product_click_sale(actor: ProductActor, click_position: Vector2) -> void:
+func handle_register_checkout_requested() -> void:
 	if _flow.is_player_input_locked():
 		return
-	if actor == null or actor.product_instance == null:
+	if not _context.has_active_customer():
 		return
 
-	var product_instance: ProductInstance = actor.product_instance
-	if product_instance.is_processed or product_instance.is_weighable() or product_instance.open_amount_cents <= 0:
+	_pending_receipt_lines = _context.receipt_builder.build_lines(_context.run_state.current_customer)
+	_pending_receipt_total_cents = _context.receipt_builder.calculate_total_cents(_pending_receipt_lines)
+	_flow.show_receipt_confirm()
+
+
+func handle_receipt_confirmed() -> void:
+	if _context.run_state == null or _context.run_state.current_customer == null:
 		return
 
-	_context.economy_system.payout_product(_context.run_state, product_instance)
-	_context.checkout_table.clear_scanned_product_amount()
-	_context.visible_object_queue_system.mark_product_processed(_context.run_state.current_customer, product_instance)
-	_finish_actor(actor, true, true, click_position)
-	_flow.notify_customer_object_processed()
+	var customer: CustomerState = _context.run_state.current_customer
+	if _pending_receipt_lines.is_empty() and _pending_receipt_total_cents == 0:
+		_pending_receipt_lines = _context.receipt_builder.build_lines(customer)
+		_pending_receipt_total_cents = _context.receipt_builder.calculate_total_cents(_pending_receipt_lines)
 
-
-func handle_bag_drop(actor: TableActor) -> void:
-	if _flow.is_player_input_locked():
-		return
-
-	var product_actor: ProductActor = actor as ProductActor
-	if product_actor != null and product_actor.product_instance != null:
-		var product_instance: ProductInstance = product_actor.product_instance
-		if not product_instance.is_weighable():
-			_context.checkout_table.play_rejected_drop_feedback(product_actor)
-			return
-		if product_instance.open_amount_cents <= 0:
-			_context.checkout_table.play_rejected_drop_feedback(product_actor)
-			return
+	for product_instance: ProductInstance in _context.receipt_builder.get_billable_products(customer):
 		_context.economy_system.payout_product(_context.run_state, product_instance)
-		_context.checkout_table.clear_scanned_product_amount()
-		_context.visible_object_queue_system.mark_product_processed(_context.run_state.current_customer, product_instance)
-		_finish_actor(product_actor, true)
-		_flow.notify_customer_object_processed()
-		return
 
-	var coupon_actor: CouponActor = actor as CouponActor
-	if coupon_actor != null and coupon_actor.coupon_instance != null:
-		_process_coupon_honestly(coupon_actor, coupon_actor.coupon_instance)
+	_context.customer_object_layout_system.mark_all_visible_objects_processed(customer)
+	_context.checkout_table.clear_scanned_product_amount()
+	_context.checkout_table.clear_visible_objects()
+	_flow.refresh_hud()
+	_flow.show_receipt(_pending_receipt_lines, _pending_receipt_total_cents)
 
 
 func handle_trash_drop(actor: TableActor) -> void:
@@ -122,7 +114,7 @@ func handle_trash_drop(actor: TableActor) -> void:
 	if product_actor != null and product_actor.product_instance != null:
 		_context.economy_system.trash_product(_context.run_state, product_actor.product_instance)
 		_context.checkout_table.clear_scanned_product_amount()
-		_context.visible_object_queue_system.mark_product_processed(_context.run_state.current_customer, product_actor.product_instance)
+		_context.customer_object_layout_system.mark_product_processed(_context.run_state.current_customer, product_actor.product_instance)
 		_finish_actor(product_actor, false)
 		_flow.notify_customer_object_processed()
 		return
@@ -130,7 +122,7 @@ func handle_trash_drop(actor: TableActor) -> void:
 	var coupon_actor: CouponActor = actor as CouponActor
 	if coupon_actor != null and coupon_actor.coupon_instance != null:
 		_context.coupon_system.mark_coupon_trashed(coupon_actor.coupon_instance)
-		_context.visible_object_queue_system.mark_coupon_processed(_context.run_state.current_customer, coupon_actor.coupon_instance, true)
+		_context.customer_object_layout_system.mark_coupon_processed(_context.run_state.current_customer, coupon_actor.coupon_instance, true)
 		_finish_actor(coupon_actor, false)
 		_flow.notify_customer_object_processed()
 
@@ -172,13 +164,6 @@ func handle_actor_taken(actor: TableActor) -> void:
 	if actor.slot_index < 0:
 		return
 
-	var taken_slot: VisibleObjectSlot = _context.visible_object_queue_system.take_slot_object(
-		_context.run_state.current_customer,
-		actor.slot_index
-	)
-	if not taken_slot.has_object():
-		return
-
 	_taken_actor_ids[actor.actor_id] = true
 
 
@@ -213,7 +198,7 @@ func _find_sticker_target(global_drop_position: Vector2) -> ProductActor:
 
 func _process_coupon_honestly(actor: CouponActor, coupon_instance: CouponInstance) -> void:
 	_context.coupon_system.mark_coupon_honestly_activated(coupon_instance)
-	_context.visible_object_queue_system.mark_coupon_processed(_context.run_state.current_customer, coupon_instance, false)
+	_context.customer_object_layout_system.mark_coupon_processed(_context.run_state.current_customer, coupon_instance, false)
 	_finish_actor(actor, true)
 	_flow.notify_customer_object_processed()
 
@@ -224,7 +209,7 @@ func _handle_caught_scan(actor: TableActor, product_instance: ProductInstance) -
 	_context.checkout_table.release_scale_actor(actor)
 	_context.checkout_table.clear_scanned_product_amount()
 	_context.checkout_table.play_customer_caught_sound()
-	_context.visible_object_queue_system.mark_product_processed(_context.run_state.current_customer, product_instance)
+	_context.customer_object_layout_system.mark_product_processed(_context.run_state.current_customer, product_instance)
 	_finish_actor(actor, false)
 	_flow.show_caught_dialog()
 

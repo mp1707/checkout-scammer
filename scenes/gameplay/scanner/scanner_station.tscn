@@ -1,51 +1,39 @@
-[gd_scene load_steps=6 format=3 uid="uid://bmhawbmbff00f"]
+[gd_scene load_steps=5 format=3 uid="uid://bmhawbmbff00f"]
 
 [ext_resource type="Script" uid="uid://3vi35cs7l5l1" path="res://scripts/gameplay/components/scanner_station.gd" id="1_scanner_station"]
 [ext_resource type="AudioStream" uid="uid://1fyx0gof1646" path="res://assets/audio/sfx/scanner/high_beep.mp3" id="2_beep"]
 [ext_resource type="Texture2D" uid="uid://p3am6q0824xw" path="res://assets/textures/environment/scanner.png" id="3_scanner"]
-[ext_resource type="Texture2D" uid="uid://djgfd7y3k2mds" path="res://assets/textures/environment/scannerstation.png" id="4_station"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_scanner_hit"]
 size = Vector2(11, 11)
 
-[node name="ScannerStation" type="Node2D" unique_id=1456192738 node_paths=PackedStringArray("hit_area", "scanner_cursor_root", "scanner_sprite", "docked_scanner_sprite", "station_sprite", "crosshair_root", "beam", "beep_player", "animation_player")]
+[node name="ScannerStation" type="Node2D" unique_id=1456192738 node_paths=PackedStringArray("hit_area", "scanner_cursor_root", "scanner_sprite", "crosshair_root", "beam", "beep_player", "animation_player")]
 script = ExtResource("1_scanner_station")
 hit_area = NodePath("ScannerCursorRoot/HitArea")
 scanner_cursor_root = NodePath("ScannerCursorRoot")
 scanner_sprite = NodePath("ScannerCursorRoot/ScannerSprite")
-docked_scanner_sprite = NodePath("DockedScannerSprite")
-station_sprite = NodePath("StationSprite")
 crosshair_root = NodePath("ScannerCursorRoot/CrosshairRoot")
 beam = NodePath("ScannerCursorRoot/Beam")
 beep_player = NodePath("BeepPlayer")
 animation_player = NodePath("AnimationPlayer")
 
-[node name="StationSprite" type="Sprite2D" parent="." unique_id=1145005385]
-texture = ExtResource("4_station")
-
-[node name="DockedScannerSprite" type="Sprite2D" parent="." unique_id=998124728]
-position = Vector2(0, 4)
-texture = ExtResource("3_scanner")
-
 [node name="ScannerCursorRoot" type="Node2D" parent="." unique_id=1299768392]
-visible = false
-z_index = 220
+z_index = 2000
 
 [node name="ScannerSprite" type="Sprite2D" parent="ScannerCursorRoot" unique_id=402925832]
-position = Vector2(0, 5)
+position = Vector2(0, 58)
 texture = ExtResource("3_scanner")
 
 [node name="Beam" type="ColorRect" parent="ScannerCursorRoot" unique_id=189562903]
 visible = false
 offset_left = -5.0
-offset_top = -49.0
+offset_top = 10.0
 offset_right = 5.0
-offset_bottom = -17.0
+offset_bottom = 52.0
 mouse_filter = 2
 color = Color(1, 0, 0.25098, 0.52)
 
 [node name="CrosshairRoot" type="Node2D" parent="ScannerCursorRoot" unique_id=1837823295]
-position = Vector2(0, -53)
 
 [node name="HorizontalLine" type="ColorRect" parent="ScannerCursorRoot/CrosshairRoot" unique_id=1050402677]
 offset_left = -8.0
@@ -64,7 +52,6 @@ mouse_filter = 2
 color = Color(1, 0, 0.25098, 1)
 
 [node name="HitArea" type="Area2D" parent="ScannerCursorRoot" unique_id=1721715330]
-position = Vector2(0, -53)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="ScannerCursorRoot/HitArea" unique_id=203524572]
 shape = SubResource("RectangleShape2D_scanner_hit")

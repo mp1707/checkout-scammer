@@ -3,9 +3,8 @@ class_name CheckoutTable
 
 signal product_hand_scan_requested(actor: ProductActor, contact_position: Vector2)
 signal coupon_hand_scan_requested(actor: CouponActor, contact_position: Vector2)
+signal register_checkout_requested()
 signal actor_taken_from_product_area(actor: TableActor)
-signal product_click_sale_requested(actor: ProductActor, click_position: Vector2)
-signal actor_bag_drop_requested(actor: TableActor)
 signal actor_trash_drop_requested(actor: TableActor)
 signal actor_scale_drop_requested(actor: ProductActor)
 signal actor_scale_removed(actor: ProductActor)
@@ -13,7 +12,7 @@ signal actor_scale_removed(actor: ProductActor)
 @export var product_scatter_view: ProductScatterView
 @export var scanner_station: ScannerStation
 @export var register_display: RegisterDisplay
-@export var bag_zone: BagZone
+@export var register_checkout_zone: RegisterCheckoutZone
 @export var trash_zone: TrashZone
 @export var scale_station: ScaleStation
 @export var customer_hand_view: CustomerHandView
@@ -31,7 +30,7 @@ func _ready() -> void:
 	_connect_children()
 
 
-func display_visible_object_slots(slots: Array[VisibleObjectSlot]) -> void:
+func display_customer_objects(slots: Array[VisibleObjectSlot]) -> void:
 	product_scatter_view.display_slots(slots)
 
 
@@ -66,6 +65,7 @@ func play_customer_caught_sound() -> void:
 func play_successful_scan_feedback(actor: ProductActor, scan_count: int) -> void:
 	scanner_station.play_success_feedback(scan_count)
 	if actor != null:
+		actor.refresh_product_state()
 		actor.play_successful_scan_feedback(scan_count)
 	if scan_count > 1:
 		_play_table_jolt(scan_count)
@@ -74,6 +74,7 @@ func play_successful_scan_feedback(actor: ProductActor, scan_count: int) -> void
 func play_successful_weigh_feedback(actor: ProductActor, charge_count: int) -> void:
 	scale_station.play_success_feedback()
 	if actor != null:
+		actor.refresh_product_state()
 		actor.play_successful_scan_feedback(charge_count)
 	if charge_count > 1:
 		_play_table_jolt(charge_count)
@@ -131,8 +132,8 @@ func _validate_required_references() -> void:
 		push_error("%s is missing required scene reference 'scanner_station'." % get_path())
 	if register_display == null:
 		push_error("%s is missing required scene reference 'register_display'." % get_path())
-	if bag_zone == null:
-		push_error("%s is missing required scene reference 'bag_zone'." % get_path())
+	if register_checkout_zone == null:
+		push_error("%s is missing required scene reference 'register_checkout_zone'." % get_path())
 	if trash_zone == null:
 		push_error("%s is missing required scene reference 'trash_zone'." % get_path())
 	if scale_station == null:
@@ -145,14 +146,13 @@ func _validate_required_references() -> void:
 
 func _connect_children() -> void:
 	if scanner_station != null:
-		scanner_station.product_hand_scan_requested.connect(_on_product_hand_scan_requested)
-		scanner_station.coupon_hand_scan_requested.connect(_on_coupon_hand_scan_requested)
-		scanner_station.mouse_mode_changed.connect(_on_scanner_mouse_mode_changed)
+		scanner_station.set_crosshair_suppressed(false)
 	if product_scatter_view != null:
 		product_scatter_view.product_actor_spawned.connect(_on_product_actor_spawned)
 		product_scatter_view.coupon_actor_spawned.connect(_on_coupon_actor_spawned)
-	if bag_zone != null:
-		bag_zone.actor_dropped.connect(_on_bag_zone_actor_dropped)
+	if register_checkout_zone != null:
+		register_checkout_zone.checkout_requested.connect(_on_register_checkout_requested)
+		register_checkout_zone.hover_changed.connect(_on_register_hover_changed)
 	if trash_zone != null:
 		trash_zone.actor_dropped.connect(_on_trash_zone_actor_dropped)
 	if scale_station != null:
@@ -162,12 +162,13 @@ func _connect_children() -> void:
 
 func _on_product_actor_spawned(actor: ProductActor, _slot_index: int) -> void:
 	_connect_actor_drag_signals(actor)
-	actor.click_sale_requested.connect(_on_product_click_sale_requested)
+	actor.scanner_clicked.connect(_on_actor_scanner_clicked)
 	actor.set_interaction_enabled(_is_actor_input_enabled)
 
 
 func _on_coupon_actor_spawned(actor: CouponActor, _slot_index: int) -> void:
 	_connect_actor_drag_signals(actor)
+	actor.scanner_clicked.connect(_on_actor_scanner_clicked)
 	actor.set_interaction_enabled(_is_actor_input_enabled)
 
 
@@ -177,6 +178,8 @@ func _connect_actor_drag_signals(actor: TableActor) -> void:
 
 
 func _on_actor_drag_started(actor: TableActor) -> void:
+	if scanner_station != null:
+		scanner_station.set_crosshair_suppressed(true)
 	if scale_station.has_actor(actor):
 		scale_station.release_actor(actor)
 	product_scatter_view.release_actor(actor)
@@ -184,41 +187,40 @@ func _on_actor_drag_started(actor: TableActor) -> void:
 
 
 func _on_actor_drag_ended(actor: TableActor, _drop_position: Vector2) -> void:
+	if scanner_station != null:
+		scanner_station.set_crosshair_suppressed(false)
 	_route_actor_drop(actor)
 
 
 func _route_actor_drop(actor: TableActor) -> void:
 	if scale_station.try_drop_actor(actor):
 		return
-	if bag_zone.try_drop_actor(actor):
-		return
 	if trash_zone.try_drop_actor(actor):
 		return
 
 
-func _on_product_hand_scan_requested(actor: ProductActor, contact_position: Vector2) -> void:
-	product_hand_scan_requested.emit(actor, contact_position)
+func _on_actor_scanner_clicked(actor: TableActor, click_position: Vector2) -> void:
+	if scanner_station != null:
+		scanner_station.set_crosshair_suppressed(false)
+
+	var product_actor: ProductActor = actor as ProductActor
+	if product_actor != null:
+		if product_actor.product_instance != null and not product_actor.product_instance.is_weighable():
+			product_hand_scan_requested.emit(product_actor, _get_scanner_contact_position(click_position))
+		return
+
+	var coupon_actor: CouponActor = actor as CouponActor
+	if coupon_actor != null:
+		coupon_hand_scan_requested.emit(coupon_actor, _get_scanner_contact_position(click_position))
 
 
-func _on_coupon_hand_scan_requested(actor: CouponActor, contact_position: Vector2) -> void:
-	coupon_hand_scan_requested.emit(actor, contact_position)
+func _on_register_checkout_requested() -> void:
+	register_checkout_requested.emit()
 
 
-func _on_product_click_sale_requested(actor: ProductActor, click_position: Vector2) -> void:
-	product_click_sale_requested.emit(actor, click_position)
-
-
-func _on_scanner_mouse_mode_changed(is_mouse_mode: bool) -> void:
-	_is_actor_input_enabled = is_mouse_mode
-	if product_scatter_view != null:
-		product_scatter_view.set_actor_input_enabled(is_mouse_mode)
-	var scale_actor: ProductActor = scale_station.get_current_actor() if scale_station != null else null
-	if scale_actor != null:
-		scale_actor.set_interaction_enabled(is_mouse_mode)
-
-
-func _on_bag_zone_actor_dropped(actor: TableActor) -> void:
-	actor_bag_drop_requested.emit(actor)
+func _on_register_hover_changed(is_hovered: bool) -> void:
+	if scanner_station != null:
+		scanner_station.set_register_hovered(is_hovered)
 
 
 func _on_trash_zone_actor_dropped(actor: TableActor) -> void:
@@ -250,10 +252,16 @@ func _spawn_coin_burst(burst_global_position: Vector2, use_bonus_sound: bool) ->
 
 
 func _get_actor_finish_position(actor: TableActor, is_sale: bool) -> Vector2:
-	var zone: Area2D = bag_zone if is_sale else trash_zone
+	var zone: Node2D = register_checkout_zone if is_sale else trash_zone
 	if zone == null:
 		return actor.global_position
-	return bag_zone.get_drop_position() if is_sale else trash_zone.get_drop_position()
+	return register_checkout_zone.get_checkout_position() if is_sale else trash_zone.get_drop_position()
+
+
+func _get_scanner_contact_position(fallback_position: Vector2) -> Vector2:
+	if scanner_station != null:
+		return scanner_station.get_crosshair_global_position()
+	return fallback_position
 
 
 func _product_uses_bonus_coin_sound(product_instance: ProductInstance) -> bool:

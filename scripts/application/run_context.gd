@@ -11,13 +11,14 @@ var checkout_table: CheckoutTable
 var hud_root: HudRoot
 
 var customer_generator: CustomerGenerator = CustomerGenerator.new()
-var visible_object_queue_system: VisibleObjectQueueSystem = VisibleObjectQueueSystem.new()
+var customer_object_layout_system: CustomerObjectLayoutSystem = CustomerObjectLayoutSystem.new()
 var scan_system: ScanSystem = ScanSystem.new()
 var suspicion_system: SuspicionSystem = SuspicionSystem.new()
 var economy_system: EconomySystem = EconomySystem.new()
 var coupon_system: CouponSystem = CouponSystem.new()
 var upgrade_system: UpgradeSystem = UpgradeSystem.new()
 var sticker_system: StickerSystem = StickerSystem.new()
+var receipt_builder: ReceiptBuilder = ReceiptBuilder.new()
 var scan_random: RandomNumberGenerator = RandomNumberGenerator.new()
 
 

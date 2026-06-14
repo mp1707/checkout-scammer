@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/gameplay/components/register_checkout_zone.gd" id="1_register_zone"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_register_checkout"]
+size = Vector2(66, 38)
+
+[node name="RegisterCheckoutZone" type="Area2D" node_paths=PackedStringArray("checkout_anchor")]
+script = ExtResource("1_register_zone")
+input_pickable = true
+checkout_anchor = NodePath("CheckoutAnchor")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_register_checkout")
+
+[node name="CheckoutAnchor" type="Marker2D" parent="."]

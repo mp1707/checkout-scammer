@@ -5,6 +5,7 @@ class_name TableActor
 ## Owns drag input, slot bookkeeping and the finish-fly animation so zones,
 ## scanner and controllers can work against one typed API.
 
+signal scanner_clicked(actor: TableActor, click_position: Vector2)
 signal drag_started(actor: TableActor)
 signal drag_moved(actor: TableActor, previous_position: Vector2, current_position: Vector2, movement_delta: Vector2)
 signal drag_ended(actor: TableActor, drop_position: Vector2)
@@ -22,7 +23,6 @@ var is_held: bool = false
 var movement_direction: Vector2 = Vector2.ZERO
 
 var _finish_tween: Tween
-var _drag_start_position: Vector2 = Vector2.ZERO
 
 
 func _ready() -> void:
@@ -62,7 +62,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	var mouse_button_event: InputEventMouseButton = event as InputEventMouseButton
 	if mouse_button_event != null:
-		if mouse_button_event.button_index == MOUSE_BUTTON_LEFT and not mouse_button_event.pressed:
+		if mouse_button_event.button_index == MOUSE_BUTTON_RIGHT and not mouse_button_event.pressed:
 			_end_drag(mouse_button_event.position.round())
 			get_viewport().set_input_as_handled()
 			return
@@ -78,11 +78,6 @@ func _handle_secondary_press(_mouse_button_event: InputEventMouseButton) -> void
 ## Override to reset subclass drag state when the finish animation starts.
 func _on_finish_started() -> void:
 	pass
-
-
-## Override to consume a short click release instead of routing it as a drop.
-func _handle_click_release(_drop_position: Vector2) -> bool:
-	return false
 
 
 func _play_finish_fly(target_global_position: Vector2, finish_duration: float, target_scale: Vector2) -> void:
@@ -115,6 +110,10 @@ func _on_interaction_area_input_event(_viewport: Viewport, event: InputEvent, _s
 	if mouse_button_event == null:
 		return
 	if mouse_button_event.button_index == MOUSE_BUTTON_LEFT and mouse_button_event.pressed:
+		scanner_clicked.emit(self, mouse_button_event.position.round())
+		get_viewport().set_input_as_handled()
+		return
+	if mouse_button_event.button_index == MOUSE_BUTTON_RIGHT and mouse_button_event.pressed:
 		_start_drag(mouse_button_event.position.round())
 		get_viewport().set_input_as_handled()
 
@@ -122,7 +121,6 @@ func _on_interaction_area_input_event(_viewport: Viewport, event: InputEvent, _s
 func _start_drag(pointer_position: Vector2) -> void:
 	is_held = true
 	z_index = Z_LAYER_DRAGGED
-	_drag_start_position = pointer_position
 	_update_drag_position(pointer_position)
 	drag_started.emit(self)
 
@@ -141,6 +139,4 @@ func _end_drag(drop_position: Vector2) -> void:
 	is_held = false
 	z_index = Z_LAYER_IDLE
 	_update_drag_position(drop_position)
-	if _handle_click_release(global_position):
-		return
 	drag_ended.emit(self, global_position)
